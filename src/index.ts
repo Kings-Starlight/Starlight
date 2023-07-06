@@ -2,13 +2,12 @@ import dotenv from "dotenv";
 import "./runtime";
 import { InitiateBot } from "./runtime";
 import { InitiateLogger, log } from "./logging/logger";
-import { SetupEventHandlers } from "./events/events";
+import { FetchUEXVehicles } from "./api/uex";
 
 dotenv.config();
 
 InitiateLogger();
 InitiateBot();
-SetupEventHandlers();
 
 process.on("SIGINT", () => {
     log.info("Preparing for shutdown!");
