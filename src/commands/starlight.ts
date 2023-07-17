@@ -9,13 +9,13 @@ import pjson from "../../package.json";
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName("info")
+        .setName("starlight")
         .setDescription("Various information about me"),
     async execute(interaction: CommandInteraction) {
         const infoEmbed: EmbedBuilder = new EmbedBuilder()
             .setColor(0x0251a8)
             .setDescription(
-                "# StockBot.\nThe solution for your trading and general knowledge needs.\n"
+                "# Starlight.\nThe solution for your trading and general knowledge needs.\n"
             )
             .setFields(
                 {
@@ -46,9 +46,14 @@ module.exports = {
                 {
                     name: "Powered By",
                     value: "**[UEX](https://uexcorp.space/)**",
+                },
+                {
+                    name: "\u200b",
+                    value: "**[StarCitizen Wiki](https://starcitizen.tools)**",
+                    inline: true,
                 }
             )
-            .setFooter({ text: "Brought to you by Starlight." })
+            .setFooter({ text: "Brought to you by king_ultron99#0647." })
             .setTimestamp();
 
         const sent = await interaction.reply({ embeds: [infoEmbed] });
