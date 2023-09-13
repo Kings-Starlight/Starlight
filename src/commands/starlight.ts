@@ -4,7 +4,7 @@ import {
     SlashCommandBuilder,
 } from "discord.js";
 import { client } from "../runtime";
-import { msToTime } from "../utilities/utilities";
+import { msToTime } from "../utilities/general";
 import pjson from "../../package.json";
 
 module.exports = {
