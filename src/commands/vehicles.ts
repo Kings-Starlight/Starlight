@@ -14,10 +14,9 @@ import { SearchResponse, WikiShip } from "../types/sc_wiki";
 import { UEXShip } from "../types/uex";
 import { FetchVehicleSerie, SearchGalactapedia, ships } from "../api/wikiAPI";
 import { RetrieveVehicleInfo } from "../api/wikiAPI";
-import { msToTime } from "../utilities/general";
+import { blue, msToTime } from "../utilities/general";
 import { UEXShips } from "../api/uexAPI";
 import { log } from "../logging/logger";
-import { ErrorResponse } from "../utilities/errors";
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -101,7 +100,7 @@ async function CreateShipEmbed(
             .setTitle(
                 `${WikiInfo.manufacturer.name} (${WikiInfo.manufacturer.code})`
             )
-            .setColor(0x0251a8)
+            .setColor(blue)
 
             .setDescription(
                 `# ${WikiInfo.name} — Concept\n### Please be aware that this information can change at any time and is not indicitive of the final outcome!\n ${WikiInfo.description.en_EN}`
@@ -179,7 +178,7 @@ async function CreateShipEmbed(
             .setTitle(
                 `${WikiInfo.manufacturer.name} (${WikiInfo.manufacturer.code})`
             )
-            .setColor(0x0251a8)
+            .setColor(blue)
             .addFields(
                 {
                     name: "Size",
@@ -376,9 +375,7 @@ async function CreateShipEmbed(
             : new ButtonBuilder()
                   .setLabel("Galactapedia unavailable")
                   .setStyle(ButtonStyle.Link)
-                  .setURL(
-                      "https://www.youtube.com/watch?v=dQw4w9WgXcQ&pp=ygUXbmV2ZXIgZ29ubmEgZ2l2ZSB5b3UgdXA%3D"
-                  )
+                  .setURL("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
                   .setDisabled(true),
     ];
     var select: StringSelectMenuBuilder,

@@ -18,3 +18,6 @@ export function msToTime(duration: number) {
         milliseconds != 0 ? `${milliseconds}ms` : ""
     }`;
 }
+
+export const blue = 0x0251a8,
+    red = 0xff0000;

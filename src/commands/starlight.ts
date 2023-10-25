@@ -4,7 +4,7 @@ import {
     SlashCommandBuilder,
 } from "discord.js";
 import { client } from "../runtime";
-import { msToTime } from "../utilities/general";
+import { blue, msToTime } from "../utilities/general";
 import pjson from "../../package.json";
 
 module.exports = {
@@ -13,7 +13,7 @@ module.exports = {
         .setDescription("Various information about me"),
     async execute(interaction: CommandInteraction) {
         const infoEmbed: EmbedBuilder = new EmbedBuilder()
-            .setColor(0x0251a8)
+            .setColor(blue)
             .setDescription(
                 "# Starlight.\nThe solution for your trading and general knowledge needs.\n"
             )

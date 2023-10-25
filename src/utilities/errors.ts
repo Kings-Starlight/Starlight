@@ -1,5 +1,11 @@
-import { EmbedBuilder, Interaction } from "discord.js";
+import {
+    AutocompleteInteraction,
+    EmbedBuilder,
+    Interaction,
+    RepliableInteraction,
+} from "discord.js";
 import { log } from "../logging/logger";
+import { red } from "./general";
 
 /**
  * ErrorResponse replies to the failed interaction presenting an error message.
@@ -7,14 +13,14 @@ import { log } from "../logging/logger";
  * @param error Error message to display.
  */
 export function ErrorResponse(
-    interaction: Interaction,
+    interaction: RepliableInteraction | AutocompleteInteraction,
     description: string,
     error?: any
 ): void {
     log.error(error ? description + ": " + error : description);
 
     const responseEmbed = new EmbedBuilder()
-        .setColor(0xff0000)
+        .setColor(red)
         .setDescription(
             `## ${description}\nThis error has been recorded.\n${
                 error ? `\`\`\`${error}\`\`\`` : ""
@@ -22,7 +28,15 @@ export function ErrorResponse(
         )
         .setTimestamp();
 
-    if (!interaction.isAutocomplete()) {
+    if (!interaction.isChatInputCommand()) {
+        if (!interaction.channel) return;
+
+        interaction.channel.send({
+            content: `<@${interaction.user.id}>`,
+            embeds: [responseEmbed],
+        });
+        return;
+    } else {
         switch (interaction.replied || interaction.deferred) {
             case false:
                 interaction.reply({ ephemeral: true, embeds: [responseEmbed] });
@@ -36,13 +50,4 @@ export function ErrorResponse(
         }
         return;
     }
-
-    if (!interaction.channel) return;
-
-    interaction.channel.send({
-        content: `<@${interaction.user.id}>`,
-        embeds: [responseEmbed],
-    });
-
-    return;
 }

@@ -4,5 +4,6 @@ namespace NodeJS {
         CLIENT_ID: string;
         UEX: string;
         TEST_GUILD: string;
+        CREATOR_ID: string;
     }
 }

@@ -6,6 +6,7 @@ import {
 } from "discord.js";
 import { Planets, Satellites, UEXTradePorts } from "../api/uexAPI";
 import { Planet, Tradeport } from "../types/uex";
+import { blue } from "../utilities/general";
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -79,7 +80,7 @@ module.exports = {
                                       }`
                             }`
                         )
-                        .setColor(0x0251a8)
+                        .setColor(blue)
                         .setTimestamp()
                         .setFooter({ text: "Powered by UEX" });
 
