@@ -8,6 +8,9 @@ export var Satellites: Planet[];
 
 const UEXAPIBASE = "https://portal.uexcorp.space/api/";
 
+/**
+ * FetchUEXVehicles returns an array of ships and vehicles within StarCitizen.
+ */
 export async function FetchUEXVehicles() {
     log.info("Fetching ships from UEX");
     log.profile("get UEX vehicles");
@@ -22,6 +25,10 @@ export async function FetchUEXVehicles() {
     log.profile("get UEX vehicles");
 }
 
+/**
+ * FetchUEXTradeports returns all locations within a system that provides the ability to buy, or sell goods.
+ * The Stanton system is used by default.
+ */
 export async function FetchUEXTradeports() {
     const fetchTradeports = await fetch(UEXAPIBASE + "tradeports/system/ST/", {
         method: "GET",
@@ -66,6 +73,10 @@ export async function FetchUEXTradeports() {
     UEXTradePorts = body;
 }
 
+/**
+ * FetchPlanets returns an array of all planets within a system.
+ * The Stanton system is used by default.
+ */
 export async function FetchPlanets() {
     const fetchPlanets = await fetch(UEXAPIBASE + "planets/system/ST", {
         method: "GET",
@@ -77,6 +88,10 @@ export async function FetchPlanets() {
     Planets = (await fetchPlanets.json()).data;
 }
 
+/**
+ * FetchSatellites returns an array of all planetary satellites within a system.
+ * The Stanton system is used by default.
+ */
 export async function FetchSatellites() {
     const FetchSatellites = await fetch(UEXAPIBASE + "satellites/system/ST", {
         method: "GET",
