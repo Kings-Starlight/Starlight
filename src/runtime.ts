@@ -1,7 +1,6 @@
 import {
     Client,
     Collection,
-    Events,
     GatewayIntentBits,
     REST,
     Routes,

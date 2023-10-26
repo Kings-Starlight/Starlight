@@ -21,6 +21,13 @@ export async function FetchUEXVehicles() {
         },
     });
 
+    if (fetchShips.status !== 200) {
+        log.error(
+            `UEX returned a non-OK status:\n code: ${fetchShips.status} - ${fetchShips.statusText}`
+        );
+        return;
+    }
+
     UEXShips = (await fetchShips.json()).data;
     log.profile("get UEX vehicles");
 }

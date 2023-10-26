@@ -54,14 +54,15 @@ module.exports = {
         );
     },
     async selectInteraction(interaction: AnySelectMenuInteraction) {
+        interaction.deferUpdate();
         const { embed, components } = await CreateShipEmbed(
             interaction.values[0]
         );
 
         try {
-            interaction.update({ embeds: [embed], components });
-        } catch {
-            log.error("failed to update message:\n");
+            interaction.editReply({ embeds: [embed], components });
+        } catch (error) {
+            log.error("failed to update message:\n", error);
             interaction.message.edit({ embeds: [embed], components });
         }
     },
@@ -75,7 +76,7 @@ module.exports = {
         interaction.editReply({ embeds: [embed], components });
     },
 };
-
+/** Creates a complete message embed, complete with appropriate buttons for a specified ship. */
 async function CreateShipEmbed(
     name: string
 ): Promise<{ embed: EmbedBuilder; components: [] }> {
@@ -85,15 +86,7 @@ async function CreateShipEmbed(
     )[0];
     const RSI = await SearchGalactapedia(WikiInfo.name);
 
-    var embed: EmbedBuilder,
-        rentable = WikiInfo.shops.filter(
-            (shop) =>
-                shop.items.filter((item) => item.rentable == true).length != 0
-        ),
-        buyable = WikiInfo.shops.filter(
-            (shop) =>
-                shop.items.filter((item) => item.buyable == true).length != 0
-        );
+    var embed: EmbedBuilder;
 
     if (WikiInfo.production_status.en_EN != "flight-ready") {
         embed = new EmbedBuilder()
@@ -125,17 +118,17 @@ async function CreateShipEmbed(
                 },
                 {
                     name: "Crew Capacity",
-                    value: WikiInfo.crew.min.toString(),
+                    value: `${WikiInfo.crew.min}`,
                     inline: true,
                 },
                 {
-                    name: "Pledge Price (USD$)",
-                    value: WikiInfo.msrp.toString(),
+                    name: "Pledge Price (USD)",
+                    value: `$${WikiInfo.msrp}`,
                     inline: true,
                 },
                 {
                     name: "Cargo Capacity (SCU)",
-                    value: WikiInfo.cargo_capacity.toString(),
+                    value: `${WikiInfo.cargo_capacity}`,
                     inline: true,
                 },
                 {
@@ -163,7 +156,7 @@ async function CreateShipEmbed(
                 }
             );
 
-        if (UEXInfo !== undefined) {
+        if (UEXInfo !== undefined && UEXInfo.photos !== null) {
             embed.setImage(
                 UEXInfo.photos
                     .split(",")[0]
@@ -173,6 +166,19 @@ async function CreateShipEmbed(
             );
         }
     } else {
+        /** At which locations can the specified ship be rented at? */
+        var rentable = WikiInfo.shops.filter(
+                (shop) =>
+                    shop.items.filter((item) => item.rentable == true).length !=
+                    0
+            ),
+            /** At which locations can the specified ship be bought at */
+            buyable = WikiInfo.shops.filter(
+                (shop) =>
+                    shop.items.filter((item) => item.buyable == true).length !=
+                    0
+            );
+
         embed = new EmbedBuilder()
             .setDescription(`# ${WikiInfo.name}\n${WikiInfo.description.en_EN}`)
             .setTitle(
@@ -200,12 +206,12 @@ async function CreateShipEmbed(
                 },
                 {
                     name: "Pledge Price (USD)",
-                    value: `$${UEXInfo.price}`,
+                    value: `$${WikiInfo.msrp}`,
                     inline: true,
                 },
                 {
                     name: "Cargo Capacity (SCU)",
-                    value: UEXInfo.scu.toString(),
+                    value: WikiInfo.cargo_capacity.toString(),
                     inline: true,
                 },
                 {
@@ -355,11 +361,21 @@ async function CreateShipEmbed(
         }
     }
 
+    const disabledLink = (item: string) => {
+        return new ButtonBuilder()
+            .setLabel(item + " unavailable")
+            .setStyle(ButtonStyle.Link)
+            .setURL("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+            .setDisabled(true);
+    };
+
     const buttons = [
-        new ButtonBuilder()
-            .setURL(UEXInfo.store_url)
-            .setLabel("Go to store page")
-            .setStyle(ButtonStyle.Link),
+        UEXInfo !== undefined && UEXInfo.store_url
+            ? new ButtonBuilder()
+                  .setURL(UEXInfo.store_url)
+                  .setLabel("Go to store page")
+                  .setStyle(ButtonStyle.Link)
+            : disabledLink("Store"),
         new ButtonBuilder()
             .setURL(
                 "https://starcitizen.tools/" +
@@ -372,11 +388,7 @@ async function CreateShipEmbed(
                   .setURL(RSI[0].rsi_url)
                   .setLabel("View Galactapedia entry")
                   .setStyle(ButtonStyle.Link)
-            : new ButtonBuilder()
-                  .setLabel("Galactapedia unavailable")
-                  .setStyle(ButtonStyle.Link)
-                  .setURL("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-                  .setDisabled(true),
+            : disabledLink("Galactapedia"),
     ];
     var select: StringSelectMenuBuilder,
         selectRow: ActionRowBuilder,

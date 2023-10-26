@@ -72,7 +72,10 @@ module.exports = {
                 );
             }
         } else {
-            return;
+            ErrorResponse(
+                interaction,
+                "There was an error responding to this interaction "
+            );
         }
     },
 };

@@ -3,7 +3,6 @@ import {
     GalactapediaResult,
     SearchResponse,
     WikiShip,
-    Manufacturer,
     ManufacturerShort,
 } from "../types/sc_wiki";
 
