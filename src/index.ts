@@ -1,30 +1,36 @@
 import dotenv from "dotenv";
-import "./runtime";
-import { InitiateBot } from "./runtime";
-import { InitiateLogger, log } from "./logging/logger";
+import { InitiateBot } from "@/runtime";
+import { InitiateLogger, log } from "@/logging/logger";
 import {
     FetchPlanets,
     FetchSatellites,
     FetchUEXTradeports,
     FetchUEXVehicles,
-} from "./api/uexAPI";
-import { FetchManufacturers, FetchVehicles } from "./api/wikiAPI";
+} from "@/api/uexAPI";
+import { FetchManufacturers, FetchVehicles } from "@/api/wikiAPI";
+import { RedisClient, SetupRedisClient } from "@/utilities/redis";
 
 dotenv.config();
 
 InitiateLogger();
-InitiateBot();
 
 (async () => {
+    // initiate a Redis Client
+    await SetupRedisClient();
+
+    // Fetch API information.
     await FetchUEXVehicles();
-    await FetchVehicles();
-    await FetchManufacturers();
     await FetchUEXTradeports();
     await FetchPlanets();
     await FetchSatellites();
+    await FetchVehicles();
+    await FetchManufacturers();
 })();
 
-process.on("SIGINT", () => {
+InitiateBot();
+
+process.on("SIGINT", async () => {
+    await RedisClient.quit();
     log.info("Preparing for shutdown!");
 
     log.info("Flushing logs...");

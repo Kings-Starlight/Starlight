@@ -3,9 +3,9 @@ import {
     EmbedBuilder,
     SlashCommandBuilder,
 } from "discord.js";
-import { client } from "../runtime";
-import { blue, msToTime } from "../utilities/general";
-import pjson from "../../package.json";
+import { client } from "@/runtime";
+import { blue, msToTime } from "@/utilities/general";
+import pjson from "@/../package.json";
 
 module.exports = {
     data: new SlashCommandBuilder()

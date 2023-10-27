@@ -5,5 +5,7 @@ namespace NodeJS {
         UEX: string;
         TEST_GUILD: string;
         CREATOR_ID: string;
+        REDIS_AUTH_USERNAME: string;
+        REDIS_AUTH_PASSWORD: string;
     }
 }

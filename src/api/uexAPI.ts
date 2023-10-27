@@ -1,5 +1,6 @@
-import { log } from "../logging/logger";
-import { UEXShip, Tradeport, TradeportPrices, Planet } from "../types/uex";
+import { log } from "@/logging/logger";
+import { UEXShip, Tradeport, TradeportPrices, Planet } from "@/types/uex";
+import { RedisClient } from "@/utilities/redis";
 
 export var UEXShips: UEXShip[];
 export var UEXTradePorts: Tradeport[];
@@ -12,24 +13,40 @@ const UEXAPIBASE = "https://portal.uexcorp.space/api/";
  * FetchUEXVehicles returns an array of ships and vehicles within StarCitizen.
  */
 export async function FetchUEXVehicles() {
-    log.info("Fetching ships from UEX");
+    log.info("Fetching ships from UEX...");
     log.profile("get UEX vehicles");
-    const fetchShips = await fetch(UEXAPIBASE + "ships", {
-        method: "GET",
-        headers: {
-            api_key: process.env.UEX,
-        },
-    });
 
-    if (fetchShips.status !== 200) {
-        log.error(
-            `UEX returned a non-OK status:\n code: ${fetchShips.status} - ${fetchShips.statusText}`
-        );
+    const cache = (await RedisClient.json.get("UEX:Ships")) as any;
+
+    if (cache === null) {
+        log.info("...No cache found. Updating...");
+        const fetchShips = await fetch(UEXAPIBASE + "ships", {
+            method: "GET",
+            headers: {
+                api_key: process.env.UEX,
+            },
+        });
+
+        if (fetchShips.status !== 200) {
+            log.error(
+                `UEX returned a non-OK status. code: ${fetchShips.status} - ${fetchShips.statusText}`
+            );
+            return;
+        }
+        const data = (await fetchShips.json()).data;
+        UEXShips = data;
+        RedisClient.json.set("UEX:Ships", "$", data);
+        // set expiry for 2 weeks
+        RedisClient.expire("UEX:Ships", 86400 * 14);
+        log.info("...Done!");
         return;
     }
 
-    UEXShips = (await fetchShips.json()).data;
+    log.info("...Found UEX vehicle cache. Done!");
+    UEXShips = cache;
+
     log.profile("get UEX vehicles");
+    return;
 }
 
 /**
@@ -37,47 +54,63 @@ export async function FetchUEXVehicles() {
  * The Stanton system is used by default.
  */
 export async function FetchUEXTradeports() {
-    const fetchTradeports = await fetch(UEXAPIBASE + "tradeports/system/ST/", {
-        method: "GET",
-        headers: {
-            api_key: process.env.UEX,
-        },
-    });
-    if (!fetchTradeports.ok)
-        throw new Error(
-            "Request failed with status: " +
-                fetchTradeports.status +
-                ", " +
-                fetchTradeports.statusText +
-                "."
+    log.info("Fetching UEX tradeports...");
+
+    const cache = (await RedisClient.json.get("UEX:Tradeports")) as any;
+
+    if (cache === null) {
+        log.info("...No cache found. Updating...");
+        const fetchTradeports = await fetch(
+            UEXAPIBASE + "tradeports/system/ST/",
+            {
+                method: "GET",
+                headers: {
+                    api_key: process.env.UEX,
+                },
+            }
         );
-    const body: Tradeport[] = (await fetchTradeports.json()).data;
-    body.forEach((tradeport: Tradeport, i: number) => {
-        if (tradeport.prices != undefined) {
-            var pricesNew: TradeportPrices[] = Object.entries(
-                tradeport.prices
-            ).map((e: [string, TradeportPrices]) => ({
-                name: e[1].name,
-                kind: e[1].kind,
-                code: e[0],
-                operation: e[1].operation,
-                price_buy: e[1].price_buy,
-                price_sell: e[1].price_sell,
-                date_update: e[1].date_update,
-                is_updated: e[1].is_updated,
-            }));
-            body[i].space = Boolean(Number(tradeport.space));
-            body[i].visible = Boolean(Number(tradeport.visible));
-            body[i].armistice = Boolean(Number(tradeport.armistice));
-            body[i].trade = Boolean(Number(tradeport.trade));
-            body[i].outlaw = Boolean(Number(tradeport.outlaw));
-            body[i].refinery = Boolean(Number(tradeport.refinery));
-            body[i].shops = Boolean(Number(tradeport.shops));
-            body[i].restricted = Boolean(Number(tradeport.restricted));
-            body[i].prices = pricesNew;
+        if (fetchTradeports.status !== 200) {
+            log.error(
+                `UEX returned a non-OK status. code: ${fetchTradeports.status} - ${fetchTradeports.statusText}`
+            );
+            return;
         }
-    });
-    UEXTradePorts = body;
+        const data: Tradeport[] = (await fetchTradeports.json()).data;
+        data.forEach((tradeport: Tradeport, i: number) => {
+            if (tradeport.prices != undefined) {
+                var pricesNew: TradeportPrices[] = Object.entries(
+                    tradeport.prices
+                ).map((e: [string, TradeportPrices]) => ({
+                    name: e[1].name,
+                    kind: e[1].kind,
+                    code: e[0],
+                    operation: e[1].operation,
+                    price_buy: e[1].price_buy,
+                    price_sell: e[1].price_sell,
+                    date_update: e[1].date_update,
+                    is_updated: e[1].is_updated,
+                }));
+                data[i].space = Boolean(Number(tradeport.space));
+                data[i].visible = Boolean(Number(tradeport.visible));
+                data[i].armistice = Boolean(Number(tradeport.armistice));
+                data[i].trade = Boolean(Number(tradeport.trade));
+                data[i].outlaw = Boolean(Number(tradeport.outlaw));
+                data[i].refinery = Boolean(Number(tradeport.refinery));
+                data[i].shops = Boolean(Number(tradeport.shops));
+                data[i].restricted = Boolean(Number(tradeport.restricted));
+                data[i].prices = pricesNew;
+            }
+        });
+        RedisClient.json.set("UEX:Tradeports", "$", data as any);
+        // set expiry for 2 weeks
+        RedisClient.expire("UEX:Tradeports", 86400 * 14);
+        UEXTradePorts = data;
+        log.info("...Done!");
+        return;
+    }
+    log.info("...Found UEX tradport cache. Done!");
+    UEXTradePorts = cache;
+    return;
 }
 
 /**
@@ -85,14 +118,34 @@ export async function FetchUEXTradeports() {
  * The Stanton system is used by default.
  */
 export async function FetchPlanets() {
-    const fetchPlanets = await fetch(UEXAPIBASE + "planets/system/ST", {
-        method: "GET",
-        headers: {
-            api_key: process.env.UEX,
-        },
-    });
+    log.info("Fetching UEX planets...");
+    const cache = (await RedisClient.json.get("UEX:Planets")) as any;
 
-    Planets = (await fetchPlanets.json()).data;
+    if (cache === null) {
+        log.info("...No cache found. Updating...");
+        const fetchPlanets = await fetch(UEXAPIBASE + "planets/system/ST", {
+            method: "GET",
+            headers: {
+                api_key: process.env.UEX,
+            },
+        });
+        if (fetchPlanets.status !== 200) {
+            log.error(
+                `UEX returned a non-OK status. code: ${fetchPlanets.status} - ${fetchPlanets.statusText}`
+            );
+            return;
+        }
+        var data = (await fetchPlanets.json()).data;
+        RedisClient.json.set("UEX:Planets", "$", data);
+        // set expiry for 2 weeks
+        RedisClient.expire("UEX:Planets", 86400 * 14);
+        Planets = data;
+        log.info("...Done!");
+        return;
+    }
+    log.info("...Found UEX planets cache. Done!");
+    Planets = cache;
+    return;
 }
 
 /**
@@ -100,12 +153,36 @@ export async function FetchPlanets() {
  * The Stanton system is used by default.
  */
 export async function FetchSatellites() {
-    const FetchSatellites = await fetch(UEXAPIBASE + "satellites/system/ST", {
-        method: "GET",
-        headers: {
-            api_key: process.env.UEX,
-        },
-    });
+    log.info("Fetching UEX satellites...");
+    const cache = (await RedisClient.json.get("UEX:Satellites")) as any;
+    if (cache === null) {
+        log.info("...No cache found. Updating...");
 
-    Satellites = (await FetchSatellites.json()).data;
+        const fetchSatellites = await fetch(
+            UEXAPIBASE + "satellites/system/ST",
+            {
+                method: "GET",
+                headers: {
+                    api_key: process.env.UEX,
+                },
+            }
+        );
+        if (fetchSatellites.status !== 200) {
+            log.error(
+                `UEX returned a non-OK status. code: ${fetchSatellites.status} - ${fetchSatellites.statusText}`
+            );
+            return;
+        }
+
+        var data = (await fetchSatellites.json()).data;
+        RedisClient.json.set("UEX:Satellites", "$", data);
+        // set expiry for 2 weeks
+        RedisClient.expire("UEX:Satellites", 86400 * 14);
+        Satellites = data;
+        log.info("...Done!");
+        return;
+    }
+    log.info("...Found UEX satellites cache. Done!");
+    Satellites = cache;
+    return;
 }

@@ -4,9 +4,9 @@ import {
     EmbedBuilder,
     SlashCommandBuilder,
 } from "discord.js";
-import { Planets, Satellites, UEXTradePorts } from "../api/uexAPI";
-import { Planet, Tradeport } from "../types/uex";
-import { blue } from "../utilities/general";
+import { Planets, Satellites, UEXTradePorts } from "@/api/uexAPI";
+import { Planet, Tradeport } from "@/types/uex";
+import { blue } from "@/utilities/general";
 
 module.exports = {
     data: new SlashCommandBuilder()

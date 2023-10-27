@@ -10,13 +10,13 @@ import {
     StringSelectMenuBuilder,
     StringSelectMenuOptionBuilder,
 } from "discord.js";
-import { SearchResponse, WikiShip } from "../types/sc_wiki";
-import { UEXShip } from "../types/uex";
-import { FetchVehicleSerie, SearchGalactapedia, ships } from "../api/wikiAPI";
-import { RetrieveVehicleInfo } from "../api/wikiAPI";
-import { blue, msToTime } from "../utilities/general";
-import { UEXShips } from "../api/uexAPI";
-import { log } from "../logging/logger";
+import { SearchResponse, WikiShip } from "@/types/sc_wiki";
+import { UEXShip } from "@/types/uex";
+import { FetchVehicleSerie, SearchGalactapedia, ships } from "@/api/wikiAPI";
+import { RetrieveVehicleInfo } from "@/api/wikiAPI";
+import { blue, msToTime } from "@/utilities/general";
+import { UEXShips } from "@/api/uexAPI";
+import { log } from "@/logging/logger";
 
 module.exports = {
     data: new SlashCommandBuilder()

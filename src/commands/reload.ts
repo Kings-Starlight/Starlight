@@ -3,7 +3,7 @@ import {
     RepliableInteraction,
     SlashCommandBuilder,
 } from "discord.js";
-import { ErrorResponse } from "../utilities/errors";
+import { ErrorResponse } from "@/utilities/errors";
 
 module.exports = {
     data: new SlashCommandBuilder()

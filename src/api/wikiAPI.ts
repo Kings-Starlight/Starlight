@@ -1,10 +1,11 @@
-import { log } from "../logging/logger";
+import { log } from "@/logging/logger";
 import {
     GalactapediaResult,
     SearchResponse,
     WikiShip,
     ManufacturerShort,
-} from "../types/sc_wiki";
+} from "@/types/sc_wiki";
+import { RedisClient } from "@/utilities/redis";
 
 const WikiAPI = "https://api.star-citizen.wiki/api/v2/";
 
@@ -16,23 +17,31 @@ export var manufacturers: ManufacturerShort[];
  * @param name Name of the ship or vehicle.
  * @returns WikiShip
  */
-export async function RetrieveVehicleInfo(name: string): Promise<WikiShip> {
-    const fetchShip = await fetch(
-        WikiAPI + `vehicles/${name}?include=components,hardpoints,shops`
-    );
-    var response: WikiShip = (await fetchShip.json()).data;
+export async function RetrieveVehicleInfo(name: string): Promise<any> {
+    var data: WikiShip = (await RedisClient.json.get(name)) as any;
 
-    if (!Array.isArray(response.foci)) {
-        log.debug(`Converting foci for ${response.name} to array...`);
-        response.foci = [response.foci];
+    if (data === null) {
+        const fetchShip = await fetch(
+            WikiAPI + `vehicles/${name}?include=components,hardpoints,shops`
+        );
+        var response: WikiShip = (await fetchShip.json()).data;
+
+        if (!Array.isArray(response.foci)) {
+            log.debug(`Converting foci for ${response.name} to array...`);
+            response.foci = [response.foci];
+        }
+
+        RedisClient.json.set("vehicle:" + response.slug, "$", response as any);
+        RedisClient.expire("vehicle:" + response.slug, 86400 * 7, "NX");
+        return response;
     }
-    return response;
+    return data;
 }
 
 /**
  * SearchVehicles takes a "query" param, and returns an array of ships matching the query.
  * @param query Name or partial name of the ship or vehicle.
- * @returns SearchRespons[]
+ * @returns SearchResponse[]
  */
 export async function SearchVehicles(query: string): Promise<SearchResponse[]> {
     const search = await fetch(WikiAPI + "vehicles/search", {
@@ -50,12 +59,26 @@ export async function SearchVehicles(query: string): Promise<SearchResponse[]> {
  * FetchVehicles saves an array of all ships and vehicles.
  */
 export async function FetchVehicles(): Promise<void> {
-    log.info("Fetching list of ships from Wiki");
+    log.info("Fetching list of ships from Wiki...");
     log.profile("get Wiki vehicles");
-    const search = await fetch(WikiAPI + "vehicles?limit=500");
-    log.profile("get Wiki vehicles");
+    const cache = (await RedisClient.json.get("Wiki:WikiShips")) as any;
+    if (cache === null) {
+        log.info("...No cache found. updating...");
+        const search = await fetch(WikiAPI + "vehicles?limit=500");
+        var data = (await search.json()).data;
+        RedisClient.json.set("Wiki:WikiShips", "$", data);
+        // set expiry for 2 weeks.
+        RedisClient.expire("Wiki:WikiShips", 86400 * 14);
+        log.info("...Done!");
 
-    ships = (await search.json()).data;
+        ships = data;
+        return;
+    }
+    log.info("...Found wiki vehicles cache. Done!");
+
+    ships = cache;
+    log.profile("get Wiki vehicles");
+    return;
 }
 
 /**
@@ -64,10 +87,23 @@ export async function FetchVehicles(): Promise<void> {
 export async function FetchManufacturers(): Promise<void> {
     log.info("Fetching list of manufacturers from Wiki");
     log.profile("get Wiki manufacturers");
-    const search = await fetch(WikiAPI + "manufacturers?limit=500");
-    log.profile("get Wiki manufacturers");
+    const cache = (await RedisClient.json.get("Wiki:WikiManufacturers")) as any;
 
-    manufacturers = (await search.json()).data;
+    if (cache === null) {
+        log.info("...No cache found. updating...");
+
+        const search = await fetch(WikiAPI + "manufacturers?limit=500");
+        var data = (await search.json()).data;
+
+        RedisClient.json.set("Wiki:WikiManufacturers", "$", data);
+        // set no point expiring this information. it basically never changes...
+
+        manufacturers = data;
+        log.info("...Done!");
+    }
+    log.info("...Found wiki manufacturers cache. Done!");
+    manufacturers = cache;
+    log.profile("get Wiki manufacturers");
 }
 
 /**

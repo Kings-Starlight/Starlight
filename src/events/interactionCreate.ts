@@ -1,6 +1,6 @@
-import { log } from "../logging/logger";
+import { log } from "@/logging/logger";
 import { CacheType, Events, Interaction } from "discord.js";
-import { ErrorResponse } from "../utilities/errors";
+import { ErrorResponse } from "@/utilities/errors";
 
 module.exports = {
     name: Events.InteractionCreate,

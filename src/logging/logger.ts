@@ -3,10 +3,17 @@ import "winston-daily-rotate-file";
 
 export var log: Logger;
 
+const customFormat = format.printf(({ level, message, label, timestamp }) => {
+    return `\x1B[35m[\x1B[0m${label}\x1B[35m]\x1B[0m | ${timestamp} | ${level}: ${message}`;
+});
+
 export function InitiateLogger(): void {
     log = createLogger({
         level: "info",
-        format: format.combine(format.timestamp(), format.prettyPrint()),
+        format: format.combine(
+            format.timestamp({ format: "MMM-DD-YYYY HH:mm:ss" }),
+            format.prettyPrint()
+        ),
         transports: [
             new transports.DailyRotateFile({
                 filename: `logs/%DATE%/log.log`,
@@ -18,8 +25,10 @@ export function InitiateLogger(): void {
             new transports.Console({
                 format: format.combine(
                     format.colorize(),
+                    format.label({ label: "Starlight" }),
+                    format.errors({ stack: true }),
                     format.simple(),
-                    format.errors({ stack: true })
+                    customFormat
                 ),
                 level: "silly",
             }),
