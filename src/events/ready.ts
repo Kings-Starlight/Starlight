@@ -1,4 +1,4 @@
-import { log } from "@/logging/logger";
+import { log } from "@logging/logger";
 import { Events } from "discord.js";
 
 module.exports = {

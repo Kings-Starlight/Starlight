@@ -1,6 +1,6 @@
-import { log } from "@/logging/logger";
-import { UEXShip, Tradeport, TradeportPrices, Planet } from "@/types/uex";
-import { RedisClient } from "@/utilities/redis";
+import { log } from "@logging/logger";
+import { UEXShip, Tradeport, TradeportPrices, Planet } from "@/src/types/uex";
+import { RedisClient } from "@utilities/redis";
 
 export var UEXShips: UEXShip[];
 export var UEXTradePorts: Tradeport[];

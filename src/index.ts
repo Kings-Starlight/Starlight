@@ -1,14 +1,14 @@
 import dotenv from "dotenv";
-import { InitiateBot } from "@/runtime";
-import { InitiateLogger, log } from "@/logging/logger";
+import { InitiateBot } from "./runtime";
+import { InitiateLogger, log } from "@logging/logger";
 import {
     FetchPlanets,
     FetchSatellites,
     FetchUEXTradeports,
     FetchUEXVehicles,
-} from "@/api/uexAPI";
-import { FetchManufacturers, FetchVehicles } from "@/api/wikiAPI";
-import { RedisClient, SetupRedisClient } from "@/utilities/redis";
+} from "@api/uexAPI";
+import { FetchManufacturers, FetchVehicles } from "@api/wikiAPI";
+import { RedisClient, SetupRedisClient } from "@utilities/redis";
 
 dotenv.config();
 

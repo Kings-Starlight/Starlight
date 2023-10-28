@@ -1,11 +1,11 @@
-import { log } from "@/logging/logger";
+import { log } from "@logging/logger";
 import {
     GalactapediaResult,
     SearchResponse,
     WikiShip,
     ManufacturerShort,
-} from "@/types/sc_wiki";
-import { RedisClient } from "@/utilities/redis";
+} from "@/src/types/sc_wiki";
+import { RedisClient } from "@utilities/redis";
 
 const WikiAPI = "https://api.star-citizen.wiki/api/v2/";
 

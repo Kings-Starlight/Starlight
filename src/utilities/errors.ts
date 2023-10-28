@@ -1,10 +1,9 @@
 import {
     AutocompleteInteraction,
     EmbedBuilder,
-    Interaction,
     RepliableInteraction,
 } from "discord.js";
-import { log } from "../logging/logger";
+import { log } from "@logging/logger";
 import { red } from "./general";
 
 /**

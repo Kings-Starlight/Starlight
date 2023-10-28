@@ -7,8 +7,8 @@ import {
 } from "discord.js";
 import path from "path";
 import fs from "node:fs";
-import { log } from "@/logging/logger";
-import { Command } from "@/types/commands";
+import { log } from "@logging/logger";
+import { Command } from "./types/commands";
 
 export var client: Client<true>;
 
