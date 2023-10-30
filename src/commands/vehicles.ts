@@ -5,6 +5,7 @@ import {
     ButtonBuilder,
     ButtonStyle,
     CommandInteraction,
+    CommandInteractionOption,
     EmbedBuilder,
     SlashCommandBuilder,
     StringSelectMenuBuilder,
@@ -12,7 +13,12 @@ import {
 } from "discord.js";
 import { SearchResponse, WikiShip } from "@/src/types/sc_wiki";
 import { UEXShip } from "@/src/types/uex";
-import { FetchVehicleSerie, SearchGalactapedia, ships } from "@api/wikiAPI";
+import {
+    FetchVehicleSerie,
+    SearchGalactapedia,
+    manufacturers,
+    ships,
+} from "@api/wikiAPI";
 import { RetrieveVehicleInfo } from "@api/wikiAPI";
 import { blue, msToTime } from "@utilities/general";
 import { UEXShips } from "@api/uexAPI";
@@ -24,14 +30,44 @@ module.exports = {
         .setDescription(
             "Get information about all the various vehicles in the 'verse"
         )
-        .addStringOption((option) =>
-            option
-                .setName("vehicle")
+        .addSubcommand((sub) =>
+            sub
+                .setName("search")
                 .setDescription(
-                    "The name of the vehicle you wish to retrieve information on."
+                    "Search for information about a specific vehicle."
                 )
-                .setRequired(true)
-                .setAutocomplete(true)
+                .addStringOption((option) =>
+                    option
+                        .setName("vehicle")
+                        .setDescription(
+                            "The name of the vehicle you wish to retrieve information on."
+                        )
+                        .setRequired(true)
+                        .setAutocomplete(true)
+                )
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("compare")
+                .setDescription("Compare basic stats of 2 vehicles.")
+                .addStringOption((option) =>
+                    option
+                        .setName("first")
+                        .setDescription(
+                            "The name of the vehicle you wish to retrieve information on."
+                        )
+                        .setRequired(true)
+                        .setAutocomplete(true)
+                )
+                .addStringOption((option) =>
+                    option
+                        .setName("second")
+                        .setDescription(
+                            "The name of the vehicle you wish to retrieve information on."
+                        )
+                        .setRequired(true)
+                        .setAutocomplete(true)
+                )
         ),
     async autocomplete(interaction: AutocompleteInteraction) {
         const focusedValue = interaction.options.getFocused();
@@ -55,36 +91,67 @@ module.exports = {
     },
     async selectInteraction(interaction: AnySelectMenuInteraction) {
         interaction.deferUpdate();
-        const { embed, components } = await CreateShipEmbed(
-            interaction.values[0]
-        );
+        const { embed } = await CreateShipEmbed(interaction.values[0]);
 
+        if (interaction.customId !== "vehicles_compare") {
+            const { components } = await CreateShipComponents(
+                interaction.values[0]
+            );
+
+            try {
+                interaction.editReply({ embeds: [embed], components });
+            } catch (error) {
+                log.error("failed to update message:\n", error);
+                interaction.message.edit({ embeds: [embed], components });
+            }
+            return;
+        }
         try {
-            interaction.editReply({ embeds: [embed], components });
+            interaction.editReply({ embeds: [embed] });
         } catch (error) {
             log.error("failed to update message:\n", error);
-            interaction.message.edit({ embeds: [embed], components });
+            interaction.message.edit({ embeds: [embed] });
         }
     },
     async execute(interaction: CommandInteraction) {
         await interaction.deferReply();
 
-        const { embed, components } = await CreateShipEmbed(
-            String(interaction.options.data[0].value)
-        );
-
-        interaction.editReply({ embeds: [embed], components });
+        switch (interaction.options.data[0].name) {
+            case "search":
+                var { embed } = await CreateShipEmbed(
+                    String(interaction.options.data[0].options[0].value)
+                );
+                var { components } = await CreateShipComponents(
+                    String(interaction.options.data[0].options[0].value)
+                );
+                interaction.editReply({ embeds: [embed], components });
+                break;
+            case "compare":
+                var { embed } = await CreateShipEmbed(
+                    interaction.options.data[0].options[0].value
+                );
+                var { components } = await CreateCompareComponents(
+                    interaction.options.data[0].options
+                );
+                interaction.editReply({ embeds: [embed], components });
+                break;
+        }
     },
 };
-/** Creates a complete message embed, complete with appropriate buttons for a specified ship. */
-async function CreateShipEmbed(
-    name: string
-): Promise<{ embed: EmbedBuilder; components: [] }> {
+
+async function RetrieveFromAPI(name: string) {
     const WikiInfo: WikiShip = await RetrieveVehicleInfo(name);
     const UEXInfo: UEXShip = UEXShips.filter((ship) =>
         ship.name.includes(WikiInfo.name)
     )[0];
     const RSI = await SearchGalactapedia(WikiInfo.name);
+
+    return { WikiInfo, UEXInfo, RSI };
+}
+
+/** Creates a message embed for a specified ship. */
+async function CreateShipEmbed(name: string): Promise<{ embed: EmbedBuilder }> {
+    const { WikiInfo, UEXInfo } = await RetrieveFromAPI(name);
 
     var embed: EmbedBuilder;
 
@@ -361,6 +428,12 @@ async function CreateShipEmbed(
         }
     }
 
+    return { embed };
+}
+/** Generates the components for a single ship*/
+async function CreateShipComponents(name: string): Promise<{ components: [] }> {
+    const { WikiInfo, UEXInfo, RSI } = await RetrieveFromAPI(name);
+
     const disabledLink = (item: string) => {
         return new ButtonBuilder()
             .setLabel(item + " unavailable")
@@ -404,17 +477,15 @@ async function CreateShipEmbed(
             .setCustomId("vehicles_variant")
             .setPlaceholder("Select variant")
             .addOptions(
-                serieFilter.map((ship) =>
-                    new StringSelectMenuOptionBuilder()
-                        .setLabel(
-                            ship.name.substring(ship.name.indexOf(" ") + 1)
-                        )
+                serieFilter.map((ship) => {
+                    return new StringSelectMenuOptionBuilder()
+                        .setLabel(ship.name)
                         .setValue(
                             ship.link.split(
                                 "https://api.star-citizen.wiki/api/v2/vehicles/"
                             )[1]
-                        )
-                )
+                        );
+                })
             );
         serieRow =
             new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
@@ -451,5 +522,30 @@ async function CreateShipEmbed(
 
     components.push(buttonRow);
 
-    return { embed, components };
+    return { components };
+}
+
+async function CreateCompareComponents(
+    options: CommandInteractionOption[]
+): Promise<{ components: [] }> {
+    const selectOptions = await Promise.all(
+        options.map(async (ship) => {
+            const { WikiInfo } = await RetrieveFromAPI(String(ship.value));
+            return new StringSelectMenuOptionBuilder()
+                .setLabel(WikiInfo.name)
+                .setValue(WikiInfo.uuid);
+        })
+    );
+    var components: any = [],
+        select = new StringSelectMenuBuilder()
+            .setCustomId("vehicles_compare")
+            .setPlaceholder("Select vehicle to compare")
+            .addOptions(selectOptions),
+        selectRow =
+            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+                select
+            );
+    components.push(selectRow);
+
+    return { components };
 }
