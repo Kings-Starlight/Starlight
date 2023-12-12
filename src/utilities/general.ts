@@ -21,3 +21,21 @@ export function msToTime(duration: number) {
 
 export const blue = 0x0251a8,
     red = 0xff0000;
+
+/**
+ * for ensuring that what I'm requesting is, infact, defined.
+ * https://stackoverflow.com/questions/54738221/typescript-array-find-possibly-undefined
+ * @param argument
+ * @param message
+ * @returns
+ */
+export function ensure<T>(
+    argument: T | undefined | null,
+    message: string = "This value was promised to be there."
+): T {
+    if (argument === undefined || argument === null) {
+        throw new TypeError(message);
+    }
+
+    return argument;
+}

@@ -20,7 +20,7 @@ import {
     ships,
 } from "@api/wikiAPI";
 import { RetrieveVehicleInfo } from "@api/wikiAPI";
-import { blue, msToTime } from "@utilities/general";
+import { blue, ensure, msToTime } from "@utilities/general";
 import { UEXShips } from "@api/uexAPI";
 import { log } from "@logging/logger";
 
@@ -116,22 +116,24 @@ module.exports = {
     async execute(interaction: CommandInteraction) {
         await interaction.deferReply();
 
-        switch (interaction.options.data[0].name) {
+        const data = interaction.options.data[0];
+
+        switch (data.name) {
             case "search":
                 var { embed } = await CreateShipEmbed(
-                    String(interaction.options.data[0].options[0].value)
+                    String(ensure(data.options)[0].value)
                 );
                 var { components } = await CreateShipComponents(
-                    String(interaction.options.data[0].options[0].value)
+                    String(ensure(data.options)[0].value)
                 );
                 interaction.editReply({ embeds: [embed], components });
                 break;
             case "compare":
                 var { embed } = await CreateShipEmbed(
-                    interaction.options.data[0].options[0].value
+                    String(ensure(data.options)[0].value)
                 );
                 var { components } = await CreateCompareComponents(
-                    interaction.options.data[0].options
+                    ensure(data.options)
                 );
                 interaction.editReply({ embeds: [embed], components });
                 break;

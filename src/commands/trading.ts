@@ -2,11 +2,13 @@ import {
     AutocompleteInteraction,
     CommandInteraction,
     EmbedBuilder,
+    RepliableInteraction,
     SlashCommandBuilder,
 } from "discord.js";
 import { Planets, Satellites, UEXTradePorts } from "@api/uexAPI";
 import { Planet, Tradeport } from "@/src/types/uex";
-import { blue } from "@utilities/general";
+import { blue, ensure } from "@utilities/general";
+import { ErrorResponse } from "../utilities/errors";
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -51,11 +53,12 @@ module.exports = {
         );
     },
     async execute(interaction: CommandInteraction) {
-        switch (interaction.options.data[0].name) {
+        const data = interaction.options.data[0];
+        const tradeportCode = ensure(data.options)[0].value;
+        switch (data.name) {
             case "tradeport":
                 const tradeport = UEXTradePorts.filter(
-                    (e) =>
-                        e.code === interaction.options.data[0].options[0].value
+                    (e) => e.code === tradeportCode
                 )[0];
                 const planet: Planet = Planets.filter(
                     (e) => e.code == tradeport.planet
