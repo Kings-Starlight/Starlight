@@ -2,7 +2,7 @@ export function msToTime(duration: number) {
     var milliseconds = Math.floor(duration % 1000),
         seconds = Math.floor((duration / 1000) % 60),
         minutes = Math.floor((duration / (1000 * 60)) % 60),
-        hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+        hours = Math.floor(duration / (1000 * 60 * 60));
 
     return `${
         hours != 0
@@ -16,7 +16,7 @@ export function msToTime(duration: number) {
             : ""
     } ${seconds != 0 ? `${seconds < 10 ? "0" + seconds : seconds}s` : ""} ${
         milliseconds != 0 ? `${milliseconds}ms` : ""
-    }`;
+    }`.trim();
 }
 
 export const blue = 0x0251a8,
