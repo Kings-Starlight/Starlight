@@ -23,7 +23,7 @@ export function InitiateBot(): void {
     const eventsPath = path.join(__dirname, "events");
     const eventFiles = fs
         .readdirSync(eventsPath)
-        .filter((file) => file.endsWith(".ts"));
+        .filter((file) => file.endsWith(".ts") || file.endsWith(".js"));
 
     for (const file of eventFiles) {
         const filePath = path.join(eventsPath, file);
@@ -43,15 +43,23 @@ export function InitiateBot(): void {
     const commandsPath: string = path.join(__dirname, "commands");
     const commandsFiles: string[] = fs
         .readdirSync(commandsPath)
-        .filter((file) => file.endsWith(".ts"));
+        .filter((file) => file.endsWith(".ts") || file.endsWith(".js"));
 
     for (const file of commandsFiles) {
         const filePath: string = path.join(commandsPath, file);
         const command: Command = require(filePath);
 
         if ("data" in command && "execute" in command) {
-            client.commands.set(command.data.name, command);
-            commands.push(command.data.toJSON());
+            if (
+                "flags" in command &&
+                command.flags.dev &&
+                process.env.NODE_ENV === "production"
+            ) {
+                log.info("Skipping dev command...");
+            } else {
+                client.commands.set(command.data.name, command);
+                commands.push(command.data.toJSON());
+            }
         } else {
             log.warn(
                 `The command at ${filePath} is missing some required properties.`

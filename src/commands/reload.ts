@@ -6,6 +6,9 @@ import {
 import { ErrorResponse } from "@utilities/errors";
 
 module.exports = {
+    flags: {
+        dev: true,
+    },
     data: new SlashCommandBuilder()
         .setName("reload")
         .setDescription("Reloads a command.")
@@ -38,9 +41,10 @@ module.exports = {
             interaction.client.commands.delete(command.data.name);
             const newCommand = require(`./${command.data.name}.ts`);
             interaction.client.commands.set(newCommand.data.name, newCommand);
-            await interaction.reply(
-                `Command \`${newCommand.data.name}\` was reloaded!`
-            );
+            await interaction.reply({
+                content: `Command \`${newCommand.data.name}\` was reloaded!`,
+                ephemeral: true,
+            });
         } catch (error: any) {
             ErrorResponse(
                 interaction as RepliableInteraction,
