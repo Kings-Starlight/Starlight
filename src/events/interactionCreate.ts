@@ -19,9 +19,7 @@ module.exports = {
             }
 
             try {
-                log.profile("Command Profile");
                 await command.execute(interaction);
-                log.profile("Command Profile");
             } catch (error) {
                 ErrorResponse(interaction, "Failed to execute command.", error);
             }
