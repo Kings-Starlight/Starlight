@@ -6,6 +6,9 @@ import {
 } from "discord.js";
 
 export interface Command {
+    flags: {
+        dev: boolean;
+    };
     data: SlashCommandBuilder;
     autocomplete: (
         Interaction: AutocompleteInteraction<CacheType>
