@@ -13,12 +13,7 @@ import {
 } from "discord.js";
 import { SearchResponse, WikiShip } from "@/src/types/sc_wiki";
 import { UEXShip } from "@/src/types/uex";
-import {
-    FetchVehicleSerie,
-    SearchGalactapedia,
-    manufacturers,
-    ships,
-} from "@api/wikiAPI";
+import { FetchVehicleSerie, SearchGalactapedia, Ships } from "@api/wikiAPI";
 import { RetrieveVehicleInfo } from "@api/wikiAPI";
 import { blue, ensure, msToTime } from "@utilities/general";
 import { UEXShips } from "@api/uexAPI";
@@ -71,7 +66,7 @@ module.exports = {
         ),
     async autocomplete(interaction: AutocompleteInteraction) {
         const focusedValue = interaction.options.getFocused();
-        const choices: { name: string; value: string }[] = ships.map(
+        const choices: { name: string; value: string }[] = Ships.map(
             (ship: SearchResponse) => ({
                 name: ship.name,
                 value: ship.uuid ? ship.uuid : ship.name,
@@ -80,7 +75,7 @@ module.exports = {
         const filtered = choices
             .sort((a, b) => a.name.localeCompare(b.name))
             .filter((choice) =>
-                choice.name.toLowerCase().startsWith(focusedValue)
+                choice.name.toLowerCase().includes(focusedValue)
             );
         await interaction.respond(
             filtered.slice(0, 24).map((choice) => ({
@@ -92,6 +87,7 @@ module.exports = {
     async selectInteraction(interaction: AnySelectMenuInteraction) {
         interaction.deferUpdate();
         const { embed } = await CreateShipEmbed(interaction.values[0]);
+        const start = Date.now();
 
         if (interaction.customId !== "vehicles_compare") {
             const { components } = await CreateShipComponents(
@@ -99,22 +95,50 @@ module.exports = {
             );
 
             try {
-                interaction.editReply({ embeds: [embed], components });
+                interaction.editReply({
+                    embeds: [
+                        embed.setFooter({
+                            text: `took ${msToTime(Date.now() - start)}`,
+                        }),
+                    ],
+                    components,
+                });
             } catch (error) {
                 log.error("failed to update message:\n", error);
-                interaction.message.edit({ embeds: [embed], components });
+                interaction.message.edit({
+                    embeds: [
+                        embed.setFooter({
+                            text: `took ${msToTime(Date.now() - start)}`,
+                        }),
+                    ],
+                    components,
+                });
             }
             return;
         }
         try {
-            interaction.editReply({ embeds: [embed] });
+            interaction.editReply({
+                embeds: [
+                    embed.setFooter({
+                        text: `took ${msToTime(Date.now() - start)}`,
+                    }),
+                ],
+            });
         } catch (error) {
             log.error("failed to update message:\n", error);
-            interaction.message.edit({ embeds: [embed] });
+            0;
+            interaction.message.edit({
+                embeds: [
+                    embed.setFooter({
+                        text: `took ${msToTime(Date.now() - start)}`,
+                    }),
+                ],
+            });
         }
     },
     async execute(interaction: CommandInteraction) {
         await interaction.deferReply();
+        const start = Date.now();
 
         const data = interaction.options.data[0];
 
@@ -126,7 +150,14 @@ module.exports = {
                 var { components } = await CreateShipComponents(
                     String(ensure(data.options)[0].value)
                 );
-                interaction.editReply({ embeds: [embed], components });
+                interaction.editReply({
+                    embeds: [
+                        embed.setFooter({
+                            text: `took ${msToTime(Date.now() - start)}`,
+                        }),
+                    ],
+                    components,
+                });
                 break;
             case "compare":
                 var { embed } = await CreateShipEmbed(
@@ -135,7 +166,14 @@ module.exports = {
                 var { components } = await CreateCompareComponents(
                     ensure(data.options)
                 );
-                interaction.editReply({ embeds: [embed], components });
+                interaction.editReply({
+                    embeds: [
+                        embed.setFooter({
+                            text: `took ${msToTime(Date.now() - start)}`,
+                        }),
+                    ],
+                    components,
+                });
                 break;
         }
     },
@@ -192,7 +230,11 @@ async function CreateShipEmbed(name: string): Promise<{ embed: EmbedBuilder }> {
                 },
                 {
                     name: "Pledge Price (USD)",
-                    value: `$${WikiInfo.msrp}`,
+                    value: `${
+                        WikiInfo.msrp !== undefined
+                            ? "$" + WikiInfo.msrp
+                            : "Not for sale"
+                    }`,
                     inline: true,
                 },
                 {
@@ -275,7 +317,11 @@ async function CreateShipEmbed(name: string): Promise<{ embed: EmbedBuilder }> {
                 },
                 {
                     name: "Pledge Price (USD)",
-                    value: `$${WikiInfo.msrp}`,
+                    value: `${
+                        WikiInfo.msrp !== undefined
+                            ? "$" + WikiInfo.msrp
+                            : "Not for sale"
+                    }`,
                     inline: true,
                 },
                 {
@@ -530,7 +576,7 @@ async function CreateShipComponents(name: string): Promise<{ components: [] }> {
 async function CreateCompareComponents(
     options: CommandInteractionOption[]
 ): Promise<{ components: [] }> {
-    const selectOptions = await Promise.all(
+    var selectOptions = await Promise.all(
         options.map(async (ship) => {
             const { WikiInfo } = await RetrieveFromAPI(String(ship.value));
             return new StringSelectMenuOptionBuilder()
@@ -538,6 +584,7 @@ async function CreateCompareComponents(
                 .setValue(WikiInfo.uuid);
         })
     );
+
     var components: any = [],
         select = new StringSelectMenuBuilder()
             .setCustomId("vehicles_compare")
