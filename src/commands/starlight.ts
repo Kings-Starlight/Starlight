@@ -15,12 +15,22 @@ module.exports = {
         const infoEmbed: EmbedBuilder = new EmbedBuilder()
             .setColor(blue)
             .setDescription(
-                "# Starlight.\nThe solution for your trading and general knowledge needs.\n"
+                `# Starlight${
+                    process.env.NODE_ENV === "production" ? "" : " In-dev"
+                }.\nThe solution for your trading and general knowledge needs.\n`
             )
             .setFields(
                 {
                     name: "Version",
                     value: `Alpha ${pjson.version}`,
+                    inline: true,
+                },
+                {
+                    name: "Status",
+                    value:
+                        process.env.NODE_ENV === "production"
+                            ? "Production"
+                            : "Development",
                     inline: true,
                 },
                 {
@@ -64,6 +74,14 @@ module.exports = {
                     {
                         name: "Version",
                         value: `Alpha ${pjson.version}`,
+                        inline: true,
+                    },
+                    {
+                        name: "Status",
+                        value:
+                            process.env.NODE_ENV === "production"
+                                ? "Production"
+                                : "Development",
                         inline: true,
                     },
                     {
