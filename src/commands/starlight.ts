@@ -22,7 +22,7 @@ module.exports = {
             .setFields(
                 {
                     name: "Version",
-                    value: `Alpha ${pjson.version}`,
+                    value: `${pjson.version}`,
                     inline: true,
                 },
                 {
