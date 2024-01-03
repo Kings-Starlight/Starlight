@@ -2,13 +2,11 @@ import {
     AutocompleteInteraction,
     CommandInteraction,
     EmbedBuilder,
-    RepliableInteraction,
     SlashCommandBuilder,
 } from "discord.js";
 import { Planets, Satellites, UEXTradePorts } from "@api/uexAPI";
 import { Planet, Tradeport } from "@/src/types/uex";
 import { blue, ensure } from "@utilities/general";
-import { ErrorResponse } from "../utilities/errors";
 
 module.exports = {
     data: new SlashCommandBuilder()
