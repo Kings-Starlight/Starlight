@@ -7,5 +7,7 @@ namespace NodeJS {
         CREATOR_ID: string;
         REDIS_AUTH_USERNAME: string;
         REDIS_AUTH_PASSWORD: string;
+        REDIS_HOST: string;
+        REDIS_PORT: string;
     }
 }
