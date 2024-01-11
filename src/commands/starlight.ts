@@ -56,6 +56,7 @@ module.exports = {
                 {
                     name: "Powered By",
                     value: "**[UEX](https://uexcorp.space/)**",
+                    inline: true
                 },
                 {
                     name: "\u200b",
@@ -73,7 +74,7 @@ module.exports = {
                 infoEmbed.setFields(
                     {
                         name: "Version",
-                        value: `Alpha ${pjson.version}`,
+                        value: `${pjson.version}`,
                         inline: true,
                     },
                     {
