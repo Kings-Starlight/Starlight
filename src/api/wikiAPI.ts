@@ -71,13 +71,12 @@ export async function FetchVehicles(): Promise<void> {
         RedisClient.expire("Wiki:WikiShips", 86400 * 14);
         log.info("...Done!");
 
-        ships = data;
+        Ships = data;
         return;
     }
     log.info("...Found wiki vehicles cache. Done!");
 
-    ships = cache;
-    log.profile("get Wiki vehicles");
+    Ships = cache;
     return;
 }
 
@@ -92,18 +91,18 @@ export async function FetchManufacturers(): Promise<void> {
     if (cache === null) {
         log.info("...No cache found. updating...");
 
-        const search = await fetch(WikiAPI + "manufacturers?limit=500");
+        const search = await fetch(WikiAPI + "manufacturers?limit=1000");
         var data = (await search.json()).data;
 
         RedisClient.json.set("Wiki:WikiManufacturers", "$", data);
         // set no point expiring this information. it basically never changes...
 
-        manufacturers = data;
+        Manufacturers = data;
         log.info("...Done!");
+        return;
     }
     log.info("...Found wiki manufacturers cache. Done!");
-    manufacturers = cache;
-    log.profile("get Wiki manufacturers");
+    Manufacturers = cache;
 }
 
 /**
