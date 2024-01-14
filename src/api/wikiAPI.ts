@@ -9,8 +9,8 @@ import { RedisClient } from "@utilities/redis";
 
 const WikiAPI = "https://api.star-citizen.wiki/api/v2/";
 
-export var ships: SearchResponse[];
-export var manufacturers: ManufacturerShort[];
+export var Ships: SearchResponse[];
+export var Manufacturers: ManufacturerShort[];
 
 /**
  * RetrieveVehicleInfo takes a "name" param, and returns details about the specified vehicle.
