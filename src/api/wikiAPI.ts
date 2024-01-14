@@ -29,7 +29,7 @@ export async function RetrieveVehicleInfo(name: string): Promise<any> {
                 `Wiki returned a non-OK status. code: ${fetchShip.status} - ${fetchShip.statusText}`
             );
             return Promise.reject(
-                `Wiki returned a non-OK status. code: ${fetchShip.status} - ${search.statusText}`
+                `Wiki returned a non-OK status. code: ${fetchShip.status} - ${fetchShip.statusText}`
             );
         }
         var response: WikiShip = (await fetchShip.json()).data;
