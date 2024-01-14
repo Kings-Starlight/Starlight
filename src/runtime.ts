@@ -55,7 +55,7 @@ export function InitiateBot(): void {
                 command.flags.dev &&
                 process.env.NODE_ENV === "production"
             ) {
-                log.info("Skipping dev command...");
+                log.info(`${command.data.name} has "dev" flag. skipping...`);
             } else {
                 client.commands.set(command.data.name, command);
                 commands.push(command.data.toJSON());
@@ -72,16 +72,25 @@ export function InitiateBot(): void {
     (async () => {
         try {
             log.info(
-                `Started refreshing ${client.commands.size} application (/) commands.`
+                `Started refreshing ${client.commands.size}  application (/) commands.`
             );
 
-            const data: any = await rest.put(
-                Routes.applicationGuildCommands(
-                    process.env.CLIENT_ID,
-                    process.env.TEST_GUILD
-                ),
-                { body: commands }
-            );
+            var data: Array<any>;
+
+            if (process.env.NODE_ENV !== "production") {
+                data = (await rest.put(
+                    Routes.applicationGuildCommands(
+                        process.env.CLIENT_ID,
+                        process.env.TEST_GUILD
+                    ),
+                    { body: commands }
+                )) as any;
+            } else {
+                data = (await rest.put(
+                    Routes.applicationCommands(process.env.CLIENT_ID),
+                    { body: commands }
+                )) as any;
+            }
 
             log.info(
                 `Successfully reloaded ${data.length} application (/) commands`

@@ -43,7 +43,11 @@ module.exports = {
                     value: `${client.ws.ping}ms`,
                     inline: true,
                 },
-                { name: "Response Ping", value: "pinging..." },
+                {
+                    name: "Response Ping",
+                    value: "pinging...",
+                    inline: true,
+                },
                 {
                     name: "Server",
                     value: "Starlight Mainframe ( MT Datacenter 8FK-Q2X-K )",
@@ -52,11 +56,14 @@ module.exports = {
                     name: "Relay Provider",
                     value: "Aciedo CommRelay [ relays ST4-64, ST4-22, ST2-55 ]",
                 },
-                { name: "Address", value: "uee.stanton.mic.8fkq2xk.starlight" },
+                {
+                    name: "Address",
+                    value: "uee.stanton.mic.8fkq2xk.starlight",
+                },
                 {
                     name: "Powered By",
                     value: "**[UEX](https://uexcorp.space/)**",
-                    inline: true
+                    inline: true,
                 },
                 {
                     name: "\u200b",
