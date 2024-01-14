@@ -14,9 +14,8 @@ const UEXAPIBASE = "https://portal.uexcorp.space/api/";
  */
 export async function FetchUEXVehicles() {
     log.info("Fetching ships from UEX...");
-    log.profile("get UEX vehicles");
 
-    const cache = (await RedisClient.json.get("UEX:Ships")) as any;
+    const cache = await RedisClient.get("UEX:Ships");
 
     if (cache === null) {
         log.info("...No cache found. Updating...");
@@ -33,9 +32,9 @@ export async function FetchUEXVehicles() {
             );
             return;
         }
-        const data = (await fetchShips.json()).data;
+        const data: UEXShip[] = (await fetchShips.json()).data;
         UEXShips = data;
-        RedisClient.json.set("UEX:Ships", "$", data);
+        RedisClient.set("UEX:Ships", JSON.stringify(data));
         // set expiry for 2 weeks
         RedisClient.expire("UEX:Ships", 86400 * 14);
         log.info("...Done!");
@@ -43,9 +42,7 @@ export async function FetchUEXVehicles() {
     }
 
     log.info("...Found UEX vehicle cache. Done!");
-    UEXShips = cache;
-
-    log.profile("get UEX vehicles");
+    UEXShips = JSON.parse(cache);
     return;
 }
 
@@ -56,7 +53,7 @@ export async function FetchUEXVehicles() {
 export async function FetchUEXTradeports() {
     log.info("Fetching UEX tradeports...");
 
-    const cache = (await RedisClient.json.get("UEX:Tradeports")) as any;
+    const cache = await RedisClient.get("UEX:Tradeports");
 
     if (cache === null) {
         log.info("...No cache found. Updating...");
@@ -101,7 +98,7 @@ export async function FetchUEXTradeports() {
                 data[i].prices = pricesNew;
             }
         });
-        RedisClient.json.set("UEX:Tradeports", "$", data as any);
+        RedisClient.set("UEX:Tradeports", JSON.stringify(data));
         // set expiry for 2 weeks
         RedisClient.expire("UEX:Tradeports", 86400 * 14);
         UEXTradePorts = data;
@@ -109,7 +106,7 @@ export async function FetchUEXTradeports() {
         return;
     }
     log.info("...Found UEX tradport cache. Done!");
-    UEXTradePorts = cache;
+    UEXTradePorts = JSON.parse(cache);
     return;
 }
 
@@ -119,7 +116,7 @@ export async function FetchUEXTradeports() {
  */
 export async function FetchPlanets() {
     log.info("Fetching UEX planets...");
-    const cache = (await RedisClient.json.get("UEX:Planets")) as any;
+    const cache = await RedisClient.get("UEX:Planets");
 
     if (cache === null) {
         log.info("...No cache found. Updating...");
@@ -135,8 +132,8 @@ export async function FetchPlanets() {
             );
             return;
         }
-        var data = (await fetchPlanets.json()).data;
-        RedisClient.json.set("UEX:Planets", "$", data);
+        var data: Planet[] = (await fetchPlanets.json()).data;
+        RedisClient.set("UEX:Planets", JSON.stringify(data));
         // set expiry for 2 weeks
         RedisClient.expire("UEX:Planets", 86400 * 14);
         Planets = data;
@@ -144,7 +141,7 @@ export async function FetchPlanets() {
         return;
     }
     log.info("...Found UEX planets cache. Done!");
-    Planets = cache;
+    Planets = JSON.parse(cache);
     return;
 }
 
@@ -154,7 +151,7 @@ export async function FetchPlanets() {
  */
 export async function FetchSatellites() {
     log.info("Fetching UEX satellites...");
-    const cache = (await RedisClient.json.get("UEX:Satellites")) as any;
+    const cache = await RedisClient.get("UEX:Satellites");
     if (cache === null) {
         log.info("...No cache found. Updating...");
 
@@ -174,8 +171,8 @@ export async function FetchSatellites() {
             return;
         }
 
-        var data = (await fetchSatellites.json()).data;
-        RedisClient.json.set("UEX:Satellites", "$", data);
+        var data: Planet[] = (await fetchSatellites.json()).data;
+        RedisClient.set("UEX:Satellites", JSON.stringify(data));
         // set expiry for 2 weeks
         RedisClient.expire("UEX:Satellites", 86400 * 14);
         Satellites = data;
@@ -183,6 +180,6 @@ export async function FetchSatellites() {
         return;
     }
     log.info("...Found UEX satellites cache. Done!");
-    Satellites = cache;
+    Satellites = JSON.parse(cache);
     return;
 }

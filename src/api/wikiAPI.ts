@@ -18,7 +18,7 @@ export var Manufacturers: ManufacturerShort[];
  * @returns WikiShip
  */
 export async function RetrieveVehicleInfo(name: string): Promise<any> {
-    var data: WikiShip = (await RedisClient.json.get(name)) as any;
+    var data = await RedisClient.get(name);
 
     if (data === null) {
         const fetchShip = await fetch(
@@ -39,11 +39,11 @@ export async function RetrieveVehicleInfo(name: string): Promise<any> {
             response.foci = [response.foci];
         }
 
-        RedisClient.json.set("vehicle:" + response.slug, "$", response as any);
+        RedisClient.set("vehicle:" + response.slug, JSON.stringify(response));
         RedisClient.expire("vehicle:" + response.slug, 86400 * 7, "NX");
         return response;
     }
-    return data;
+    return JSON.parse(data);
 }
 
 /**
@@ -77,7 +77,7 @@ export async function SearchVehicles(query: string): Promise<SearchResponse[]> {
 export async function FetchVehicles(): Promise<void> {
     log.info("Fetching list of ships from Wiki...");
     log.profile("get Wiki vehicles");
-    const cache = (await RedisClient.json.get("Wiki:WikiShips")) as any;
+    const cache = await RedisClient.get("Wiki:WikiShips");
     if (cache === null) {
         log.info("...No cache found. updating...");
         const search = await fetch(WikiAPI + "vehicles?limit=500");
@@ -90,7 +90,7 @@ export async function FetchVehicles(): Promise<void> {
             );
         }
         var data = (await search.json()).data;
-        RedisClient.json.set("Wiki:WikiShips", "$", data);
+        RedisClient.set("Wiki:WikiShips", JSON.stringify(data));
         // set expiry for 2 weeks.
         RedisClient.expire("Wiki:WikiShips", 86400 * 14);
         log.info("...Done!");
@@ -100,7 +100,7 @@ export async function FetchVehicles(): Promise<void> {
     }
     log.info("...Found wiki vehicles cache. Done!");
 
-    Ships = cache;
+    Ships = JSON.parse(cache);
     return;
 }
 
@@ -110,7 +110,7 @@ export async function FetchVehicles(): Promise<void> {
 export async function FetchManufacturers(): Promise<void> {
     log.info("Fetching list of manufacturers from Wiki");
     log.profile("get Wiki manufacturers");
-    const cache = (await RedisClient.json.get("Wiki:WikiManufacturers")) as any;
+    const cache = await RedisClient.get("Wiki:WikiManufacturers");
 
     if (cache === null) {
         log.info("...No cache found. updating...");
@@ -126,7 +126,7 @@ export async function FetchManufacturers(): Promise<void> {
         }
         var data = (await search.json()).data;
 
-        RedisClient.json.set("Wiki:WikiManufacturers", "$", data);
+        RedisClient.set("Wiki:WikiManufacturers", JSON.stringify(data));
         // set no point expiring this information. it basically never changes...
 
         Manufacturers = data;
@@ -134,7 +134,7 @@ export async function FetchManufacturers(): Promise<void> {
         return;
     }
     log.info("...Found wiki manufacturers cache. Done!");
-    Manufacturers = cache;
+    Manufacturers = JSON.parse(cache);
 }
 
 /**
