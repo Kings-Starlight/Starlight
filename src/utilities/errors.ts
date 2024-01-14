@@ -4,7 +4,7 @@ import {
     RepliableInteraction,
 } from "discord.js";
 import { log } from "@logging/logger";
-import { red } from "./general";
+import { interactionType, red } from "./general";
 
 /**
  * ErrorResponse replies to the failed interaction presenting an error message.
@@ -16,7 +16,7 @@ export function ErrorResponse(
     description: string,
     error?: any
 ): void {
-    log.error(error ? description + ": " + error : description);
+    log.error(`An error occured when attempting to run a ${interactionType(interaction.type)} command ${error ? description + ": " + error : description}`);
 
     const responseEmbed = new EmbedBuilder()
         .setColor(red)

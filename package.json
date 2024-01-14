@@ -6,7 +6,7 @@
     "scripts": {
         "build": "tsc && tsc-alias",
         "watch": "tsc -watch",
-        "start": "node ./build/src/index.js",
+        "start": "set NODE_ENV=production&&node ./build/src/index.js",
         "dev": "ts-node -Tr tsconfig-paths/register ./src/index.ts "
     },
     "keywords": [],
