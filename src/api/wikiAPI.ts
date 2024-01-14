@@ -24,6 +24,14 @@ export async function RetrieveVehicleInfo(name: string): Promise<any> {
         const fetchShip = await fetch(
             WikiAPI + `vehicles/${name}?include=components,hardpoints,shops`
         );
+        if (fetchShip.status !== 200) {
+            log.error(
+                `Wiki returned a non-OK status. code: ${fetchShip.status} - ${fetchShip.statusText}`
+            );
+            return Promise.reject(
+                `Wiki returned a non-OK status. code: ${fetchShip.status} - ${search.statusText}`
+            );
+        }
         var response: WikiShip = (await fetchShip.json()).data;
 
         if (!Array.isArray(response.foci)) {
@@ -52,6 +60,14 @@ export async function SearchVehicles(query: string): Promise<SearchResponse[]> {
         },
         body: JSON.stringify({ query }),
     });
+    if (search.status !== 200) {
+        log.error(
+            `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+        );
+        return Promise.reject(
+            `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+        );
+    }
     return await search.json();
 }
 
@@ -65,6 +81,14 @@ export async function FetchVehicles(): Promise<void> {
     if (cache === null) {
         log.info("...No cache found. updating...");
         const search = await fetch(WikiAPI + "vehicles?limit=500");
+        if (search.status !== 200) {
+            log.error(
+                `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+            );
+            return Promise.reject(
+                `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+            );
+        }
         var data = (await search.json()).data;
         RedisClient.json.set("Wiki:WikiShips", "$", data);
         // set expiry for 2 weeks.
@@ -92,6 +116,14 @@ export async function FetchManufacturers(): Promise<void> {
         log.info("...No cache found. updating...");
 
         const search = await fetch(WikiAPI + "manufacturers?limit=1000");
+        if (search.status !== 200) {
+            log.error(
+                `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+            );
+            return Promise.reject(
+                `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+            );
+        }
         var data = (await search.json()).data;
 
         RedisClient.json.set("Wiki:WikiManufacturers", "$", data);
@@ -116,6 +148,14 @@ export async function FetchVehicleSerie(
     const search = await fetch(
         WikiAPI + `vehicles?filter[chassis_id]=${chassis_id}`
     );
+    if (search.status !== 200) {
+        log.error(
+            `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+        );
+        return Promise.reject(
+            `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+        );
+    }
     return (await search.json()).data;
 }
 
@@ -135,5 +175,13 @@ export async function SearchGalactapedia(
         },
         body: JSON.stringify({ query }),
     });
+    if (search.status !== 200) {
+        log.error(
+            `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+        );
+        return Promise.reject(
+            `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+        );
+    }
     return (await search.json()).data;
 }
