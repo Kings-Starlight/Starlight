@@ -14,7 +14,8 @@ RedisClient.on("error", (err: any) =>
 );
 
 export async function SetupRedisClient() {
-    RedisClient.connect();
+    await Promise.all([RedisClient.connect()]);
+
     if (process.env.NODE_ENV !== "production") {
         RedisClient.auth({
             username: process.env.REDIS_AUTH_USERNAME,
