@@ -1,3 +1,6 @@
+<img width="128" src="https://ptu.uexcorp.space/img/uex-api-badge-powered.png"/>
+Powered by the [StarCitizen Wiki](https://starcitizen.tools)
+
 Starlight
 ======================
 The solution for your trading and general knowledge needs.
