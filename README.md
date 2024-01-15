@@ -1,5 +1,5 @@
 <img width="128" src="https://ptu.uexcorp.space/img/uex-api-badge-powered.png"/>
-Powered by the [StarCitizen Wiki](https://starcitizen.tools)
+Powered by the <a href="https://starcitizen.tools/">StarCitizen wiki</a>
 
 Starlight
 ======================

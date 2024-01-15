@@ -24,12 +24,13 @@ export async function RetrieveVehicleInfo(name: string): Promise<any> {
         const fetchShip = await fetch(
             WikiAPI + `vehicles/${name}?include=components,hardpoints,shops`
         );
+
         if (fetchShip.status !== 200) {
             log.error(
-                `Wiki returned a non-OK status. code: ${fetchShip.status} - ${fetchShip.statusText}`
+                `Failed to retrieve ship. Wiki returned a non-OK status. code: ${fetchShip.status} - ${fetchShip.statusText}`
             );
             return Promise.reject(
-                `Wiki returned a non-OK status. code: ${fetchShip.status} - ${fetchShip.statusText}`
+                `Failed to retrieve ship. Wiki returned a non-OK status. code: ${fetchShip.status} - ${fetchShip.statusText}`
             );
         }
         var response: WikiShip = (await fetchShip.json()).data;
@@ -166,7 +167,7 @@ export async function FetchVehicleSerie(
  */
 export async function SearchGalactapedia(
     query: string
-): Promise<GalactapediaResult[]> {
+): Promise<GalactapediaResult[] | null> {
     const search = await fetch(WikiAPI + "galactapedia/search", {
         method: "POST",
         headers: {
@@ -179,9 +180,7 @@ export async function SearchGalactapedia(
         log.error(
             `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
         );
-        return Promise.reject(
-            `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
-        );
+        return null;
     }
     return (await search.json()).data;
 }
