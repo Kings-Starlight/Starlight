@@ -1,17 +1,100 @@
 import {
+    ActionRowBuilder,
+    AttachmentBuilder,
+    ButtonBuilder,
+    ButtonInteraction,
+    ButtonStyle,
     CommandInteraction,
     EmbedBuilder,
+    ModalActionRowComponentBuilder,
+    ModalBuilder,
+    ModalSubmitInteraction,
     SlashCommandBuilder,
+    TextInputBuilder,
+    TextInputStyle,
 } from "discord.js";
 import { client } from "@/src/runtime";
-import { blue, msToTime } from "@utilities/general";
+import { blue, msToTime, red } from "@utilities/general";
 import pjson from "@/package.json";
+import { timeStamp } from "console";
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("starlight")
         .setDescription("Various information about me"),
+    async modalInteraction(interaction: ModalSubmitInteraction) {
+        interaction.reply({
+            ephemeral: true,
+            embeds: [
+                new EmbedBuilder()
+                    .setTitle(":tada: Success!")
+                    .setDescription(
+                        "# Thank you!\n Your feedback has been submitted and an issue has been created.\nIts thanks to people like you, that <@864438005599305729> can continue to improve!\n\n## Want to go the extra mile?\n press the button below to support the development of <@864438005599305729>!\nAll tips & donations go towards keeping the bot hosted."
+                    )
+                    .setColor("Green")
+                    .setTimestamp(),
+            ],
+            components: [
+                new ActionRowBuilder<ButtonBuilder>().addComponents(
+                    new ButtonBuilder()
+                        .setURL("https://ko-fi.com/king_ultron99")
+                        .setLabel("Support me on Ko-Fi")
+                        .setStyle(ButtonStyle.Link)
+                ),
+            ],
+        });
+    },
+    async buttonInteraction(interaction: ButtonInteraction) {
+        if (interaction.customId !== "starlight_feedback-confirm") {
+            interaction.reply({
+                ephemeral: true,
+                embeds: [
+                    {
+                        description:
+                            "# Submit Feedback:\nYou can use this tool to create feature requests or issue bug reports.\n\n## PLEASE NOTE:\nIf it is found that users are abusing this tool, either to troll or to send unrelated submissions, we will remove this tool completely. \n\nPlease use this carefully.",
+                        color: red,
+                    },
+                ],
+                components: [
+                    new ActionRowBuilder<ButtonBuilder>().addComponents(
+                        new ButtonBuilder()
+                            .setCustomId("starlight_feedback-confirm")
+                            .setLabel("Confirm")
+                            .setStyle(ButtonStyle.Danger)
+                    ),
+                ],
+            });
+            return;
+        }
+        const modal = new ModalBuilder()
+            .setCustomId("starlight_feedback-submit")
+            .setTitle("Send Feedback")
+            .addComponents(
+                new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+                    new TextInputBuilder()
+                        .setCustomId("starlight_feedback-title")
+                        .setStyle(TextInputStyle.Short)
+                        .setLabel("Title")
+                        .setRequired(true)
+                ),
+                new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+                    new TextInputBuilder()
+                        .setCustomId("starlight_feedback-description")
+                        .setStyle(TextInputStyle.Paragraph)
+                        .setLabel("Description")
+                        .setRequired(true)
+                )
+            );
+
+        await interaction.showModal(modal);
+    },
     async execute(interaction: CommandInteraction) {
+        const file = new AttachmentBuilder(
+            process.env.NODE_ENV === "production"
+                ? "./src/assets/sl_banner.png"
+                : "./src/assets/sld_banner.png"
+        );
+
         const infoEmbed: EmbedBuilder = new EmbedBuilder()
             .setColor(blue)
             .setDescription(
@@ -72,9 +155,25 @@ module.exports = {
                 }
             )
             .setFooter({ text: "Brought to you by king_ultron99#0647." })
+            .setImage(
+                process.env.NODE_ENV === "production"
+                    ? "attachment://sl_banner.png"
+                    : "attachment://sld_banner.png"
+            )
             .setTimestamp();
 
         const sent = await interaction.reply({ embeds: [infoEmbed] });
+
+        var components = new ActionRowBuilder<ButtonBuilder>().addComponents([
+            new ButtonBuilder()
+                .setURL("https://ko-fi.com/king_ultron99")
+                .setLabel("Support me on Ko-Fi")
+                .setStyle(ButtonStyle.Link),
+            new ButtonBuilder()
+                .setCustomId("starlight_feedback")
+                .setLabel("Send us feedback!")
+                .setStyle(ButtonStyle.Primary),
+        ]);
 
         interaction.editReply({
             embeds: [
@@ -133,6 +232,8 @@ module.exports = {
                     }
                 ),
             ],
+            components: [components],
+            files: [file],
         });
     },
 };
