@@ -16,33 +16,55 @@ import {
 import { client } from "@/src/runtime";
 import { blue, msToTime, red } from "@utilities/general";
 import pjson from "@/package.json";
-import { timeStamp } from "console";
+import { Github } from "@utilities/octokit";
+import { ErrorResponse } from "../utilities/errors";
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("starlight")
         .setDescription("Various information about me"),
     async modalInteraction(interaction: ModalSubmitInteraction) {
-        interaction.reply({
-            ephemeral: true,
-            embeds: [
-                new EmbedBuilder()
-                    .setTitle(":tada: Success!")
-                    .setDescription(
-                        "# Thank you!\n Your feedback has been submitted and an issue has been created.\nIts thanks to people like you, that <@864438005599305729> can continue to improve!\n\n## Want to go the extra mile?\n press the button below to support the development of <@864438005599305729>!\nAll tips & donations go towards keeping the bot hosted."
-                    )
-                    .setColor("Green")
-                    .setTimestamp(),
-            ],
-            components: [
-                new ActionRowBuilder<ButtonBuilder>().addComponents(
-                    new ButtonBuilder()
-                        .setURL("https://ko-fi.com/king_ultron99")
-                        .setLabel("Support me on Ko-Fi")
-                        .setStyle(ButtonStyle.Link)
+        Github.rest.issues
+            .create({
+                owner: "kingultron99",
+                repo: "Starlight",
+                title: interaction.fields.getTextInputValue(
+                    "starlight_feedback-title"
                 ),
-            ],
-        });
+                body: interaction.fields.getTextInputValue(
+                    "starlight_feedback-description"
+                ),
+                assignees: ["kingultron99"],
+            })
+            .then(() => {
+                interaction.reply({
+                    ephemeral: true,
+                    embeds: [
+                        new EmbedBuilder()
+                            .setTitle(":tada: Success!")
+                            .setDescription(
+                                "# Thank you!\n Your feedback has been submitted and an issue has been created.\nIts thanks to people like you, that <@864438005599305729> can continue to improve!\n\n## Want to go the extra mile?\n press the button below to support the development of <@864438005599305729>!\nAll tips & donations go towards keeping the bot hosted."
+                            )
+                            .setColor("Green")
+                            .setTimestamp(),
+                    ],
+                    components: [
+                        new ActionRowBuilder<ButtonBuilder>().addComponents(
+                            new ButtonBuilder()
+                                .setURL("https://ko-fi.com/king_ultron99")
+                                .setLabel("Support me on Ko-Fi")
+                                .setStyle(ButtonStyle.Link)
+                        ),
+                    ],
+                });
+            })
+            .catch((err: any) =>
+                ErrorResponse(
+                    interaction,
+                    "Sorry, I was unable to submit your report.",
+                    err
+                )
+            );
     },
     async buttonInteraction(interaction: ButtonInteraction) {
         if (interaction.customId !== "starlight_feedback-confirm") {

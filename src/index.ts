@@ -9,6 +9,7 @@ import {
 } from "@api/uexAPI";
 import { FetchManufacturers, FetchVehicles } from "@api/wikiAPI";
 import { RedisClient, SetupRedisClient } from "@utilities/redis";
+import { initiateGithub } from "./utilities/octokit";
 
 dotenv.config();
 
@@ -18,7 +19,8 @@ InitiateLogger();
     // initiate a Redis Client
     await SetupRedisClient();
 
-    // Fetch API information.
+    // initiate github connection
+    await initiateGithub();
     await FetchUEXVehicles();
     await FetchUEXTradeports();
     await FetchPlanets();
