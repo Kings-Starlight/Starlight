@@ -4,6 +4,9 @@ import {
     SearchResponse,
     WikiShip,
     ManufacturerShort,
+    FPSItemShort,
+    Weapon,
+    MasterItem,
 } from "@/src/types/sc_wiki";
 import { RedisClient } from "@utilities/redis";
 
@@ -11,6 +14,14 @@ const WikiAPI = "https://api.star-citizen.wiki/api/v2/";
 
 export var Ships: SearchResponse[];
 export var Manufacturers: ManufacturerShort[];
+export var Weapons: Weapon[];
+export var Food: FPSItemShort[];
+export var Clothes: FPSItemShort[];
+export var Armor: FPSItemShort[];
+export var FPSItems: FPSItemShort[];
+export var WeaponAttachments: FPSItemShort[];
+export var VehicleWeapons: FPSItemShort[];
+export var VehicleItems: FPSItemShort[];
 
 /**
  * RetrieveVehicleInfo takes a "name" param, and returns details about the specified vehicle.
@@ -183,4 +194,365 @@ export async function SearchGalactapedia(
         return null;
     }
     return (await search.json()).data;
+}
+
+export async function FetchVehicleWeapons() {
+    log.info("Fetching list of vehicle weapons from Wiki...");
+    log.profile("get Wiki vehicles Weapons");
+    const cache = await RedisClient.get("Wiki:WikiVehicleWeapons");
+    if (cache === null) {
+        log.info("...No cache found. updating...");
+        const search = await fetch(WikiAPI + "vehicle-weapons?limit=5000");
+        if (search.status !== 200) {
+            log.error(
+                `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+            );
+            return Promise.reject(
+                `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+            );
+        }
+        var data = (await search.json()).data
+            .filter((item: any) =>
+                item.name === "<= PLACEHOLDER =>" ? false : true
+            )
+            .filter(
+                (arr: MasterItem, index: number, self: any) =>
+                    index ===
+                    self.findIndex(
+                        (t: MasterItem) =>
+                            t.name === arr.name &&
+                            t.description === arr.description
+                    )
+            );
+        RedisClient.set("Wiki:WikiVehicleWeapons", JSON.stringify(data));
+        log.info("...Done!");
+
+        VehicleWeapons = data;
+        return;
+    }
+    log.info("...Found wiki vehicle weapons cache. Done!");
+
+    VehicleWeapons = JSON.parse(cache);
+    log.profile("get Wiki vehicles Weapons");
+    return;
+}
+export async function FetchVehicleItems() {
+    log.info("Fetching list of vehicle items from Wiki...");
+    log.profile("get Wiki vehicles Items");
+    const cache = await RedisClient.get("Wiki:WikiVehicleItems");
+    if (cache === null) {
+        log.info("...No cache found. updating...");
+        const search = await fetch(WikiAPI + "vehicle-items?limit=5000");
+        if (search.status !== 200) {
+            log.error(
+                `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+            );
+            return Promise.reject(
+                `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+            );
+        }
+        var data = (await search.json()).data
+            .filter((item: any) =>
+                item.name === "<= PLACEHOLDER =>" ? false : true
+            )
+            .filter(
+                (arr: MasterItem, index: number, self: any) =>
+                    index ===
+                    self.findIndex(
+                        (t: MasterItem) =>
+                            t.name === arr.name &&
+                            t.description === arr.description
+                    )
+            );
+        RedisClient.set("Wiki:WikiVehicleItems", JSON.stringify(data));
+        log.info("...Done!");
+
+        VehicleItems = data;
+        return;
+    }
+    log.info("...Found wiki vehicles items cache. Done!");
+
+    VehicleItems = JSON.parse(cache);
+    log.profile("get Wiki vehicles Items");
+    return;
+}
+export async function FetchFPSWeapons() {
+    log.info("Fetching list of ships from Wiki...");
+    log.profile("get Wiki FPS Weapons");
+    const cache = await RedisClient.get("Wiki:WikiWeapons");
+    if (cache === null) {
+        log.info("...No cache found. updating...");
+        const search = await fetch(WikiAPI + "weapons?limit=5000");
+        if (search.status !== 200) {
+            log.error(
+                `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+            );
+            return Promise.reject(
+                `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+            );
+        }
+        var data = (await search.json()).data
+            .filter((item: any) =>
+                item.name === "<= PLACEHOLDER =>" ? false : true
+            )
+            .filter(
+                (arr: MasterItem, index: number, self: any) =>
+                    index ===
+                    self.findIndex(
+                        (t: MasterItem) =>
+                            t.name === arr.name &&
+                            t.description === arr.description
+                    )
+            );
+        RedisClient.set("Wiki:WikiWeapons", JSON.stringify(data));
+        log.info("...Done!");
+
+        Weapons = data;
+        return;
+    }
+    log.info("...Found wiki weapons cache. Done!");
+
+    Weapons = JSON.parse(cache);
+    log.profile("get Wiki FPS Weapons");
+    return;
+}
+export async function FetchFPSWeaponAttachments() {
+    log.info("Fetching list of weapon attachments from Wiki...");
+    log.profile("get Wiki Weapon Attachments");
+    const cache = await RedisClient.get("Wiki:WikiWeaponAttachments");
+    if (cache === null) {
+        log.info("...No cache found. updating...");
+        const search = await fetch(WikiAPI + "weapon-attachments?limit=5000");
+        if (search.status !== 200) {
+            log.error(
+                `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+            );
+            return Promise.reject(
+                `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+            );
+        }
+        var data = (await search.json()).data
+            .filter((item: any) =>
+                item.name === "<= PLACEHOLDER =>" ? false : true
+            )
+            .filter(
+                (arr: MasterItem, index: number, self: any) =>
+                    index ===
+                    self.findIndex(
+                        (t: MasterItem) =>
+                            t.name === arr.name &&
+                            t.description === arr.description
+                    )
+            );
+        RedisClient.set("Wiki:WikiWeaponAttachments", JSON.stringify(data));
+        log.info("...Done!");
+
+        WeaponAttachments = data;
+        return;
+    }
+    log.info("...Found wiki weapon attachments cache. Done!");
+
+    WeaponAttachments = JSON.parse(cache);
+    log.profile("get Wiki Weapon Attachments");
+    return;
+}
+export async function FetchFPSItems() {
+    log.info("Fetching list of items from Wiki...");
+    log.profile("get Wiki items");
+    const cache = await RedisClient.get("Wiki:WikiFPSItems");
+    if (cache === null) {
+        var page = 1;
+        var temp: any[] = [];
+        var newItems: boolean = true;
+        var newLink = WikiAPI + "items?limit=500";
+        log.info("...No cache found. updating...");
+        while (newItems) {
+            const search = await fetch(newLink);
+            if (search.status !== 200) {
+                log.error(
+                    `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+                );
+                return Promise.reject(
+                    `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+                );
+            }
+            var data = await search.json();
+            temp.push(
+                ...data.data
+                    .filter((item: any) =>
+                        item.name === "<= PLACEHOLDER =>" ? false : true
+                    )
+                    .filter(
+                        (arr: MasterItem, index: number, self: any) =>
+                            index ===
+                            self.findIndex(
+                                (t: MasterItem) =>
+                                    t.name === arr.name &&
+                                    t.description === arr.description
+                            )
+                    )
+            );
+            if (data.links.next !== null) {
+                log.debug("wiki items page: " + page + " traversed.");
+                page++;
+                newLink = data.links.next;
+                continue;
+            }
+            newItems = false;
+        }
+        RedisClient.set("Wiki:WikiFPSItems", JSON.stringify(data));
+        log.info("...Done!");
+
+        FPSItems = temp;
+        return;
+    }
+    log.info("...Found wiki items cache. Done!");
+
+    FPSItems = JSON.parse(cache);
+    log.profile("get Wiki items");
+    return;
+}
+export async function FetchFood() {
+    log.info("Fetching list of food from Wiki...");
+    log.profile("get Wiki food");
+    const cache = await RedisClient.get("Wiki:WikiFood");
+    if (cache === null) {
+        log.info("...No cache found. updating...");
+        const search = await fetch(WikiAPI + "food?limit=5000");
+        if (search.status !== 200) {
+            log.error(
+                `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+            );
+            return Promise.reject(
+                `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+            );
+        }
+        var data = (await search.json()).data
+            .filter((item: any) =>
+                item.name === "<= PLACEHOLDER =>" ? false : true
+            )
+            .filter(
+                (arr: MasterItem, index: number, self: any) =>
+                    index ===
+                    self.findIndex(
+                        (t: MasterItem) =>
+                            t.name === arr.name &&
+                            t.description === arr.description
+                    )
+            );
+        RedisClient.set("Wiki:WikiFood", JSON.stringify(data));
+        log.info("...Done!");
+
+        Food = data;
+        return;
+    }
+    log.info("...Found wiki Food cache. Done!");
+
+    Food = JSON.parse(cache);
+    log.profile("get Wiki food");
+    return;
+}
+export async function FetchClothes() {
+    log.info("Fetching list of clothing from Wiki...");
+    log.profile("get Wiki clothes");
+    const cache = await RedisClient.get("Wiki:WikiClothes");
+    if (cache === null) {
+        log.info("...No cache found. updating...");
+        const search = await fetch(WikiAPI + "clothes?limit=5000");
+        if (search.status !== 200) {
+            log.error(
+                `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+            );
+            return Promise.reject(
+                `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+            );
+        }
+        var data = (await search.json()).data
+            .filter((item: any) =>
+                item.name === "<= PLACEHOLDER =>" ? false : true
+            )
+            .filter(
+                (arr: MasterItem, index: number, self: any) =>
+                    index ===
+                    self.findIndex(
+                        (t: MasterItem) =>
+                            t.name === arr.name &&
+                            t.description === arr.description
+                    )
+            );
+        RedisClient.set("Wiki:WikiClothes", JSON.stringify(data));
+        log.info("...Done!");
+
+        Clothes = data;
+        return;
+    }
+    log.info("...Found wiki clothes cache. Done!");
+
+    Clothes = JSON.parse(cache);
+    return;
+}
+export async function FetchArmour() {
+    log.info("Fetching list of armor from Wiki...");
+    log.profile("get Wiki armor");
+    const cache = await RedisClient.get("Wiki:WikiArmor");
+    if (cache === null) {
+        log.info("...No cache found. updating...");
+        const search = await fetch(WikiAPI + "armor?limit=5000");
+        if (search.status !== 200) {
+            log.error(
+                `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+            );
+            return Promise.reject(
+                `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
+            );
+        }
+        var data = (await search.json()).data
+            .filter((item: any) =>
+                item.name === "<= PLACEHOLDER =>" ? false : true
+            )
+            .filter(
+                (arr: MasterItem, index: number, self: any) =>
+                    index ===
+                    self.findIndex(
+                        (t: MasterItem) =>
+                            t.name === arr.name &&
+                            t.description === arr.description
+                    )
+            );
+        RedisClient.set("Wiki:WikiArmor", JSON.stringify(data));
+        log.info("...Done!");
+
+        Armor = data;
+        return;
+    }
+    log.info("...Found wiki Armor cache. Done!");
+
+    Armor = JSON.parse(cache);
+    return;
+}
+
+/**
+ * Retrieves information about a specific item from the Wiki api
+ * @param id The unique id of the item to retrieve
+ * @returns {Promise<MasterItem>} Returns a promise containing a JSON instance of the requested item
+ */
+export async function FetchItemInfo(id: string): Promise<MasterItem> {
+    const data = await RedisClient.get(id);
+    if (data === null) {
+        const fetchItem = await fetch(WikiAPI + `items/${id}`);
+        var response: MasterItem = (await fetchItem.json()).data;
+
+        if (fetchItem.status !== 200) {
+            log.error(
+                `Wiki returned a non-OK status. code: ${fetchItem.status} - ${fetchItem.statusText}`
+            );
+            return Promise.reject(
+                `Wiki returned a non-OK status. code: ${fetchItem.status} - ${fetchItem.statusText}`
+            );
+        }
+
+        RedisClient.set("Items:" + response.uuid, JSON.stringify(data));
+        return response;
+    }
+    return JSON.parse(data);
 }

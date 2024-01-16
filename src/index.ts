@@ -7,7 +7,18 @@ import {
     FetchUEXTradeports,
     FetchUEXVehicles,
 } from "@api/uexAPI";
-import { FetchManufacturers, FetchVehicles } from "@api/wikiAPI";
+import {
+    FetchArmour,
+    FetchClothes,
+    FetchFPSItems,
+    FetchFPSWeaponAttachments,
+    FetchFPSWeapons,
+    FetchFood,
+    FetchManufacturers,
+    FetchVehicleItems,
+    FetchVehicleWeapons,
+    FetchVehicles,
+} from "@api/wikiAPI";
 import { RedisClient, SetupRedisClient } from "@utilities/redis";
 import { initiateGithub } from "./utilities/octokit";
 
@@ -21,6 +32,20 @@ InitiateLogger();
 
     // initiate github connection
     await initiateGithub();
+
+    // Fetch From API.
+
+    // Items, Components and Equipment
+    await FetchArmour();
+    await FetchClothes();
+    await FetchVehicleWeapons();
+    await FetchVehicleItems();
+    await FetchFPSWeapons();
+    await FetchFPSWeaponAttachments();
+    await FetchFood();
+    await FetchFPSItems();
+
+    // Fetch Vehicle Information
     await FetchUEXVehicles();
     await FetchUEXTradeports();
     await FetchPlanets();
