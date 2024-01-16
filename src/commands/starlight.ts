@@ -14,7 +14,7 @@ import {
     TextInputStyle,
 } from "discord.js";
 import { client } from "@/src/runtime";
-import { blue, msToTime, red } from "@utilities/general";
+import { blue, dev, msToTime, prod, red } from "@utilities/general";
 import pjson from "@/package.json";
 import { Github } from "@utilities/octokit";
 import { ErrorResponse } from "../utilities/errors";
@@ -118,7 +118,7 @@ module.exports = {
         );
 
         const infoEmbed: EmbedBuilder = new EmbedBuilder()
-            .setColor(blue)
+            .setColor(process.env.NODE_ENV === "production" ? prod : dev)
             .setDescription(
                 `# Starlight${
                     process.env.NODE_ENV === "production" ? "" : " In-dev"
