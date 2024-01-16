@@ -179,8 +179,6 @@ async function CreateEquipmentEmbed(
         );
     }
 
-    console.log(item);
-
     switch (type) {
         case "a":
             embed.addFields({
