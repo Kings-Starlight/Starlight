@@ -142,12 +142,6 @@ async function CreateEquipmentEmbed(
         .setColor(blue)
         .addFields(
             {
-                name: "Item type",
-                value: ensure(item.type)
-                    .replaceAll("_", " ")
-                    .replace("Char ", ""),
-            },
-            {
                 name: "Mass (KG)",
                 value: ensure(item.mass).toString(),
                 inline: true,
@@ -189,7 +183,8 @@ async function CreateEquipmentEmbed(
             });
             break;
         case "b":
-            var modes = { name: "Firing Modes", value: "N/A", inline: true };
+            var modes = { name: "Firing Modes", value: "N/A", inline: true },
+                damages = { name: "Damage Types", value: "N/A", inline: true };
             if (
                 item.personal_weapon?.modes !== null &&
                 item.personal_weapon?.modes !== undefined
@@ -207,26 +202,46 @@ async function CreateEquipmentEmbed(
                     inline: false,
                 };
             }
-            embed.addFields(modes);
+            if (item.personal_weapon?.damages !== undefined) {
+                damages = {
+                    name: "Dammage types",
+                    value: ensure(item.personal_weapon?.damages)
+                        .map(
+                            (item) =>
+                                `- ${item.name}/${item.type} ${item.damage}dmg`
+                        )
+                        .join("\n"),
+                    inline: false,
+                };
+            }
+            embed.addFields(modes, damages);
             break;
         case "d":
-            embed.addFields(
-                {
-                    name: "Packaging type",
-                    value: ensure(item.food?.container_type)
-                        .replace(/([A-Z])/g, " $1")
-                        .replace(/^./g, (str) => {
-                            return str.toUpperCase();
-                        }),
-                    inline: true,
-                },
+            // some items have next to no information, causing the command to error out if we try to ensure their information.
+            if (
+                item.food?.container_type !== null &&
+                item.food?.can_be_reclosed !== null
+            ) {
+                embed.addFields(
+                    {
+                        name: "Packaging type",
+                        value: ensure(item.food?.container_type)
+                            .replace(/([A-Z])/g, " $1")
+                            .replace(/^./g, (str) => {
+                                return str.toUpperCase();
+                            }),
+                        inline: true,
+                    },
 
-                {
-                    name: "Resealable",
-                    value: ensure(item.food?.can_be_reclosed) ? "Yes" : "no",
-                    inline: true,
-                }
-            );
+                    {
+                        name: "Resealable",
+                        value: ensure(item.food?.can_be_reclosed)
+                            ? "Yes"
+                            : "no",
+                        inline: true,
+                    }
+                );
+            }
             break;
         case "e":
             embed.addFields(

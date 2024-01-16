@@ -211,9 +211,19 @@ export async function FetchVehicleWeapons() {
                 `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
             );
         }
-        var data = (await search.json()).data.filter((item: any) =>
-            item.name === "<= PLACEHOLDER =>" ? false : true
-        );
+        var data = (await search.json()).data
+            .filter((item: any) =>
+                item.name === "<= PLACEHOLDER =>" ? false : true
+            )
+            .filter(
+                (arr: MasterItem, index: number, self: any) =>
+                    index ===
+                    self.findIndex(
+                        (t: MasterItem) =>
+                            t.name === arr.name &&
+                            t.description === arr.description
+                    )
+            );
         RedisClient.set("Wiki:WikiVehicleWeapons", JSON.stringify(data));
         log.info("...Done!");
 
@@ -241,9 +251,19 @@ export async function FetchVehicleItems() {
                 `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
             );
         }
-        var data = (await search.json()).data.filter((item: any) =>
-            item.name === "<= PLACEHOLDER =>" ? false : true
-        );
+        var data = (await search.json()).data
+            .filter((item: any) =>
+                item.name === "<= PLACEHOLDER =>" ? false : true
+            )
+            .filter(
+                (arr: MasterItem, index: number, self: any) =>
+                    index ===
+                    self.findIndex(
+                        (t: MasterItem) =>
+                            t.name === arr.name &&
+                            t.description === arr.description
+                    )
+            );
         RedisClient.set("Wiki:WikiVehicleItems", JSON.stringify(data));
         log.info("...Done!");
 
@@ -271,9 +291,19 @@ export async function FetchFPSWeapons() {
                 `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
             );
         }
-        var data = (await search.json()).data.filter((item: any) =>
-            item.name === "<= PLACEHOLDER =>" ? false : true
-        );
+        var data = (await search.json()).data
+            .filter((item: any) =>
+                item.name === "<= PLACEHOLDER =>" ? false : true
+            )
+            .filter(
+                (arr: MasterItem, index: number, self: any) =>
+                    index ===
+                    self.findIndex(
+                        (t: MasterItem) =>
+                            t.name === arr.name &&
+                            t.description === arr.description
+                    )
+            );
         RedisClient.set("Wiki:WikiWeapons", JSON.stringify(data));
         log.info("...Done!");
 
@@ -301,9 +331,19 @@ export async function FetchFPSWeaponAttachments() {
                 `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
             );
         }
-        var data = (await search.json()).data.filter((item: any) =>
-            item.name === "<= PLACEHOLDER =>" ? false : true
-        );
+        var data = (await search.json()).data
+            .filter((item: any) =>
+                item.name === "<= PLACEHOLDER =>" ? false : true
+            )
+            .filter(
+                (arr: MasterItem, index: number, self: any) =>
+                    index ===
+                    self.findIndex(
+                        (t: MasterItem) =>
+                            t.name === arr.name &&
+                            t.description === arr.description
+                    )
+            );
         RedisClient.set("Wiki:WikiWeaponAttachments", JSON.stringify(data));
         log.info("...Done!");
 
@@ -338,9 +378,19 @@ export async function FetchFPSItems() {
             }
             var data = await search.json();
             temp.push(
-                ...data.data.filter((item: any) =>
-                    item.name === "<= PLACEHOLDER =>" ? false : true
-                )
+                ...data.data
+                    .filter((item: any) =>
+                        item.name === "<= PLACEHOLDER =>" ? false : true
+                    )
+                    .filter(
+                        (arr: MasterItem, index: number, self: any) =>
+                            index ===
+                            self.findIndex(
+                                (t: MasterItem) =>
+                                    t.name === arr.name &&
+                                    t.description === arr.description
+                            )
+                    )
             );
             if (data.links.next !== null) {
                 log.debug("wiki items page: " + page + " traversed.");
@@ -377,9 +427,19 @@ export async function FetchFood() {
                 `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
             );
         }
-        var data = (await search.json()).data.filter((item: any) =>
-            item.name === "<= PLACEHOLDER =>" ? false : true
-        );
+        var data = (await search.json()).data
+            .filter((item: any) =>
+                item.name === "<= PLACEHOLDER =>" ? false : true
+            )
+            .filter(
+                (arr: MasterItem, index: number, self: any) =>
+                    index ===
+                    self.findIndex(
+                        (t: MasterItem) =>
+                            t.name === arr.name &&
+                            t.description === arr.description
+                    )
+            );
         RedisClient.set("Wiki:WikiFood", JSON.stringify(data));
         log.info("...Done!");
 
@@ -407,9 +467,19 @@ export async function FetchClothes() {
                 `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
             );
         }
-        var data = (await search.json()).data.filter((item: any) =>
-            item.name === "<= PLACEHOLDER =>" ? false : true
-        );
+        var data = (await search.json()).data
+            .filter((item: any) =>
+                item.name === "<= PLACEHOLDER =>" ? false : true
+            )
+            .filter(
+                (arr: MasterItem, index: number, self: any) =>
+                    index ===
+                    self.findIndex(
+                        (t: MasterItem) =>
+                            t.name === arr.name &&
+                            t.description === arr.description
+                    )
+            );
         RedisClient.set("Wiki:WikiClothes", JSON.stringify(data));
         log.info("...Done!");
 
@@ -436,9 +506,19 @@ export async function FetchArmour() {
                 `Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
             );
         }
-        var data = (await search.json()).data.filter((item: any) =>
-            item.name === "<= PLACEHOLDER =>" ? false : true
-        );
+        var data = (await search.json()).data
+            .filter((item: any) =>
+                item.name === "<= PLACEHOLDER =>" ? false : true
+            )
+            .filter(
+                (arr: MasterItem, index: number, self: any) =>
+                    index ===
+                    self.findIndex(
+                        (t: MasterItem) =>
+                            t.name === arr.name &&
+                            t.description === arr.description
+                    )
+            );
         RedisClient.set("Wiki:WikiArmor", JSON.stringify(data));
         log.info("...Done!");
 
