@@ -315,7 +315,7 @@ export interface Cooler {
 
 export interface DescriptionDatum {
     name: string;
-    value: string;
+    type: string;
 }
 
 export interface Dimension {
@@ -455,7 +455,7 @@ export interface PersonalWeapon {
     effective_range: string;
     damage_per_shot: number;
     rof: string;
-    modes: PersonalWeaponMode[];
+    modes?: PersonalWeaponMode[];
     damages: Damage[];
     size: number;
     lifetime: number;
@@ -710,4 +710,75 @@ export interface Manufacturer {
             version: string;
         }
     ];
+}
+
+export interface FPSItemShort {
+    uuid: string;
+    name: string;
+    type: string;
+    sub_type?: string;
+    manufacturer: ManufacturerShort;
+    link: string;
+    updated_at: string;
+    version: string;
+}
+
+export interface Weapon extends FPSItemShort {
+    class: string;
+}
+
+export interface MasterItem {
+    uuid?: string;
+    name?: string;
+    description?: { en_EN: string; de_DE: string };
+    size?: number;
+    grade?: string;
+    class?: string;
+    mass?: number;
+    description_data?: DescriptionDatum[];
+    manufacturer_description?: string;
+    manufacturer?: Manufacturer;
+    type?: string;
+    sub_type?: string;
+    min_size?: number;
+    max_size?: number;
+    max_mounts?: number;
+    max_missiles?: number;
+    max_bombs?: number;
+    armor?: Armor;
+    barrel_attach?: BarrelAttach;
+    clothing?: Clothing;
+    cooler?: Cooler;
+    emp?: Emp;
+    flight_controller?: FlightController;
+    food?: Food;
+    fuel_intake?: FuelIntake;
+    fuel_tank?: FuelTank;
+    grenade?: Grenade;
+    iron_sight?: IronSight;
+    mining_laser?: MiningLaser;
+    mining_module?: MiningModule;
+    missile?: Missile;
+    personal_weapon?: PersonalWeapon;
+    personal_weapon_magazine?: PersonalWeaponMagazine;
+    power_plant?: PowerPlant;
+    quantum_drive?: QuantumDrive;
+    quantum_interdiction_generator?: QuantumInterdictionGenerator;
+    self_destruct?: SelfDestruct;
+    shield?: Shield;
+    thruster?: Thruster;
+    vehicle_weapon?: VehicleWeapon;
+    dimension?: Dimension;
+    inventory?: Inventory;
+    tags?: string[];
+    required_tags?: string[];
+    interactions?: string[];
+    ports?: Ports;
+    heat?: { [key: string]: number };
+    power?: Power;
+    distortion?: Distortion;
+    durability?: Durability;
+    shops?: Shops;
+    updated_at?: number;
+    version?: number;
 }
