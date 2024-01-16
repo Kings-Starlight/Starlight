@@ -8,10 +8,8 @@ import { blue, ensure } from "@utilities/general";
 import {
     Armor,
     Clothes,
-    FPSItems,
     FetchItemInfo,
     Food,
-    Manufacturers,
     WeaponAttachments,
     Weapons,
 } from "../api/wikiAPI";
