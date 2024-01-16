@@ -20,7 +20,9 @@ export function msToTime(duration: number) {
 }
 
 export const blue = 0x0251a8,
-    red = 0xff0000;
+    red = 0xff0000,
+    dev = 0xffff61,
+    prod = 0x6e61ff;
 
 /**
  * for ensuring that what I'm requesting is, infact, defined.
