@@ -551,7 +551,7 @@ export async function FetchItemInfo(id: string): Promise<MasterItem> {
             );
         }
 
-        RedisClient.set("Items:" + response.uuid, JSON.stringify(data));
+        RedisClient.set("Items:" + response.uuid, JSON.stringify(response));
         return response;
     }
     return JSON.parse(data);
