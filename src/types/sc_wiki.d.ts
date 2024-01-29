@@ -216,7 +216,7 @@ export interface Hardpoint {
     health: number;
     type: string;
     sub_type: number;
-    children: string[];
+    children: Hardpoint[];
     item: HardpointItem;
 }
 
@@ -627,6 +627,7 @@ export interface Thruster {
 
 export interface VehicleWeapon {
     class: string;
+    type: string;
     capacity: number;
     range: string;
     damage_per_shot: number;
@@ -781,4 +782,16 @@ export interface MasterItem {
     shops?: Shops;
     updated_at?: number;
     version?: number;
+}
+
+export interface WikiResponse {
+    batchcomplete: boolean;
+    query: {
+        pages: {
+            thumbnail: {
+                source: string;
+            };
+            missing: boolean;
+        }[];
+    };
 }

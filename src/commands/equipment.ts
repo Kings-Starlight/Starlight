@@ -50,7 +50,7 @@ module.exports = {
         ),
     async autocomplete(interaction: AutocompleteInteraction) {
         const focusedValue = interaction.options.getFocused();
-        var choices: { name: string; value: string }[] = [];
+        let choices: { name: string; value: string }[] = [];
 
         switch (interaction.options.getString("type")) {
             case "a":
@@ -104,7 +104,7 @@ module.exports = {
     async execute(interaction: CommandInteraction) {
         await interaction.deferReply();
 
-        var { embed } = await CreateEquipmentEmbed(
+        const { embed } = await CreateEquipmentEmbed(
             ensure(interaction.options.get("type")?.value).toString(),
             ensure(interaction.options.get("item")?.value).toString()
         );
@@ -114,7 +114,7 @@ module.exports = {
 };
 
 async function retrieveFromAPI(name: string): Promise<MasterItem> {
-    var data = await FetchItemInfo(name);
+    const data = await FetchItemInfo(name);
     return data;
 }
 
@@ -122,9 +122,9 @@ async function CreateEquipmentEmbed(
     type: string,
     name: string
 ): Promise<{ embed: EmbedBuilder }> {
-    var item = await retrieveFromAPI(name);
+    const item = await retrieveFromAPI(name);
 
-    var embed = new EmbedBuilder()
+    const embed = new EmbedBuilder()
         .setTitle(`Available since ${item.version}`)
         .setDescription(
             `# ${
@@ -134,6 +134,9 @@ async function CreateEquipmentEmbed(
             }\n\n${
                 // some responses from the wiki API return an empty array as its description, rather than a null or undefined object.
                 // so, here's my workaround. not ideal, but it works, so its not exactly stupid.
+                //
+                // biome-ignore lint/suspicious/noExplicitAny:
+                // biome-ignore lint/suspicious/noDoubleEquals:
                 (item.description as any) != false
                     ? item.description?.en_EN
                     : "This item has no description"
@@ -182,9 +185,9 @@ async function CreateEquipmentEmbed(
                 ).join("\n"),
             });
             break;
-        case "b":
-            var modes = { name: "Firing Modes", value: "N/A", inline: true },
-                damages = { name: "Damage Types", value: "N/A", inline: true };
+        case "b": {
+            let modes = { name: "Firing Modes", value: "N/A", inline: true };
+            let damages = { name: "Damage Types", value: "N/A", inline: true };
             if (
                 item.personal_weapon?.modes !== null &&
                 item.personal_weapon?.modes !== undefined
@@ -216,6 +219,7 @@ async function CreateEquipmentEmbed(
             }
             embed.addFields(modes, damages);
             break;
+        }
         case "d":
             // some items have next to no information, causing the command to error out if we try to ensure their information.
             if (

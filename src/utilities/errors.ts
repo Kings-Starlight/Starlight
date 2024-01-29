@@ -14,9 +14,14 @@ import { interactionType, red } from "./general";
 export function ErrorResponse(
     interaction: RepliableInteraction | AutocompleteInteraction,
     description: string,
+    // biome-ignore lint/suspicious/noExplicitAny: Errors caught in catch blocks require a type of either "any" or "unknown"
     error?: any
 ): void {
-    log.error(`An error occured when attempting to run a ${interactionType(interaction.type)} command ${error ? description + ": " + error : description}`);
+    log.error(
+        `An error occured when attempting to run a ${interactionType(
+            interaction.type
+        )} command ${error ? `${description}: ${error}` : description}`
+    );
 
     const responseEmbed = new EmbedBuilder()
         .setColor(red)
@@ -35,18 +40,17 @@ export function ErrorResponse(
             embeds: [responseEmbed],
         });
         return;
-    } else {
-        switch (interaction.replied || interaction.deferred) {
-            case false:
-                interaction.reply({ ephemeral: true, embeds: [responseEmbed] });
-                break;
-            default:
-                interaction.followUp({
-                    ephemeral: true,
-                    embeds: [responseEmbed],
-                });
-                break;
-        }
-        return;
     }
+    switch (interaction.replied || interaction.deferred) {
+        case false:
+            interaction.reply({ ephemeral: true, embeds: [responseEmbed] });
+            break;
+        default:
+            interaction.followUp({
+                ephemeral: true,
+                embeds: [responseEmbed],
+            });
+            break;
+    }
+    return;
 }

@@ -1,5 +1,6 @@
 import {
     ActionRowBuilder,
+    AnyComponentBuilder,
     AnySelectMenuInteraction,
     AutocompleteInteraction,
     ButtonBuilder,
@@ -13,11 +14,18 @@ import {
 } from "discord.js";
 import { SearchResponse, WikiShip } from "@/src/types/sc_wiki";
 import { UEXShip } from "@/src/types/uex";
-import { FetchVehicleSerie, SearchGalactapedia, Ships } from "@api/wikiAPI";
+import {
+    FetchVehicleSerie,
+    RequestImage,
+    SearchGalactapedia,
+    Ships,
+} from "@api/wikiAPI";
 import { RetrieveVehicleInfo } from "@api/wikiAPI";
 import { blue, ensure, msToTime } from "@utilities/general";
 import { UEXShips } from "@api/uexAPI";
 import { log } from "@logging/logger";
+import { RedisClient } from "../utilities/redis";
+import { json } from "stream/consumers";
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -85,55 +93,99 @@ module.exports = {
         );
     },
     async selectInteraction(interaction: AnySelectMenuInteraction) {
-        interaction.deferUpdate();
-        const { embed } = await CreateShipEmbed(interaction.values[0]);
-        const start = Date.now();
+        switch (interaction.customId) {
+            case "vehicles_compare": {
+                interaction.deferUpdate();
+                const embed = await CreateGeneralEmbed(interaction.values[0]);
+                const start = Date.now();
 
-        if (interaction.customId !== "vehicles_compare") {
-            const { components } = await CreateShipComponents(
-                interaction.values[0]
-            );
-
-            try {
-                interaction.editReply({
-                    embeds: [
-                        embed.setFooter({
-                            text: `took ${msToTime(Date.now() - start)}`,
-                        }),
-                    ],
-                    components,
-                });
-            } catch (error) {
-                log.error("failed to update message:\n", error);
-                interaction.message.edit({
-                    embeds: [
-                        embed.setFooter({
-                            text: `took ${msToTime(Date.now() - start)}`,
-                        }),
-                    ],
-                    components,
-                });
+                try {
+                    interaction.editReply({
+                        embeds: [
+                            embed.setFooter({
+                                text: `took ${msToTime(Date.now() - start)}`,
+                            }),
+                        ],
+                    });
+                } catch (error) {
+                    log.error("failed to update message:\n", error);
+                    0;
+                    interaction.message.edit({
+                        embeds: [
+                            embed.setFooter({
+                                text: `took ${msToTime(Date.now() - start)}`,
+                            }),
+                        ],
+                    });
+                }
+                break;
             }
-            return;
-        }
-        try {
-            interaction.editReply({
-                embeds: [
-                    embed.setFooter({
-                        text: `took ${msToTime(Date.now() - start)}`,
-                    }),
-                ],
-            });
-        } catch (error) {
-            log.error("failed to update message:\n", error);
-            0;
-            interaction.message.edit({
-                embeds: [
-                    embed.setFooter({
-                        text: `took ${msToTime(Date.now() - start)}`,
-                    }),
-                ],
-            });
+            case "vehicles_variant": {
+                interaction.deferUpdate();
+                const embed = await CreateGeneralEmbed(interaction.values[0]);
+                const start = Date.now();
+
+                const components = await CreateShipComponents(
+                    interaction.values[0]
+                );
+
+                try {
+                    interaction.editReply({
+                        embeds: [
+                            embed.setFooter({
+                                text: `took ${msToTime(Date.now() - start)}`,
+                            }),
+                        ],
+                        components,
+                    });
+                } catch (error) {
+                    log.error("failed to update message:\n", error);
+                    interaction.message.edit({
+                        embeds: [
+                            embed.setFooter({
+                                text: `took ${msToTime(Date.now() - start)}`,
+                            }),
+                        ],
+                        components,
+                    });
+                }
+                break;
+            }
+            case "vehicles_page": {
+                interaction.deferUpdate();
+
+                const name = interaction.values[0].split("_")[0];
+                const page = interaction.values[0].split("_")[1];
+                const components = await CreateShipComponents(name, page);
+                switch (page) {
+                    case "General": {
+                        const embed = await CreateGeneralEmbed(name);
+                        interaction.editReply({
+                            embeds: [embed],
+                            components,
+                        });
+                        break;
+                    }
+                    case "Weapons": {
+                        const embed = await CreateWeaponsEmbed(name);
+                        interaction.editReply({
+                            embeds: [embed],
+                            components,
+                        });
+                        break;
+                    }
+                    case "Components": {
+                        const embed = await CreateComponentsEmbed(name);
+                        interaction.editReply({
+                            embeds: [embed],
+                            components,
+                        });
+                        break;
+                    }
+                }
+
+                break;
+            }
         }
     },
     async execute(interaction: CommandInteraction) {
@@ -143,11 +195,11 @@ module.exports = {
         const data = interaction.options.data[0];
 
         switch (data.name) {
-            case "search":
-                var { embed } = await CreateShipEmbed(
+            case "search": {
+                const embed = await CreateGeneralEmbed(
                     String(ensure(data.options)[0].value)
                 );
-                var { components } = await CreateShipComponents(
+                const components = await CreateShipComponents(
                     String(ensure(data.options)[0].value)
                 );
                 interaction.editReply({
@@ -159,11 +211,12 @@ module.exports = {
                     components,
                 });
                 break;
-            case "compare":
-                var { embed } = await CreateShipEmbed(
+            }
+            case "compare": {
+                const embed = await CreateGeneralEmbed(
                     String(ensure(data.options)[0].value)
                 );
-                var { components } = await CreateCompareComponents(
+                const components = await CreateCompareComponents(
                     ensure(data.options)
                 );
                 interaction.editReply({
@@ -175,6 +228,7 @@ module.exports = {
                     components,
                 });
                 break;
+            }
         }
     },
 };
@@ -184,18 +238,23 @@ async function RetrieveFromAPI(name: string) {
     const UEXInfo: UEXShip = UEXShips.filter((ship) =>
         ship.name.includes(WikiInfo.name)
     )[0];
-    const RSI = await SearchGalactapedia(WikiInfo.name);
 
-    return { WikiInfo, UEXInfo, RSI };
+    return { WikiInfo, UEXInfo };
 }
 
 /** Creates a message embed for a specified ship. */
-async function CreateShipEmbed(name: string): Promise<{ embed: EmbedBuilder }> {
+async function CreateGeneralEmbed(name: string): Promise<EmbedBuilder> {
+    const cache = await RedisClient.get(`Embed:${name}`);
+    let embed: EmbedBuilder;
+
+    if (cache !== null) {
+        embed = new EmbedBuilder(JSON.parse(cache));
+        return embed;
+    }
+
     const { WikiInfo, UEXInfo } = await RetrieveFromAPI(name);
 
-    var embed: EmbedBuilder;
-
-    if (WikiInfo.production_status.en_EN != "flight-ready") {
+    if (WikiInfo.production_status.en_EN !== "flight-ready") {
         embed = new EmbedBuilder()
             .setTitle(
                 `${WikiInfo.manufacturer.name} (${WikiInfo.manufacturer.code})`
@@ -232,7 +291,7 @@ async function CreateShipEmbed(name: string): Promise<{ embed: EmbedBuilder }> {
                     name: "Pledge Price (USD)",
                     value: `${
                         WikiInfo.msrp !== undefined
-                            ? "$" + WikiInfo.msrp
+                            ? `$${WikiInfo.msrp}`
                             : "Not for sale"
                     }`,
                     inline: true,
@@ -278,17 +337,15 @@ async function CreateShipEmbed(name: string): Promise<{ embed: EmbedBuilder }> {
         }
     } else {
         /** At which locations can the specified ship be rented at? */
-        var rentable = WikiInfo.shops.filter(
-                (shop) =>
-                    shop.items.filter((item) => item.rentable == true).length !=
-                    0
-            ),
-            /** At which locations can the specified ship be bought at */
-            buyable = WikiInfo.shops.filter(
-                (shop) =>
-                    shop.items.filter((item) => item.buyable == true).length !=
-                    0
-            );
+        const rentable = WikiInfo.shops.filter(
+            (shop) =>
+                shop.items.filter((item) => item.rentable === true).length !== 0
+        );
+        /** At which locations can the specified ship be bought at */
+        const buyable = WikiInfo.shops.filter(
+            (shop) =>
+                shop.items.filter((item) => item.buyable === true).length !== 0
+        );
 
         embed = new EmbedBuilder()
             .setDescription(`# ${WikiInfo.name}\n${WikiInfo.description.en_EN}`)
@@ -319,7 +376,7 @@ async function CreateShipEmbed(name: string): Promise<{ embed: EmbedBuilder }> {
                     name: "Pledge Price (USD)",
                     value: `${
                         WikiInfo.msrp !== undefined
-                            ? "$" + WikiInfo.msrp
+                            ? `$${WikiInfo.msrp}`
                             : "Not for sale"
                     }`,
                     inline: true,
@@ -332,7 +389,7 @@ async function CreateShipEmbed(name: string): Promise<{ embed: EmbedBuilder }> {
                 {
                     name: "Where to buy",
                     value:
-                        buyable.length != 0 && buyable != undefined
+                        buyable.length !== 0 && buyable !== undefined
                             ? buyable
                                   .map(
                                       (shop) =>
@@ -344,37 +401,29 @@ async function CreateShipEmbed(name: string): Promise<{ embed: EmbedBuilder }> {
                 {
                     name: "Where to rent",
                     value:
-                        rentable.length != 0 && rentable != undefined
+                        rentable.length !== 0 && rentable !== undefined
                             ? rentable
                                   .map(
                                       (shop) =>
                                           `- ${shop.name_raw}:\n - 1d: ${
                                               shop.items[0].rental_price_days
                                                   .duration_1
-                                                  ? shop.items[0]
-                                                        .rental_price_days
-                                                        .duration_1 + "aUEC"
+                                                  ? `${shop.items[0].rental_price_days.duration_1}aUEC`
                                                   : "not available"
                                           }\n - 3d: ${
                                               shop.items[0].rental_price_days
                                                   .duration_3
-                                                  ? shop.items[0]
-                                                        .rental_price_days
-                                                        .duration_3 + "aUEC"
+                                                  ? `${shop.items[0].rental_price_days.duration_3}aUEC`
                                                   : "not available"
                                           }\n - 7d: ${
                                               shop.items[0].rental_price_days
                                                   .duration_7
-                                                  ? shop.items[0]
-                                                        .rental_price_days
-                                                        .duration_7 + "aUEC"
+                                                  ? `${shop.items[0].rental_price_days.duration_7}aUEC`
                                                   : "not available"
                                           }\n - 30d: ${
                                               shop.items[0].rental_price_days
                                                   .duration_30
-                                                  ? shop.items[0]
-                                                        .rental_price_days
-                                                        .duration_30 + "aUEC"
+                                                  ? `${shop.items[0].rental_price_days.duration_30}aUEC`
                                                   : "not available"
                                           }`
                                   )
@@ -413,8 +462,9 @@ async function CreateShipEmbed(name: string): Promise<{ embed: EmbedBuilder }> {
                 },
                 {
                     name: "Mass",
-                    value:
-                        Intl.NumberFormat("en").format(WikiInfo.mass) + " kg",
+                    value: `${Intl.NumberFormat("en").format(
+                        WikiInfo.mass
+                    )} kg`,
                     inline: true,
                 },
                 {
@@ -459,39 +509,36 @@ async function CreateShipEmbed(name: string): Promise<{ embed: EmbedBuilder }> {
                 },
                 {
                     name: "Production Status",
-                    value:
-                        WikiInfo.production_status.en_EN +
-                        " since " +
-                        WikiInfo.version,
+                    value: `${WikiInfo.production_status.en_EN} since ${WikiInfo.version}`,
                 }
             );
-        if (UEXInfo !== undefined) {
-            embed.setImage(
-                UEXInfo.photos
-                    .split(",")[0]
-                    .replaceAll("\\", "")
-                    .replaceAll("[", "")
-                    .replaceAll('"', "")
-            );
-        }
+        embed.setImage(await RequestImage(WikiInfo.name));
     }
-
-    return { embed };
+    await RedisClient.set(
+        `Embed:${WikiInfo.name}`,
+        JSON.stringify(embed.toJSON())
+    );
+    return embed;
 }
 /** Generates the components for a single ship*/
-async function CreateShipComponents(name: string): Promise<{ components: [] }> {
-    const { WikiInfo, UEXInfo, RSI } = await RetrieveFromAPI(name);
+async function CreateShipComponents(
+    name: string,
+    page = "General"
+    // biome-ignore lint/suspicious/noExplicitAny: Discord.js's AnyComponentBuilder generic causes issues when passing components into replies. Specifying any stops this. I cannot set a specific generic as multiple are being used.
+): Promise<ActionRowBuilder<any>[]> {
+    const { WikiInfo, UEXInfo } = await RetrieveFromAPI(name);
+    const RSI = await SearchGalactapedia(WikiInfo.name);
 
     const disabledLink = (item: string) => {
         return new ButtonBuilder()
-            .setLabel(item + " unavailable")
+            .setLabel(`${item} unavailable`)
             .setStyle(ButtonStyle.Link)
             .setURL("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
             .setDisabled(true);
     };
 
     const buttons = [
-        UEXInfo !== undefined && UEXInfo.store_url
+        UEXInfo?.store_url
             ? new ButtonBuilder()
                   .setURL(UEXInfo.store_url)
                   .setLabel("Go to store page")
@@ -499,8 +546,10 @@ async function CreateShipComponents(name: string): Promise<{ components: [] }> {
             : disabledLink("Store"),
         new ButtonBuilder()
             .setURL(
-                "https://starcitizen.tools/" +
-                    WikiInfo.name.replaceAll(" ", "_")
+                `https://starcitizen.tools/${WikiInfo.name.replaceAll(
+                    " ",
+                    "_"
+                )}`
             )
             .setLabel("View wiki page")
             .setStyle(ButtonStyle.Link),
@@ -511,16 +560,53 @@ async function CreateShipComponents(name: string): Promise<{ components: [] }> {
                   .setStyle(ButtonStyle.Link)
             : disabledLink("Galactapedia"),
     ];
-    var select: StringSelectMenuBuilder,
-        selectRow: ActionRowBuilder,
-        serieRow: ActionRowBuilder,
-        serieSelect: StringSelectMenuBuilder,
-        components: any = [],
-        serieFilter = (await FetchVehicleSerie(WikiInfo.chassis_id)).filter(
-            (ship) => ship.name !== WikiInfo.name
-        );
+    let select: StringSelectMenuBuilder;
+    const selectRow = new ActionRowBuilder<StringSelectMenuBuilder>();
+    const serieRow = new ActionRowBuilder<StringSelectMenuBuilder>();
+    let serieSelect: StringSelectMenuBuilder;
 
-    if (serieFilter.length != 0) {
+    const components: ActionRowBuilder<AnyComponentBuilder>[] = [];
+    const pageSelect =
+        new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+            new StringSelectMenuBuilder()
+                .setCustomId("vehicles_page")
+                .setPlaceholder("Select a page")
+                .setDisabled(
+                    WikiInfo.production_status.en_EN !== "flight-ready"
+                        ? true
+                        : false
+                )
+                .addOptions(
+                    new StringSelectMenuOptionBuilder()
+                        .setLabel("General")
+                        .setValue(`${WikiInfo.name}_General`)
+                        .setDefault(page === "General")
+                        .setDescription(
+                            "Provides a general overview of the vehicle, its price and where to buy it."
+                        ),
+                    new StringSelectMenuOptionBuilder()
+                        .setLabel("Weapons")
+                        .setValue(`${WikiInfo.name}_Weapons`)
+                        .setDefault(page === "Weapons")
+                        .setDescription(
+                            "Provides an overview of the vehicles weapons."
+                        ),
+                    new StringSelectMenuOptionBuilder()
+                        .setLabel("Components")
+                        .setValue(`${WikiInfo.name}_Components`)
+                        .setDefault(page === "Components")
+                        .setDescription(
+                            "Provides an overview of the vehicles components"
+                        )
+                )
+        );
+    components.push(pageSelect);
+
+    const serieFilter = (await FetchVehicleSerie(WikiInfo.chassis_id)).filter(
+        (ship) => ship.name !== WikiInfo.name
+    );
+
+    if (serieFilter.length !== 0) {
         serieSelect = new StringSelectMenuBuilder()
             .setCustomId("vehicles_variant")
             .setPlaceholder("Select variant")
@@ -535,14 +621,11 @@ async function CreateShipComponents(name: string): Promise<{ components: [] }> {
                         );
                 })
             );
-        serieRow =
-            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-                serieSelect
-            );
+        serieRow.addComponents(serieSelect);
         components.push(serieRow);
     }
 
-    if (WikiInfo.loaner && WikiInfo.loaner?.length != 0) {
+    if (WikiInfo.loaner && WikiInfo.loaner?.length !== 0) {
         select = new StringSelectMenuBuilder()
             .setCustomId("vehicles_loaner")
             .setPlaceholder("Select Loaner")
@@ -557,10 +640,7 @@ async function CreateShipComponents(name: string): Promise<{ components: [] }> {
                         )
                 )
             );
-        selectRow =
-            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-                select
-            );
+        selectRow.addComponents(select);
         components.push(selectRow);
     }
 
@@ -570,13 +650,14 @@ async function CreateShipComponents(name: string): Promise<{ components: [] }> {
 
     components.push(buttonRow);
 
-    return { components };
+    return components;
 }
 
 async function CreateCompareComponents(
     options: CommandInteractionOption[]
-): Promise<{ components: [] }> {
-    var selectOptions = await Promise.all(
+    // biome-ignore lint/suspicious/noExplicitAny: Discord.js's AnyComponentBuilder generic causes issues when passing components into replies. Specifying any stops this. I cannot set a specific generic as multiple are being used.
+): Promise<ActionRowBuilder<any>[]> {
+    const selectOptions = await Promise.all(
         options.map(async (ship) => {
             const { WikiInfo } = await RetrieveFromAPI(String(ship.value));
             return new StringSelectMenuOptionBuilder()
@@ -585,16 +666,97 @@ async function CreateCompareComponents(
         })
     );
 
-    var components: any = [],
-        select = new StringSelectMenuBuilder()
-            .setCustomId("vehicles_compare")
-            .setPlaceholder("Select vehicle to compare")
-            .addOptions(selectOptions),
-        selectRow =
-            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-                select
-            );
+    const components: ActionRowBuilder<AnyComponentBuilder>[] = [];
+    const select = new StringSelectMenuBuilder()
+        .setCustomId("vehicles_compare")
+        .setPlaceholder("Select vehicle to compare")
+        .addOptions(selectOptions);
+    const selectRow =
+        new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select);
     components.push(selectRow);
 
-    return { components };
+    return components;
+}
+async function CreateWeaponsEmbed(name: string): Promise<EmbedBuilder> {
+    const { WikiInfo } = await RetrieveFromAPI(name);
+
+    const TurretWeapons = (i: number) => {
+        const temp = [];
+        for (const [k, v] of Object.entries(
+            WikiInfo.hardpoints
+                .filter((hardpoint) => hardpoint.type === "Turret")
+                [i].children.reduce((acc, child) => {
+                    if (!acc[child.item.name]) {
+                        acc[child.item.name] = 0;
+                    }
+                    acc[child.item.name]++;
+                    return acc;
+                }, {} as Record<string, number>)
+        )) {
+            temp.push(`${k} x${v}`);
+        }
+        return temp;
+    };
+
+    const embed = new EmbedBuilder()
+        .setDescription(
+            `# ${WikiInfo.name} > Weapons
+            ${
+                WikiInfo.hardpoints !== undefined
+                    ? `${
+                          WikiInfo.hardpoints.filter(
+                              (hardpoint) => hardpoint.type === "WeaponGun"
+                          ).length !== 0
+                              ? `## Hardpoints
+                              ${WikiInfo.hardpoints
+                                  .filter(
+                                      (hardpoint) =>
+                                          hardpoint.type === "WeaponGun"
+                                  )
+                                  .map((weapon) => {
+                                      return `## Weapons\n### ${weapon.item.name}
+                              ${weapon.item.manufacturer.name} (**${weapon.item.manufacturer.code}**)\n**Size**: ${weapon.item.size} | ${weapon.item.mass}kg\n**Class**: ${weapon.item.vehicle_weapon.type}\n**Capacity**: ${weapon.item.vehicle_weapon.capacity}\n**Range**: ${weapon.item.vehicle_weapon.range}m\n`;
+                                  })}`
+                              : "**No Hardpoint weapons**"
+                      }\n${
+                          WikiInfo.hardpoints.filter(
+                              (hardpoint) => hardpoint.type === "Turret"
+                          ).length !== 0
+                              ? `## Turrets\n${WikiInfo.hardpoints
+                                    .filter(
+                                        (hardpoint) =>
+                                            hardpoint.type === "Turret"
+                                    )
+                                    .map((weapon, i) => {
+                                        return `### ${
+                                            weapon.item.name
+                                        }\n**Size**: ${
+                                            weapon.item.size
+                                        }\n**Weapon(s)**: ${TurretWeapons(
+                                            i
+                                        ).join("\n")}`;
+                                    })
+                                    .join("\n")}`
+                              : "**No Turrets**"
+                      }`
+                    : "This ship does not have any hardpoint information!"
+            }`
+        )
+        .setTimestamp()
+        .setColor(blue)
+        .setTitle(WikiInfo.manufacturer.name);
+
+    return embed;
+}
+
+async function CreateComponentsEmbed(name: string): Promise<EmbedBuilder> {
+    const { WikiInfo } = await RetrieveFromAPI(name);
+    const embed = new EmbedBuilder()
+        .setDescription(`# ${WikiInfo.name} > Components`)
+        .setFields()
+        .setTimestamp()
+        .setColor(blue)
+        .setTitle(WikiInfo.manufacturer.name);
+
+    return embed;
 }

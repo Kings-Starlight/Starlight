@@ -2,7 +2,8 @@ import { Octokit } from "octokit";
 import { createAppAuth } from "@octokit/auth-app";
 import { log } from "../logging/logger";
 
-export var Github: any;
+// biome-ignore lint/suspicious/noExplicitAny: havent yet obtained its full type...
+export let Github: any;
 
 export async function initiateGithub() {
     log.info("setting up Octokit");

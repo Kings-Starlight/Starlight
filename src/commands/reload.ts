@@ -45,6 +45,7 @@ module.exports = {
                 content: `Command \`${newCommand.data.name}\` was reloaded!`,
                 ephemeral: true,
             });
+            // biome-ignore lint/suspicious/noExplicitAny: catch value must be "any" or "unknown" if specified
         } catch (error: any) {
             ErrorResponse(
                 interaction as RepliableInteraction,
