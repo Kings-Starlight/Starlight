@@ -116,14 +116,18 @@ module.exports = {
                 ? "./src/assets/sl_banner.png"
                 : "./src/assets/sld_banner.png"
         );
+        const thumbnail = new AttachmentBuilder(
+            "./src/assets/MadeByTheCommunity.png"
+        );
 
         const infoEmbed: EmbedBuilder = new EmbedBuilder()
             .setColor(process.env.NODE_ENV === "production" ? prod : dev)
             .setDescription(
                 `# Starlight${
                     process.env.NODE_ENV === "production" ? "" : " In-dev"
-                }.\nThe solution for your trading and general knowledge needs.\n`
+                }.\nThe solution for your trading and general knowledge needs.`
             )
+            .setThumbnail("attachment://MadeByTheCommunity.png")
             .setFields(
                 {
                     name: "Version",
@@ -141,7 +145,7 @@ module.exports = {
                 {
                     name: "Uptime",
                     value: msToTime(client.uptime),
-                    inline: true,
+                    inline: false,
                 },
                 {
                     name: "WS Heartbeat",
@@ -174,6 +178,10 @@ module.exports = {
                     name: "\u200b",
                     value: "**[StarCitizen Wiki](https://starcitizen.tools)**",
                     inline: true,
+                },
+                {
+                    name: "Disclaimer",
+                    value: "\n This is an unofficial Star Citizen service, not affiliated with Cloud Imperium Games, Roberts Space Industries®️ or StarCitizen. All content on this service not authored by its host or users are property of their respective owners.",
                 }
             )
             .setFooter({ text: "Brought to you by king_ultron99#0647." })
@@ -184,7 +192,10 @@ module.exports = {
             )
             .setTimestamp();
 
-        const sent = await interaction.reply({ embeds: [infoEmbed] });
+        const sent = await interaction.reply({
+            embeds: [infoEmbed],
+            files: [file, thumbnail],
+        });
 
         var components = new ActionRowBuilder<ButtonBuilder>().addComponents([
             new ButtonBuilder()
@@ -216,7 +227,7 @@ module.exports = {
                     {
                         name: "Uptime",
                         value: msToTime(client.uptime),
-                        inline: true,
+                        inline: false,
                     },
                     {
                         name: "WS Heartbeat",
@@ -232,11 +243,11 @@ module.exports = {
                     },
                     {
                         name: "Server",
-                        value: "Starlight Mainframe ( MT Datacenter 8FK-Q2X-K )",
+                        value: "Starlight Mainframe:\n( MT Datacenter 8FK-Q2X-K )",
                     },
                     {
                         name: "Relay Provider",
-                        value: "Aciedo CommRelay [ relays ST4-64, ST4-22, ST2-55 ]",
+                        value: "Aciedo CommRelay:\n[ relays ST4-64, ST4-22, ST2-55 ]",
                     },
                     {
                         name: "Address",
@@ -251,11 +262,14 @@ module.exports = {
                         name: "\u200b",
                         value: "**[StarCitizen Wiki](https://starcitizen.tools)**",
                         inline: true,
+                    },
+                    {
+                        name: "Disclaimer",
+                        value: "\n This is an unofficial Star Citizen service, not affiliated with UEX, the StarCitizen Wiki, Cloud Imperium Games, Roberts Space Industries®️ or StarCitizen.\nAll content on this service not authored by its host or users are property of their respective owners.",
                     }
                 ),
             ],
             components: [components],
-            files: [file],
         });
     },
 };
