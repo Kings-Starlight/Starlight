@@ -596,28 +596,29 @@ async function CreateShipComponents(
                 .setCustomId("vehicles_page")
                 .setPlaceholder("Select a page")
                 .setDisabled(
-                    WikiInfo.production_status.en_EN !== "flight-ready"
+                    WikiInfo.hardpoints === undefined ||
+                        WikiInfo.production_status.en_EN !== "flight-ready"
                         ? true
                         : false
                 )
                 .addOptions(
                     new StringSelectMenuOptionBuilder()
                         .setLabel("General")
-                        .setValue(`${WikiInfo.name}_General`)
+                        .setValue(`${WikiInfo.uuid}_General`)
                         .setDefault(page === "General")
                         .setDescription(
                             "Provides a general overview of the vehicle, its price and where to buy it."
                         ),
                     new StringSelectMenuOptionBuilder()
                         .setLabel("Weapons")
-                        .setValue(`${WikiInfo.name}_Weapons`)
+                        .setValue(`${WikiInfo.uuid}_Weapons`)
                         .setDefault(page === "Weapons")
                         .setDescription(
                             "Provides an overview of the vehicles weapons."
                         ),
                     new StringSelectMenuOptionBuilder()
                         .setLabel("Components")
-                        .setValue(`${WikiInfo.name}_Components`)
+                        .setValue(`${WikiInfo.uuid}_Components`)
                         .setDefault(page === "Components")
                         .setDescription(
                             "Provides an overview of the vehicles components"
@@ -701,6 +702,7 @@ async function CreateCompareComponents(
 
     return components;
 }
+
 async function CreateWeaponsEmbed(name: string): Promise<EmbedBuilder> {
     const { WikiInfo } = await RetrieveFromAPI(name);
 
