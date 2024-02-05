@@ -12,7 +12,12 @@ import {
     StringSelectMenuBuilder,
     StringSelectMenuOptionBuilder,
 } from "discord.js";
-import { SearchResponse, WikiShip } from "@/src/types/sc_wiki";
+import {
+    Hardpoint,
+    MasterItem,
+    SearchResponse,
+    WikiShip,
+} from "@/src/types/sc_wiki";
 import { UEXShip } from "@/src/types/uex";
 import {
     FetchVehicleSerie,
@@ -152,7 +157,8 @@ module.exports = {
                 break;
             }
             case "vehicles_page": {
-                interaction.deferUpdate();
+                await interaction.deferUpdate();
+                const start = Date.now();
 
                 const name = interaction.values[0].split("_")[0];
                 const page = interaction.values[0].split("_")[1];
@@ -161,7 +167,13 @@ module.exports = {
                     case "General": {
                         const embed = await CreateGeneralEmbed(name);
                         interaction.editReply({
-                            embeds: [embed],
+                            embeds: [
+                                embed.setFooter({
+                                    text: `took ${msToTime(
+                                        Date.now() - start
+                                    )}`,
+                                }),
+                            ],
                             components,
                         });
                         break;
@@ -169,7 +181,13 @@ module.exports = {
                     case "Weapons": {
                         const embed = await CreateWeaponsEmbed(name);
                         interaction.editReply({
-                            embeds: [embed],
+                            embeds: [
+                                embed.setFooter({
+                                    text: `took ${msToTime(
+                                        Date.now() - start
+                                    )}`,
+                                }),
+                            ],
                             components,
                         });
                         break;
@@ -177,7 +195,13 @@ module.exports = {
                     case "Components": {
                         const embed = await CreateComponentsEmbed(name);
                         interaction.editReply({
-                            embeds: [embed],
+                            embeds: [
+                                embed.setFooter({
+                                    text: `took ${msToTime(
+                                        Date.now() - start
+                                    )}`,
+                                }),
+                            ],
                             components,
                         });
                         break;
@@ -686,14 +710,38 @@ async function CreateWeaponsEmbed(name: string): Promise<EmbedBuilder> {
             WikiInfo.hardpoints
                 .filter((hardpoint) => hardpoint.type === "Turret")
                 [i].children.reduce((acc, child) => {
-                    if (!acc[child.item.name]) {
-                        acc[child.item.name] = 0;
+                    if (!acc[ensure(child.item.name)]) {
+                        acc[ensure(child.item.name)] = {
+                            count: 0,
+                            size: ensure(child.item.size),
+                        };
                     }
-                    acc[child.item.name]++;
+                    acc[ensure(child.item.name)].count++;
                     return acc;
-                }, {} as Record<string, number>)
+                }, {} as Record<string, { count: number; size: number }>)
         )) {
-            temp.push(`${k} x${v}`);
+            temp.push(
+                `> ${
+                    Object.entries(
+                        WikiInfo.hardpoints
+                            .filter((hardpoint) => hardpoint.type === "Turret")
+                            [i].children.reduce((acc, child) => {
+                                if (!acc[ensure(child.item.name)]) {
+                                    acc[ensure(child.item.name)] = {
+                                        count: 0,
+                                        size: ensure(child.item.size),
+                                    };
+                                }
+                                acc[ensure(child.item.name)].count++;
+                                return acc;
+                            }, {} as Record<string, { count: number; size: number }>)
+                    )
+                        .slice(-1)
+                        .find(([k1]) => k1 === k)
+                        ? "└─"
+                        : "├─"
+                } x${v.count} S${v.size} ${k}${v.count > 1 ? "s" : ""} `
+            );
         }
         return temp;
     };
@@ -707,22 +755,36 @@ async function CreateWeaponsEmbed(name: string): Promise<EmbedBuilder> {
                           WikiInfo.hardpoints.filter(
                               (hardpoint) => hardpoint.type === "WeaponGun"
                           ).length !== 0
-                              ? `## Hardpoints
+                              ? `## Fixed Weaponry
                               ${WikiInfo.hardpoints
                                   .filter(
                                       (hardpoint) =>
                                           hardpoint.type === "WeaponGun"
                                   )
                                   .map((weapon) => {
-                                      return `## Weapons\n### ${weapon.item.name}
-                              ${weapon.item.manufacturer.name} (**${weapon.item.manufacturer.code}**)\n**Size**: ${weapon.item.size} | ${weapon.item.mass}kg\n**Class**: ${weapon.item.vehicle_weapon.type}\n**Capacity**: ${weapon.item.vehicle_weapon.capacity}\n**Range**: ${weapon.item.vehicle_weapon.range}m\n`;
-                                  })}`
-                              : "**No Hardpoint weapons**"
+                                      return `### ${weapon.item.name}
+                              > ${ensure(weapon.item.manufacturer).name} (**${
+                                          ensure(weapon.item.manufacturer).code
+                                      }**)\n> **Size**: ${weapon.item.size} | ${
+                                          weapon.item.mass
+                                      }kg\n> **Class**: ${
+                                          ensure(weapon.item.vehicle_weapon)
+                                              .type
+                                      }\n> **Capacity**: ${
+                                          ensure(weapon.item.vehicle_weapon)
+                                              .capacity
+                                      }\n> **Range**: ${
+                                          ensure(weapon.item.vehicle_weapon)
+                                              .range
+                                      }m\n`;
+                                  })
+                                  .join("\n")}`
+                              : "### No fixed weapons"
                       }\n${
                           WikiInfo.hardpoints.filter(
                               (hardpoint) => hardpoint.type === "Turret"
                           ).length !== 0
-                              ? `## Turrets\n${WikiInfo.hardpoints
+                              ? `## Gimbal/Turret Weaponry\n${WikiInfo.hardpoints
                                     .filter(
                                         (hardpoint) =>
                                             hardpoint.type === "Turret"
@@ -730,16 +792,16 @@ async function CreateWeaponsEmbed(name: string): Promise<EmbedBuilder> {
                                     .map((weapon, i) => {
                                         return `### ${
                                             weapon.item.name
-                                        }\n**Size**: ${
+                                        }\n> **Size**: ${
                                             weapon.item.size
-                                        }\n**Weapon(s)**: ${TurretWeapons(
+                                        }\n> **Weapon(s)**:\n${TurretWeapons(
                                             i
                                         ).join("\n")}`;
                                     })
                                     .join("\n")}`
-                              : "**No Turrets**"
+                              : "### No Gimbal/Turret weapons"
                       }`
-                    : "This ship does not have any hardpoint information!"
+                    : "This ship does not have any hardpoint information!\n\n### This is most likely an error with the Wiki api rather than an issue with the bot."
             }`
         )
         .setTimestamp()
@@ -751,9 +813,54 @@ async function CreateWeaponsEmbed(name: string): Promise<EmbedBuilder> {
 
 async function CreateComponentsEmbed(name: string): Promise<EmbedBuilder> {
     const { WikiInfo } = await RetrieveFromAPI(name);
+
+    // TODO: Map over and reduce components for readability. make embed content.
+
+    const components = () => {
+        const temp: string[] = [];
+        for (const [k, v] of Object.entries(
+            WikiInfo.hardpoints
+                .filter(
+                    (hardpoint) =>
+                        hardpoint.type === "Shield" ||
+                        hardpoint.type === "QuantumDrive" ||
+                        hardpoint.type === "PowerPlant" ||
+                        hardpoint.type === "Cooler"
+                )
+                .reduce((acc, child) => {
+                    if (!acc[ensure(child.item.name)]) {
+                        acc[ensure(child.item.name)] = {
+                            count: 0,
+                            item: child.item,
+                        };
+                    }
+                    ensure(acc[ensure(child.item.name)]).count++;
+                    return acc;
+                }, {} as Record<string, { count: number; item: MasterItem }>)
+        )) {
+            temp.push(
+                `## x${v.count} ${k}\n${v.item.description?.en_EN}\n\n> **Manufacturer**: ${v.item.manufacturer?.name} (${v.item.manufacturer?.code})\n> **Type**: ${v.item.type}\n> **Size**: ${v.item.size}\n> **Grade**: ${v.item.grade} | **Class**: ${v.item.class}`
+            );
+        }
+        return temp;
+    };
+
     const embed = new EmbedBuilder()
-        .setDescription(`# ${WikiInfo.name} > Components`)
-        .setFields()
+        .setDescription(
+            WikiInfo.hardpoints !== undefined
+                ? `# ${WikiInfo.name} > Components\n${
+                      WikiInfo.hardpoints.filter(
+                          (hardpoint) =>
+                              hardpoint.type === "Shield" ||
+                              hardpoint.type === "QuantumDrive" ||
+                              hardpoint.type === "PowerPlant" ||
+                              hardpoint.type === "Cooler"
+                      ).length !== 0
+                          ? components().join("\n")
+                          : "Strange... this ship doesnt appear to have any core components listed...\n\n### This is most likely an error with the Wiki api rather than an issue with the bot."
+                  }`
+                : "This ship does not have any hardpoint information!\n\n### This is most likely an error with the Wiki api rather than an issue with the bot."
+        )
         .setTimestamp()
         .setColor(blue)
         .setTitle(WikiInfo.manufacturer.name);
