@@ -210,6 +210,7 @@ interface ChildPart {
 
 export interface Hardpoint {
     name: string;
+    position: string;
     min_size: number;
     max_size: number;
     class_name: string;

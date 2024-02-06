@@ -268,13 +268,7 @@ async function RetrieveFromAPI(name: string) {
 
 /** Creates a message embed for a specified ship. */
 async function CreateGeneralEmbed(name: string): Promise<EmbedBuilder> {
-    const cache = await RedisClient.get(`Embed:${name}`);
     let embed: EmbedBuilder;
-
-    if (cache !== null) {
-        embed = new EmbedBuilder(JSON.parse(cache));
-        return embed;
-    }
 
     const { WikiInfo, UEXInfo } = await RetrieveFromAPI(name);
 
@@ -538,10 +532,7 @@ async function CreateGeneralEmbed(name: string): Promise<EmbedBuilder> {
             );
         embed.setImage(await RequestImage(WikiInfo.name));
     }
-    await RedisClient.set(
-        `Embed:${WikiInfo.name}`,
-        JSON.stringify(embed.toJSON())
-    );
+
     return embed;
 }
 /** Generates the components for a single ship*/
@@ -710,7 +701,11 @@ async function CreateWeaponsEmbed(name: string): Promise<EmbedBuilder> {
         const temp = [];
         for (const [k, v] of Object.entries(
             WikiInfo.hardpoints
-                .filter((hardpoint) => hardpoint.type === "Turret")
+                .filter(
+                    (hardpoint) =>
+                        hardpoint.type === "Turret" ||
+                        hardpoint.type === "TurretBase"
+                )
                 [i].children.reduce((acc, child) => {
                     if (!acc[ensure(child.item.name)]) {
                         acc[ensure(child.item.name)] = {
@@ -726,17 +721,20 @@ async function CreateWeaponsEmbed(name: string): Promise<EmbedBuilder> {
                 `> ${
                     Object.entries(
                         WikiInfo.hardpoints
-                            .filter((hardpoint) => hardpoint.type === "Turret")
+                            .filter(
+                                (hardpoint) =>
+                                    hardpoint.type === "Turret" ||
+                                    hardpoint.type === "TurretBase"
+                            )
                             [i].children.reduce((acc, child) => {
                                 if (!acc[ensure(child.item.name)]) {
                                     acc[ensure(child.item.name)] = {
                                         count: 0,
-                                        size: ensure(child.item.size),
                                     };
                                 }
                                 acc[ensure(child.item.name)].count++;
                                 return acc;
-                            }, {} as Record<string, { count: number; size: number }>)
+                            }, {} as Record<string, { count: number }>)
                     )
                         .slice(-1)
                         .find(([k1]) => k1 === k)
@@ -784,18 +782,23 @@ async function CreateWeaponsEmbed(name: string): Promise<EmbedBuilder> {
                               : "### No fixed weapons"
                       }\n${
                           WikiInfo.hardpoints.filter(
-                              (hardpoint) => hardpoint.type === "Turret"
+                              (hardpoint) =>
+                                  hardpoint.type === "Turret" ||
+                                  hardpoint.type === "TurretBase"
                           ).length !== 0
                               ? `## Gimbal/Turret Weaponry\n${WikiInfo.hardpoints
                                     .filter(
                                         (hardpoint) =>
-                                            hardpoint.type === "Turret"
+                                            hardpoint.type === "Turret" ||
+                                            hardpoint.type === "TurretBase"
                                     )
                                     .map((weapon, i) => {
                                         return `### ${
                                             weapon.item.name
                                         }\n> **Size**: ${
                                             weapon.item.size
+                                        }\n> **Location**: ${
+                                            weapon.position
                                         }\n> **Weapon(s)**:\n${TurretWeapons(
                                             i
                                         ).join("\n")}`;
@@ -815,8 +818,6 @@ async function CreateWeaponsEmbed(name: string): Promise<EmbedBuilder> {
 
 async function CreateComponentsEmbed(name: string): Promise<EmbedBuilder> {
     const { WikiInfo } = await RetrieveFromAPI(name);
-
-    // TODO: Map over and reduce components for readability. make embed content.
 
     const components = () => {
         const temp: string[] = [];
@@ -841,7 +842,16 @@ async function CreateComponentsEmbed(name: string): Promise<EmbedBuilder> {
                 }, {} as Record<string, { count: number; item: MasterItem }>)
         )) {
             temp.push(
-                `## x${v.count} ${k}\n${v.item.description?.en_EN}\n\n> **Manufacturer**: ${v.item.manufacturer?.name} (${v.item.manufacturer?.code})\n> **Type**: ${v.item.type}\n> **Size**: ${v.item.size}\n> **Grade**: ${v.item.grade} | **Class**: ${v.item.class}`
+                `## x${v.count} [${k}](https://starcitizen.tools/${k.replaceAll(
+                    " ",
+                    "_"
+                )})\n${v.item.description?.en_EN}\n\n> **Manufacturer**: ${
+                    v.item.manufacturer?.name
+                } (${v.item.manufacturer?.code})\n> **Type**: ${
+                    v.item.type
+                }\n> **Size**: ${v.item.size}\n> **Grade**: ${
+                    v.item.grade
+                } | **Class**: ${v.item.class}`
             );
         }
         return temp;
