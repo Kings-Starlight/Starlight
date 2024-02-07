@@ -2,6 +2,7 @@ import {
     ActionRowBuilder,
     AnyComponentBuilder,
     AnySelectMenuInteraction,
+    AttachmentBuilder,
     AutocompleteInteraction,
     ButtonBuilder,
     ButtonStyle,
@@ -12,12 +13,7 @@ import {
     StringSelectMenuBuilder,
     StringSelectMenuOptionBuilder,
 } from "discord.js";
-import {
-    Hardpoint,
-    MasterItem,
-    SearchResponse,
-    WikiShip,
-} from "@/src/types/sc_wiki";
+import { MasterItem, SearchResponse, WikiShip } from "@/src/types/sc_wiki";
 import { UEXShip } from "@/src/types/uex";
 import {
     FetchVehicleSerie,
@@ -26,11 +22,9 @@ import {
     Ships,
 } from "@api/wikiAPI";
 import { RetrieveVehicleInfo } from "@api/wikiAPI";
-import { blue, ensure, msToTime } from "@utilities/general";
+import { blue, ensure, getBrandImage, msToTime } from "@utilities/general";
 import { UEXShips } from "@api/uexAPI";
 import { log } from "@logging/logger";
-import { RedisClient } from "../utilities/redis";
-import { json } from "stream/consumers";
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -107,7 +101,7 @@ module.exports = {
                 try {
                     interaction.editReply({
                         embeds: [
-                            embed.setFooter({
+                            embed.embed.setFooter({
                                 text: `took ${msToTime(Date.now() - start)}`,
                             }),
                         ],
@@ -117,7 +111,7 @@ module.exports = {
                     0;
                     interaction.message.edit({
                         embeds: [
-                            embed.setFooter({
+                            embed.embed.setFooter({
                                 text: `took ${msToTime(Date.now() - start)}`,
                             }),
                         ],
@@ -137,7 +131,7 @@ module.exports = {
                 try {
                     interaction.editReply({
                         embeds: [
-                            embed.setFooter({
+                            embed.embed.setFooter({
                                 text: `took ${msToTime(Date.now() - start)}`,
                             }),
                         ],
@@ -147,7 +141,7 @@ module.exports = {
                     log.error("failed to update message:\n", error);
                     interaction.message.edit({
                         embeds: [
-                            embed.setFooter({
+                            embed.embed.setFooter({
                                 text: `took ${msToTime(Date.now() - start)}`,
                             }),
                         ],
@@ -168,7 +162,7 @@ module.exports = {
                         const embed = await CreateGeneralEmbed(name);
                         interaction.editReply({
                             embeds: [
-                                embed.setFooter({
+                                embed.embed.setFooter({
                                     text: `took ${msToTime(
                                         Date.now() - start
                                     )}`,
@@ -228,11 +222,12 @@ module.exports = {
                 );
                 interaction.editReply({
                     embeds: [
-                        embed.setFooter({
+                        embed.embed.setFooter({
                             text: `took ${msToTime(Date.now() - start)}`,
                         }),
                     ],
                     components,
+                    files: embed.file ? [embed.file] : [],
                 });
                 break;
             }
@@ -245,11 +240,12 @@ module.exports = {
                 );
                 interaction.editReply({
                     embeds: [
-                        embed.setFooter({
+                        embed.embed.setFooter({
                             text: `took ${msToTime(Date.now() - start)}`,
                         }),
                     ],
                     components,
+                    files: embed.file ? [embed.file] : [],
                 });
                 break;
             }
@@ -267,7 +263,9 @@ async function RetrieveFromAPI(name: string) {
 }
 
 /** Creates a message embed for a specified ship. */
-async function CreateGeneralEmbed(name: string): Promise<EmbedBuilder> {
+async function CreateGeneralEmbed(
+    name: string
+): Promise<{ embed: EmbedBuilder; file: AttachmentBuilder | null }> {
     let embed: EmbedBuilder;
 
     const { WikiInfo, UEXInfo } = await RetrieveFromAPI(name);
@@ -282,6 +280,7 @@ async function CreateGeneralEmbed(name: string): Promise<EmbedBuilder> {
             .setDescription(
                 `# ${WikiInfo.name} — Concept\n### Please be aware that this information can change at any time and is not indicitive of the final outcome!\n ${WikiInfo.description.en_EN}`
             )
+
             .addFields(
                 {
                     name: "Size",
@@ -342,16 +341,14 @@ async function CreateGeneralEmbed(name: string): Promise<EmbedBuilder> {
                             : "Unknown"
                     }`,
                 }
-            );
+            )
+            .setImage(await RequestImage(WikiInfo.name));
 
-        if (UEXInfo !== undefined && UEXInfo.photos !== null) {
-            embed.setImage(
-                UEXInfo.photos
-                    .split(",")[0]
-                    .replaceAll("\\", "")
-                    .replaceAll("[", "")
-                    .replaceAll('"', "")
-            );
+        const brand = getBrandImage(WikiInfo.manufacturer.name);
+
+        if (brand !== null) {
+            embed.setThumbnail(`attachment://${brand.name}`);
+            return { embed, file: brand.file };
         }
     } else {
         /** At which locations can the specified ship be rented at? */
@@ -371,6 +368,7 @@ async function CreateGeneralEmbed(name: string): Promise<EmbedBuilder> {
                 `${WikiInfo.manufacturer.name} (${WikiInfo.manufacturer.code})`
             )
             .setColor(blue)
+            .setThumbnail(await RequestImage(WikiInfo.manufacturer.name))
             .addFields(
                 {
                     name: "Size",
@@ -529,11 +527,18 @@ async function CreateGeneralEmbed(name: string): Promise<EmbedBuilder> {
                     name: "Production Status",
                     value: `${WikiInfo.production_status.en_EN} since ${WikiInfo.version}`,
                 }
-            );
-        embed.setImage(await RequestImage(WikiInfo.name));
+            )
+            .setImage(await RequestImage(WikiInfo.name));
+
+        const brand = getBrandImage(WikiInfo.manufacturer.name);
+
+        if (brand !== null) {
+            embed.setThumbnail(`attachment://${brand.name}`);
+            return { embed, file: brand.file };
+        }
     }
 
-    return embed;
+    return { embed, file: null };
 }
 /** Generates the components for a single ship*/
 async function CreateShipComponents(
