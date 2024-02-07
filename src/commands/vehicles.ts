@@ -779,7 +779,7 @@ async function CreateWeaponsEmbed(name: string): Promise<EmbedBuilder> {
                                       }m\n`;
                                   })
                                   .join("\n")}`
-                              : "### No fixed weapons"
+                              : ""
                       }\n${
                           WikiInfo.hardpoints.filter(
                               (hardpoint) =>
@@ -804,7 +804,7 @@ async function CreateWeaponsEmbed(name: string): Promise<EmbedBuilder> {
                                         ).join("\n")}`;
                                     })
                                     .join("\n")}`
-                              : "### No Gimbal/Turret weapons"
+                              : ""
                       }`
                     : "This ship does not have any hardpoint information!\n\n### This is most likely an error with the Wiki api rather than an issue with the bot."
             }`
