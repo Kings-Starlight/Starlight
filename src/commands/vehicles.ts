@@ -529,13 +529,6 @@ async function CreateGeneralEmbed(
                 }
             )
             .setImage(await RequestImage(WikiInfo.name));
-
-        const brand = getBrandImage(WikiInfo.manufacturer.name);
-
-        if (brand !== null) {
-            embed.setThumbnail(`attachment://${brand.name}`);
-            return { embed, file: brand.file };
-        }
     }
 
     return { embed, file: null };
@@ -752,6 +745,7 @@ async function CreateWeaponsEmbed(name: string): Promise<EmbedBuilder> {
     };
 
     const embed = new EmbedBuilder()
+        .setThumbnail(await RequestImage(WikiInfo.manufacturer.name))
         .setDescription(
             `# ${WikiInfo.name} > Weapons
             ${
@@ -850,19 +844,23 @@ async function CreateComponentsEmbed(name: string): Promise<EmbedBuilder> {
                 `## x${v.count} [${k}](https://starcitizen.tools/${k.replaceAll(
                     " ",
                     "_"
-                )})\n${v.item.description?.en_EN}\n\n> **Manufacturer**: ${
-                    v.item.manufacturer?.name
-                } (${v.item.manufacturer?.code})\n> **Type**: ${
-                    v.item.type
-                }\n> **Size**: ${v.item.size}\n> **Grade**: ${
-                    v.item.grade
-                } | **Class**: ${v.item.class}`
+                )})\n${
+                    // more empty arrays for descriptions...
+                    (v.item.description as unknown as []).length !== 0
+                        ? v.item.description?.en_EN
+                        : "This item does not have a description"
+                }\n\n> **Manufacturer**: ${v.item.manufacturer?.name} (${
+                    v.item.manufacturer?.code
+                })\n> **Type**: ${v.item.type}\n> **Size**: ${
+                    v.item.size
+                }\n> **Grade**: ${v.item.grade} | **Class**: ${v.item.class}`
             );
         }
         return temp;
     };
 
     const embed = new EmbedBuilder()
+        .setThumbnail(await RequestImage(WikiInfo.manufacturer.name))
         .setDescription(
             WikiInfo.hardpoints !== undefined
                 ? `# ${WikiInfo.name} > Components\n${
