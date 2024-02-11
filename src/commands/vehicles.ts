@@ -805,7 +805,7 @@ async function CreateWeaponsEmbed(name: string): Promise<EmbedBuilder> {
                                     .join("\n")}`
                               : ""
                       }`
-                    : "This ship does not have any hardpoint information!\n\n### This is most likely an error with the Wiki api rather than an issue with the bot."
+                    : "This ship does not have any hardpoint information!"
             }`
         )
         .setTimestamp()
@@ -872,9 +872,9 @@ async function CreateComponentsEmbed(name: string): Promise<EmbedBuilder> {
                               hardpoint.type === "Cooler"
                       ).length !== 0
                           ? components().join("\n")
-                          : "Strange... this ship doesnt appear to have any core components listed...\n\n### This is most likely an error with the Wiki api rather than an issue with the bot."
+                          : "Strange... this ship doesnt appear to have any core components listed..."
                   }`
-                : "This ship does not have any hardpoint information!\n\n### This is most likely an error with the Wiki api rather than an issue with the bot."
+                : "This ship does not have any hardpoint information!"
         )
         .setTimestamp()
         .setColor(blue)
