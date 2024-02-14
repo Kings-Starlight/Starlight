@@ -266,12 +266,12 @@ async function RetrieveFromAPI(name: string) {
 async function CreateGeneralEmbed(
     name: string
 ): Promise<{ embed: EmbedBuilder; file: AttachmentBuilder | null }> {
-    let embed: EmbedBuilder;
+    const embed = new EmbedBuilder();
 
-    const { WikiInfo, UEXInfo } = await RetrieveFromAPI(name);
+    const { WikiInfo } = await RetrieveFromAPI(name);
 
     if (WikiInfo.production_status.en_EN !== "flight-ready") {
-        embed = new EmbedBuilder()
+        embed
             .setTitle(
                 `${WikiInfo.manufacturer.name} (${WikiInfo.manufacturer.code})`
             )
@@ -342,6 +342,7 @@ async function CreateGeneralEmbed(
                     }`,
                 }
             )
+
             .setImage(await RequestImage(WikiInfo.name));
 
         const brand = getBrandImage(WikiInfo.manufacturer.name);
@@ -362,13 +363,13 @@ async function CreateGeneralEmbed(
                 shop.items.filter((item) => item.buyable === true).length !== 0
         );
 
-        embed = new EmbedBuilder()
+        embed
             .setDescription(`# ${WikiInfo.name}\n${WikiInfo.description.en_EN}`)
             .setTitle(
                 `${WikiInfo.manufacturer.name} (${WikiInfo.manufacturer.code})`
             )
             .setColor(blue)
-            .setThumbnail(await RequestImage(WikiInfo.manufacturer.name))
+
             .addFields(
                 {
                     name: "Size",
@@ -529,8 +530,14 @@ async function CreateGeneralEmbed(
                 }
             )
             .setImage(await RequestImage(WikiInfo.name));
-    }
 
+        const brand = getBrandImage(WikiInfo.manufacturer.name);
+
+        if (brand !== null) {
+            embed.setThumbnail(`attachment://${brand.name}`);
+            return { embed, file: brand.file };
+        }
+    }
     return { embed, file: null };
 }
 /** Generates the components for a single ship*/
