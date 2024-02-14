@@ -10,7 +10,7 @@ import fs from "node:fs";
 import { log } from "@logging/logger";
 import { Command } from "./types/commands";
 
-export var client: Client<true>;
+export let client: Client<true>;
 
 export function InitiateBot(): void {
     log.info("Setting up bot instance");
@@ -38,7 +38,7 @@ export function InitiateBot(): void {
 
     // Command mapping and registration:
 
-    var commands = [];
+    const commands = [];
 
     const commandsPath: string = path.join(__dirname, "commands");
     const commandsFiles: string[] = fs
@@ -75,7 +75,8 @@ export function InitiateBot(): void {
                 `Started refreshing ${client.commands.size}  application (/) commands.`
             );
 
-            var data: Array<any>;
+            // biome-ignore lint/suspicious/noExplicitAny: Return type is unknown atm.
+            let data: Array<any>;
 
             if (process.env.NODE_ENV !== "production") {
                 data = (await rest.put(
@@ -84,11 +85,13 @@ export function InitiateBot(): void {
                         process.env.TEST_GUILD
                     ),
                     { body: commands }
+                    // biome-ignore lint/suspicious/noExplicitAny: Return type is unknown atm.
                 )) as any;
             } else {
                 data = (await rest.put(
                     Routes.applicationCommands(process.env.CLIENT_ID),
                     { body: commands }
+                    // biome-ignore lint/suspicious/noExplicitAny: Return type is unknown atm.
                 )) as any;
             }
 

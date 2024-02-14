@@ -2,10 +2,10 @@ import { log } from "@logging/logger";
 import { UEXShip, Tradeport, TradeportPrices, Planet } from "@/src/types/uex";
 import { RedisClient } from "@utilities/redis";
 
-export var UEXShips: UEXShip[];
-export var UEXTradePorts: Tradeport[];
-export var Planets: Planet[];
-export var Satellites: Planet[];
+export let UEXShips: UEXShip[];
+export let UEXTradePorts: Tradeport[];
+export let Planets: Planet[];
+export let Satellites: Planet[];
 
 const UEXAPIBASE = "https://portal.uexcorp.space/api/";
 
@@ -19,7 +19,7 @@ export async function FetchUEXVehicles() {
 
     if (cache === null) {
         log.info("...No cache found. Updating...");
-        const fetchShips = await fetch(UEXAPIBASE + "ships", {
+        const fetchShips = await fetch(`${UEXAPIBASE}ships`, {
             method: "GET",
             headers: {
                 api_key: process.env.UEX,
@@ -58,7 +58,7 @@ export async function FetchUEXTradeports() {
     if (cache === null) {
         log.info("...No cache found. Updating...");
         const fetchTradeports = await fetch(
-            UEXAPIBASE + "tradeports/system/ST/",
+            `${UEXAPIBASE}tradeports/system/ST/`,
             {
                 method: "GET",
                 headers: {
@@ -74,8 +74,8 @@ export async function FetchUEXTradeports() {
         }
         const data: Tradeport[] = (await fetchTradeports.json()).data;
         data.forEach((tradeport: Tradeport, i: number) => {
-            if (tradeport.prices != undefined) {
-                var pricesNew: TradeportPrices[] = Object.entries(
+            if (tradeport.prices !== undefined) {
+                const pricesNew: TradeportPrices[] = Object.entries(
                     tradeport.prices
                 ).map((e: [string, TradeportPrices]) => ({
                     name: e[1].name,
@@ -120,7 +120,7 @@ export async function FetchPlanets() {
 
     if (cache === null) {
         log.info("...No cache found. Updating...");
-        const fetchPlanets = await fetch(UEXAPIBASE + "planets/system/ST", {
+        const fetchPlanets = await fetch(`${UEXAPIBASE}planets/system/ST`, {
             method: "GET",
             headers: {
                 api_key: process.env.UEX,
@@ -132,7 +132,7 @@ export async function FetchPlanets() {
             );
             return;
         }
-        var data: Planet[] = (await fetchPlanets.json()).data;
+        const data: Planet[] = (await fetchPlanets.json()).data;
         RedisClient.set("UEX:Planets", JSON.stringify(data));
         // set expiry for 2 weeks
         RedisClient.expire("UEX:Planets", 86400 * 14);
@@ -156,7 +156,7 @@ export async function FetchSatellites() {
         log.info("...No cache found. Updating...");
 
         const fetchSatellites = await fetch(
-            UEXAPIBASE + "satellites/system/ST",
+            `${UEXAPIBASE}satellites/system/ST`,
             {
                 method: "GET",
                 headers: {
@@ -171,7 +171,7 @@ export async function FetchSatellites() {
             return;
         }
 
-        var data: Planet[] = (await fetchSatellites.json()).data;
+        const data: Planet[] = (await fetchSatellites.json()).data;
         RedisClient.set("UEX:Satellites", JSON.stringify(data));
         // set expiry for 2 weeks
         RedisClient.expire("UEX:Satellites", 86400 * 14);

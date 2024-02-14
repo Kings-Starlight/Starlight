@@ -1,7 +1,7 @@
 import { createLogger, transports, format, type Logger } from "winston";
 import "winston-daily-rotate-file";
 
-export var log: Logger;
+export let log: Logger;
 
 const customFormat = format.printf(({ level, message, label, timestamp }) => {
     return `\x1B[35m[\x1B[0m${label}\x1B[35m]\x1B[0m | ${timestamp} | ${level}: ${message}`;
@@ -16,7 +16,7 @@ export function InitiateLogger(): void {
         ),
         transports: [
             new transports.DailyRotateFile({
-                filename: `logs/%DATE%/log.log`,
+                filename: "logs/%DATE%/log.log",
                 datePattern: "YYYY-MM-DD",
                 zippedArchive: true,
                 maxSize: "20m",
@@ -37,7 +37,7 @@ export function InitiateLogger(): void {
         exceptionHandlers: [
             new transports.DailyRotateFile({
                 format: format.errors({ stack: true }),
-                filename: `logs/%DATE%/exceptions.log`,
+                filename: "logs/%DATE%/exceptions.log",
                 datePattern: "YYYY-MM-DD",
                 zippedArchive: true,
                 maxSize: "20m",

@@ -58,7 +58,7 @@ module.exports = {
                     ],
                 });
             })
-            .catch((err: any) =>
+            .catch((err: Error) =>
                 ErrorResponse(
                     interaction,
                     "Sorry, I was unable to submit your report.",
@@ -197,7 +197,7 @@ module.exports = {
             files: [file, thumbnail],
         });
 
-        var components = new ActionRowBuilder<ButtonBuilder>().addComponents([
+        const components = new ActionRowBuilder<ButtonBuilder>().addComponents([
             new ButtonBuilder()
                 .setURL("https://ko-fi.com/king_ultron99")
                 .setLabel("Support me on Ko-Fi")
