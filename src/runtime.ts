@@ -24,7 +24,6 @@ export function InitiateBot(): void {
     const eventFiles = fs
         .readdirSync(eventsPath)
         .filter((file) => file.endsWith(".ts") || file.endsWith(".js"));
-
     for (const file of eventFiles) {
         const filePath = path.join(eventsPath, file);
         const event = require(filePath);
@@ -37,7 +36,6 @@ export function InitiateBot(): void {
     client.login(process.env.TOKEN);
 
     // Command mapping and registration:
-
     const commands = [];
 
     const commandsPath: string = path.join(__dirname, "commands");

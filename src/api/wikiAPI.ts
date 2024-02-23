@@ -19,7 +19,7 @@ export let Weapons: Weapon[];
 export let Food: FPSItemShort[];
 export let Clothes: FPSItemShort[];
 export let Armor: FPSItemShort[];
-export let FPSItems: FPSItemShort[];
+export let Items: FPSItemShort[];
 export let WeaponAttachments: FPSItemShort[];
 export let VehicleWeapons: FPSItemShort[];
 export let VehicleItems: FPSItemShort[];
@@ -442,12 +442,12 @@ export async function FetchFPSItems() {
         RedisClient.set("Wiki:WikiFPSItems", JSON.stringify(temp));
         log.info("...Done!");
 
-        FPSItems = temp;
+        Items = temp;
         return;
     }
     log.info("...Found wiki items cache. Done!");
 
-    FPSItems = JSON.parse(cache);
+    Items = JSON.parse(cache);
     log.profile("get Wiki items");
     return;
 }
