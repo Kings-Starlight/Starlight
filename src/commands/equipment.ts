@@ -24,6 +24,7 @@ module.exports = {
         .setDescription(
             "Information about the various FPS equipment found around the 'verse"
         )
+
         .addStringOption((option) =>
             option
                 .setName("type")
@@ -134,6 +135,8 @@ async function CreateEquipmentEmbed(
             }\n\n${
                 // some responses from the wiki API return an empty array as its description, rather than a null or undefined object.
                 // so, here's my workaround. not ideal, but it works, so its not exactly stupid.
+                //
+                // https://github.com/StarCitizenWiki/API/issues/108
                 //
                 // biome-ignore lint/suspicious/noExplicitAny:
                 // biome-ignore lint/suspicious/noDoubleEquals:
