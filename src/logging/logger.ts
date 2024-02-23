@@ -50,7 +50,7 @@ export function InitiateLogger(): void {
         log = createLogger({
             level: "error",
             format: format.timestamp({ format: "MMM-DD-YYYY HH:mm:ss" }),
-            transports: [new transports.Console({ level: "error" })],
+            transports: [new transports.Console()],
         });
     }
 
