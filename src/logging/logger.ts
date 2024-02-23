@@ -48,9 +48,14 @@ export function InitiateLogger(): void {
         });
     } else {
         log = createLogger({
-            level: "error",
+            level: "info",
             format: format.timestamp({ format: "MMM-DD-YYYY HH:mm:ss" }),
-            transports: [new transports.Console()],
+            transports: [
+                new transports.Console({
+                    format: format.errors({ stack: true }),
+                    level: "info",
+                }),
+            ],
         });
     }
 
