@@ -18,6 +18,8 @@ import { blue, dev, msToTime, prod, red } from "@utilities/general";
 import pjson from "@/package.json";
 import { Github } from "@utilities/octokit";
 import { ErrorResponse } from "../utilities/errors";
+import { ChildProcess, exec, execSync } from "child_process";
+import { log } from "../logging/logger";
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -120,6 +122,8 @@ module.exports = {
             "./src/assets/MadeByTheCommunity.png"
         );
 
+        const commit = execSync("git rev-parse --short HEAD");
+
         const infoEmbed: EmbedBuilder = new EmbedBuilder()
             .setColor(process.env.NODE_ENV === "production" ? prod : dev)
             .setDescription(
@@ -132,6 +136,11 @@ module.exports = {
                 {
                     name: "Version",
                     value: `${pjson.version}`,
+                    inline: true,
+                },
+                {
+                    name: "Commit",
+                    value: `\`${commit}\``,
                     inline: true,
                 },
                 {
@@ -214,6 +223,11 @@ module.exports = {
                     {
                         name: "Version",
                         value: `${pjson.version}`,
+                        inline: true,
+                    },
+                    {
+                        name: "Commit",
+                        value: `\`${commit}\``,
                         inline: true,
                     },
                     {
