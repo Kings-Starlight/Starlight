@@ -1,4 +1,3 @@
-import { log } from "@logging/logger";
 import { CacheType, Events, Interaction } from "discord.js";
 import { ErrorResponse } from "@utilities/errors";
 
@@ -66,6 +65,52 @@ module.exports = {
                 ErrorResponse(
                     interaction,
                     "There was an error responding to this StringSelect interaction ",
+                    error
+                );
+            }
+        } else if (interaction.isButton()) {
+            const command = interaction.client.commands.get(
+                interaction.customId.split("_")[0]
+            );
+
+            if (!command) {
+                ErrorResponse(
+                    interaction,
+                    `No command matching ${
+                        interaction.customId.split("_")[0]
+                    } was found.`
+                );
+                return;
+            }
+            try {
+                await command.buttonInteraction(interaction);
+            } catch (error) {
+                ErrorResponse(
+                    interaction,
+                    "There was an error responding to this Button interaction ",
+                    error
+                );
+            }
+        } else if (interaction.isModalSubmit()) {
+            const command = interaction.client.commands.get(
+                interaction.customId.split("_")[0]
+            );
+
+            if (!command) {
+                ErrorResponse(
+                    interaction,
+                    `No command matching ${
+                        interaction.customId.split("_")[0]
+                    } was found.`
+                );
+                return;
+            }
+            try {
+                await command.modalInteraction(interaction);
+            } catch (error) {
+                ErrorResponse(
+                    interaction,
+                    "There was an error responding to this Button interaction ",
                     error
                 );
             }

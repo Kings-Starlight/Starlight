@@ -54,43 +54,42 @@ module.exports = {
         const data = interaction.options.data[0];
         const tradeportCode = ensure(data.options)[0].value;
         switch (data.name) {
-            case "tradeport":
+            case "tradeport": {
                 const tradeport = UEXTradePorts.filter(
                     (e) => e.code === tradeportCode
                 )[0];
                 const planet: Planet = Planets.filter(
-                    (e) => e.code == tradeport.planet
+                    (e) => e.code === tradeport.planet
                 )[0];
-                var satellite: Planet | null = tradeport.satellite
-                    ? Satellites.filter((e) => e.code == tradeport.satellite)[0]
+                const satellite: Planet | null = tradeport.satellite
+                    ? Satellites.filter(
+                          (e) => e.code === tradeport.satellite
+                      )[0]
                     : null;
-                const embeds = [],
-                    infoEmbed = new EmbedBuilder()
-                        .setTitle(tradeport.name)
-                        .setDescription(
-                            `${tradeport.name_short} is a${
-                                tradeport.space
-                                    ? " space station, orbiting " +
-                                      "`" +
-                                      planet.name +
-                                      "`"
-                                    : `n outpost, located on ${
-                                          tradeport.satellite
-                                              ? `\`${planet.name} > ${satellite?.name}\``
-                                              : "`" + planet.name + "`"
-                                      }`
-                            }`
-                        )
-                        .setColor(blue)
-                        .setTimestamp()
-                        .setFooter({ text: "Powered by UEX" });
+                const embeds = [];
+                const infoEmbed = new EmbedBuilder()
+                    .setTitle(tradeport.name)
+                    .setDescription(
+                        `${tradeport.name_short} is a${
+                            tradeport.space
+                                ? ` space station, orbiting \`${planet.name}\``
+                                : `n outpost, located on ${
+                                      tradeport.satellite
+                                          ? `\`${planet.name} > ${satellite?.name}\``
+                                          : `\`${planet.name}\``
+                                  }`
+                        }`
+                    )
+                    .setColor(blue)
+                    .setTimestamp()
+                    .setFooter({ text: "Powered by UEX" });
 
                 if (tradeport.prices) {
                     infoEmbed.addFields(
                         {
                             name: "Buying",
                             value: `${tradeport.prices
-                                .filter((e) => e.operation == "sell")
+                                .filter((e) => e.operation === "sell")
                                 .map(
                                     (e) =>
                                         `- ${e.name} (${
@@ -105,7 +104,7 @@ module.exports = {
                         {
                             name: "Selling",
                             value: `${tradeport.prices
-                                .filter((e) => e.operation == "buy")
+                                .filter((e) => e.operation === "buy")
                                 .map(
                                     (e) =>
                                         `- ${e.name} (${
@@ -130,6 +129,7 @@ module.exports = {
 
                 interaction.reply({ embeds });
                 break;
+            }
         }
     },
 };
