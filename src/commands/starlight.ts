@@ -231,7 +231,15 @@ module.exports = {
                     },
                     {
                         name: "Commit",
-                        value: `\`${commit}\``,
+                        value: `\`${
+                            process.env.NODE_ENV === "production"
+                                ? String(
+                                      process.env.RAILWAY_GIT_COMMIT_SHA
+                                  ).substring(0, 7)
+                                : execSync(
+                                      "git rev-parse --short HEAD"
+                                  ).toString()
+                        }\``,
                         inline: true,
                     },
                     {
