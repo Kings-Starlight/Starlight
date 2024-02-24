@@ -122,8 +122,11 @@ module.exports = {
             "./src/assets/MadeByTheCommunity.png"
         );
 
-        const commit = execSync("git rev-parse --short HEAD");
+        let commit: string;
 
+        if (process.env.NODE_ENV !== "production") {
+            commit = execSync("git rev-parse --short HEAD").toString();
+        }
         const infoEmbed: EmbedBuilder = new EmbedBuilder()
             .setColor(process.env.NODE_ENV === "production" ? prod : dev)
             .setDescription(
@@ -140,7 +143,13 @@ module.exports = {
                 },
                 {
                     name: "Commit",
-                    value: `\`${commit}\``,
+                    value: `\`${
+                        process.env.NODE_ENV === "production"
+                            ? String(
+                                  process.env.RAILWAY_GIT_COMMIT_SHA
+                              ).substring(0, 7)
+                            : commit
+                    }\``,
                     inline: true,
                 },
                 {
