@@ -159,21 +159,22 @@ module.exports = {
                 const components = await CreateShipComponents(name, page);
                 switch (page) {
                     case "General": {
-                        const embed = await CreateGeneralEmbed(name);
+                        const { embed, file } = await CreateGeneralEmbed(name);
                         interaction.editReply({
                             embeds: [
-                                embed.embed.setFooter({
+                                embed.setFooter({
                                     text: `took ${msToTime(
                                         Date.now() - start
                                     )}`,
                                 }),
                             ],
                             components,
+                            files: file ? [file] : [],
                         });
                         break;
                     }
                     case "Weapons": {
-                        const embed = await CreateWeaponsEmbed(name);
+                        const { embed, file } = await CreateWeaponsEmbed(name);
                         interaction.editReply({
                             embeds: [
                                 embed.setFooter({
@@ -183,11 +184,14 @@ module.exports = {
                                 }),
                             ],
                             components,
+                            files: file ? [file] : [],
                         });
                         break;
                     }
                     case "Components": {
-                        const embed = await CreateComponentsEmbed(name);
+                        const { embed, file } = await CreateComponentsEmbed(
+                            name
+                        );
                         interaction.editReply({
                             embeds: [
                                 embed.setFooter({
@@ -197,6 +201,7 @@ module.exports = {
                                 }),
                             ],
                             components,
+                            files: file ? [file] : [],
                         });
                         break;
                     }
@@ -699,7 +704,9 @@ async function CreateCompareComponents(
     return components;
 }
 
-async function CreateWeaponsEmbed(name: string): Promise<EmbedBuilder> {
+async function CreateWeaponsEmbed(
+    name: string
+): Promise<{ embed: EmbedBuilder; file: AttachmentBuilder | null }> {
     const { WikiInfo } = await RetrieveFromAPI(name);
 
     const TurretWeapons = (i: number) => {
@@ -752,7 +759,6 @@ async function CreateWeaponsEmbed(name: string): Promise<EmbedBuilder> {
     };
 
     const embed = new EmbedBuilder()
-        .setThumbnail(await RequestImage(WikiInfo.manufacturer.name))
         .setDescription(
             `# ${WikiInfo.name} > Weapons
             ${
@@ -819,10 +825,19 @@ async function CreateWeaponsEmbed(name: string): Promise<EmbedBuilder> {
         .setColor(blue)
         .setTitle(WikiInfo.manufacturer.name);
 
-    return embed;
+    const brand = getBrandImage(WikiInfo.manufacturer.name);
+
+    if (brand !== null) {
+        embed.setThumbnail(`attachment://${brand.name}`);
+        return { embed, file: brand.file };
+    }
+
+    return { embed, file: null };
 }
 
-async function CreateComponentsEmbed(name: string): Promise<EmbedBuilder> {
+async function CreateComponentsEmbed(
+    name: string
+): Promise<{ embed: EmbedBuilder; file: AttachmentBuilder | null }> {
     const { WikiInfo } = await RetrieveFromAPI(name);
 
     const components = () => {
@@ -867,7 +882,6 @@ async function CreateComponentsEmbed(name: string): Promise<EmbedBuilder> {
     };
 
     const embed = new EmbedBuilder()
-        .setThumbnail(await RequestImage(WikiInfo.manufacturer.name))
         .setDescription(
             WikiInfo.hardpoints !== undefined
                 ? `# ${WikiInfo.name} > Components\n${
@@ -887,5 +901,12 @@ async function CreateComponentsEmbed(name: string): Promise<EmbedBuilder> {
         .setColor(blue)
         .setTitle(WikiInfo.manufacturer.name);
 
-    return embed;
+    const brand = getBrandImage(WikiInfo.manufacturer.name);
+
+    if (brand !== null) {
+        embed.setThumbnail(`attachment://${brand.name}`);
+        return { embed, file: brand.file };
+    }
+
+    return { embed, file: null };
 }
