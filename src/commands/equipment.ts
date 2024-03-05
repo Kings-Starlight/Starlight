@@ -285,6 +285,26 @@ async function CreateEquipmentEmbed(
             ];
             break;
         }
+        case "c":
+            {
+                const buttons = [
+                    new ButtonBuilder()
+                        .setURL(
+                            `https://starcitizen.tools/${ensure(
+                                item.name
+                            ).replaceAll(" ", "_")}`
+                        )
+                        .setLabel("View wiki page")
+                        .setStyle(ButtonStyle.Link),
+                ];
+
+                components = [
+                    new ActionRowBuilder<ButtonBuilder>().addComponents(
+                        buttons
+                    ),
+                ];
+            }
+            break;
         case "d": {
             // some items have next to no information, causing the command to error out if we try to ensure their information.
             if (
