@@ -1,15 +1,24 @@
 import {
+    ActionRowBuilder,
+    AnyComponentBuilder,
     AutocompleteInteraction,
+    ButtonBuilder,
+    ButtonStyle,
     CommandInteraction,
     EmbedBuilder,
     SlashCommandBuilder,
+    StringSelectMenuBuilder,
+    StringSelectMenuOptionBuilder,
 } from "discord.js";
 import { blue, ensure } from "@utilities/general";
 import {
     Armor,
     Clothes,
     FetchItemInfo,
+    FetchVehicleSerie,
     Food,
+    RequestImage,
+    SearchGalactapedia,
     WeaponAttachments,
     Weapons,
 } from "../api/wikiAPI";
@@ -105,16 +114,16 @@ module.exports = {
     async execute(interaction: CommandInteraction) {
         await interaction.deferReply();
 
-        const { embed } = await CreateEquipmentEmbed(
+        const { embed, components } = await CreateEquipmentEmbed(
             ensure(interaction.options.get("type")?.value).toString(),
             ensure(interaction.options.get("item")?.value).toString()
         );
 
-        interaction.editReply({ embeds: [embed] });
+        interaction.editReply({ embeds: [embed], components: components });
     },
 };
 
-async function retrieveFromAPI(name: string): Promise<MasterItem> {
+async function RetrieveFromAPI(name: string): Promise<MasterItem> {
     const data = await FetchItemInfo(name);
     return data;
 }
@@ -122,11 +131,15 @@ async function retrieveFromAPI(name: string): Promise<MasterItem> {
 async function CreateEquipmentEmbed(
     type: string,
     name: string
-): Promise<{ embed: EmbedBuilder }> {
-    const item = await retrieveFromAPI(name);
+): Promise<{
+    embed: EmbedBuilder;
+    components: ActionRowBuilder<ButtonBuilder>[];
+}> {
+    const item = await RetrieveFromAPI(name);
 
     const embed = new EmbedBuilder()
         .setTitle(`Available since ${item.version}`)
+        .setImage(await RequestImage(ensure(item.name)))
         .setDescription(
             `# ${
                 item.name
@@ -177,8 +190,10 @@ async function CreateEquipmentEmbed(
         );
     }
 
+    let components: ActionRowBuilder<ButtonBuilder>[] = [];
+
     switch (type) {
-        case "a":
+        case "a": {
             embed.addFields({
                 name: "Resistances",
                 value: ensure(
@@ -187,7 +202,29 @@ async function CreateEquipmentEmbed(
                     })
                 ).join("\n"),
             });
+
+            let name: string;
+
+            switch (ensure(item.name).split(" ")[0]) {
+                case "Lynx":
+                    name = `${ensure(item.name).split(" ")[0]}_(armour_set)`;
+                    break;
+                default:
+                    name = ensure(item.name).split(" ")[0];
+                    break;
+            }
+            const buttons = [
+                new ButtonBuilder()
+                    .setURL(`https://starcitizen.tools/${name}`)
+                    .setLabel("View wiki page")
+                    .setStyle(ButtonStyle.Link),
+            ];
+
+            components = [
+                new ActionRowBuilder<ButtonBuilder>().addComponents(buttons),
+            ];
             break;
+        }
         case "b": {
             let modes = { name: "Firing Modes", value: "N/A", inline: true };
             let damages = { name: "Damage Types", value: "N/A", inline: true };
@@ -220,10 +257,42 @@ async function CreateEquipmentEmbed(
                     inline: false,
                 };
             }
-            embed.addFields(modes, damages);
+
+            let magazine = {
+                name: "Magazine",
+                value: "Info not available...",
+                inline: true,
+            };
+
+            if (item.ports !== undefined)
+                for (const port of item.ports) {
+                    if (port.name === "magazine_attach") {
+                        magazine = {
+                            name: "Magazine",
+                            value: ensure(port.equipped_item.name),
+                            inline: true,
+                        };
+                    }
+                }
+
+            embed.addFields(modes, damages, magazine);
+            const buttons = [
+                new ButtonBuilder()
+                    .setURL(
+                        `https://starcitizen.tools/${ensure(
+                            item.name
+                        ).replaceAll(" ", "_")}`
+                    )
+                    .setLabel("View wiki page")
+                    .setStyle(ButtonStyle.Link),
+            ];
+
+            components = [
+                new ActionRowBuilder<ButtonBuilder>().addComponents(buttons),
+            ];
             break;
         }
-        case "d":
+        case "d": {
             // some items have next to no information, causing the command to error out if we try to ensure their information.
             if (
                 item.food?.container_type !== null &&
@@ -249,8 +318,23 @@ async function CreateEquipmentEmbed(
                     }
                 );
             }
+            const buttons = [
+                new ButtonBuilder()
+                    .setURL(
+                        `https://starcitizen.tools/${ensure(
+                            item.name
+                        ).replaceAll(" ", "_")}`
+                    )
+                    .setLabel("View wiki page")
+                    .setStyle(ButtonStyle.Link),
+            ];
+
+            components = [
+                new ActionRowBuilder<ButtonBuilder>().addComponents(buttons),
+            ];
             break;
-        case "e":
+        }
+        case "e": {
             embed.addFields(
                 {
                     name: "Brand",
@@ -268,8 +352,23 @@ async function CreateEquipmentEmbed(
                     inline: true,
                 }
             );
+            const buttons = [
+                new ButtonBuilder()
+                    .setURL(
+                        `https://starcitizen.tools/${ensure(
+                            item.name
+                        ).replaceAll(" ", "_")}`
+                    )
+                    .setLabel("View wiki page")
+                    .setStyle(ButtonStyle.Link),
+            ];
+
+            components = [
+                new ActionRowBuilder<ButtonBuilder>().addComponents(buttons),
+            ];
             break;
+        }
     }
 
-    return { embed };
+    return { embed, components };
 }

@@ -60,7 +60,10 @@ export async function RequestImage(title: string) {
     for (const page of result.query.pages.filter(
         (page) => page?.missing !== true
     )) {
-        if (typeof page.thumbnail !== "undefined") {
+        if (
+            typeof page.thumbnail !== "undefined" &&
+            !page.thumbnail.source.includes("Platzhalter")
+        ) {
             image = page.thumbnail.source.replace("50px-", "800px-");
         }
     }
@@ -332,7 +335,9 @@ export async function FetchFPSWeapons() {
         }
         const data = (await search.json()).data
             .filter((item: MasterItem) =>
-                item.name === "<= PLACEHOLDER =>" ? false : true
+                item.name === "<= PLACEHOLDER =>"
+                    ? false
+                    : true && item.is_base_variant
             )
             .filter(
                 (arr: MasterItem, index: number, self: MasterItem[]) =>
@@ -372,7 +377,9 @@ export async function FetchFPSWeaponAttachments() {
         }
         const data = (await search.json()).data
             .filter((item: MasterItem) =>
-                item.name === "<= PLACEHOLDER =>" ? false : true
+                item.name === "<= PLACEHOLDER =>"
+                    ? false
+                    : true && item.is_base_variant
             )
             .filter(
                 (arr: MasterItem, index: number, self: MasterItem[]) =>
@@ -419,7 +426,9 @@ export async function FetchFPSItems() {
             temp.push(
                 ...data.data
                     .filter((item: MasterItem) =>
-                        item.name === "<= PLACEHOLDER =>" ? false : true
+                        item.name === "<= PLACEHOLDER =>"
+                            ? false
+                            : true && item.is_base_variant
                     )
                     .filter(
                         (arr: MasterItem, index: number, self: MasterItem[]) =>
@@ -468,7 +477,9 @@ export async function FetchFood() {
         }
         const data = (await search.json()).data
             .filter((item: MasterItem) =>
-                item.name === "<= PLACEHOLDER =>" ? false : true
+                item.name === "<= PLACEHOLDER =>"
+                    ? false
+                    : true && item.is_base_variant
             )
             .filter(
                 (arr: MasterItem, index: number, self: MasterItem[]) =>
@@ -508,7 +519,9 @@ export async function FetchClothes() {
         }
         const data = (await search.json()).data
             .filter((item: MasterItem) =>
-                item.name === "<= PLACEHOLDER =>" ? false : true
+                item.name === "<= PLACEHOLDER =>"
+                    ? false
+                    : true && item.is_base_variant
             )
             .filter(
                 (arr: MasterItem, index: number, self: MasterItem[]) =>
@@ -547,7 +560,9 @@ export async function FetchArmour() {
         }
         const data = (await search.json()).data
             .filter((item: MasterItem) =>
-                item.name === "<= PLACEHOLDER =>" ? false : true
+                item.name === "<= PLACEHOLDER =>"
+                    ? false
+                    : true && item.is_base_variant
             )
             .filter(
                 (arr: MasterItem, index: number, self: MasterItem[]) =>

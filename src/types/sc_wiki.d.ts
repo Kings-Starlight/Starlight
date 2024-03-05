@@ -432,7 +432,7 @@ export interface Ports {
     sizes: Sizes;
     tags: string[];
     required_tags: string[];
-    equipped_item: string;
+    equipped_item: MasterItem;
 }
 
 export interface Sizes {
@@ -720,7 +720,7 @@ export interface MasterItem {
     tags?: string[];
     required_tags?: string[];
     interactions?: string[];
-    ports?: Ports;
+    ports?: Ports[];
     heat?: { [key: string]: number };
     power?: Power;
     distortion?: Distortion;
@@ -728,6 +728,7 @@ export interface MasterItem {
     shops?: Shops;
     updated_at?: number;
     version?: number;
+    is_base_variant: boolean;
 }
 
 export interface WikiResponse {
