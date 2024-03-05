@@ -146,14 +146,7 @@ async function CreateEquipmentEmbed(
                     ? item.name
                     : "This item doesnt have a name.... weird."
             }\n\n${
-                // some responses from the wiki API return an empty array as its description, rather than a null or undefined object.
-                // so, here's my workaround. not ideal, but it works, so its not exactly stupid.
-                //
-                // https://github.com/StarCitizenWiki/API/issues/108
-                //
-                // biome-ignore lint/suspicious/noExplicitAny:
-                // biome-ignore lint/suspicious/noDoubleEquals:
-                (item.description as any) != false
+                item.description !== undefined
                     ? item.description?.en_EN
                     : "This item has no description"
             }`
@@ -266,7 +259,7 @@ async function CreateEquipmentEmbed(
 
             if (item.ports !== undefined)
                 for (const port of item.ports) {
-                    if (port.name === "magazine_attach") {
+                    if (port.position === "Magazine") {
                         magazine = {
                             name: "Magazine",
                             value: ensure(port.equipped_item.name),
@@ -352,20 +345,6 @@ async function CreateEquipmentEmbed(
                     inline: true,
                 }
             );
-            const buttons = [
-                new ButtonBuilder()
-                    .setURL(
-                        `https://starcitizen.tools/${ensure(
-                            item.name
-                        ).replaceAll(" ", "_")}`
-                    )
-                    .setLabel("View wiki page")
-                    .setStyle(ButtonStyle.Link),
-            ];
-
-            components = [
-                new ActionRowBuilder<ButtonBuilder>().addComponents(buttons),
-            ];
             break;
         }
     }
