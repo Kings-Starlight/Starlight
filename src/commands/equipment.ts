@@ -1,24 +1,19 @@
 import {
     ActionRowBuilder,
-    AnyComponentBuilder,
     AutocompleteInteraction,
     ButtonBuilder,
     ButtonStyle,
     CommandInteraction,
     EmbedBuilder,
     SlashCommandBuilder,
-    StringSelectMenuBuilder,
-    StringSelectMenuOptionBuilder,
 } from "discord.js";
 import { blue, ensure } from "@utilities/general";
 import {
     Armor,
     Clothes,
     FetchItemInfo,
-    FetchVehicleSerie,
     Food,
     RequestImage,
-    SearchGalactapedia,
     WeaponAttachments,
     Weapons,
 } from "../api/wikiAPI";
