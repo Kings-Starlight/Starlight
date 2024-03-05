@@ -86,7 +86,7 @@ export function InitiateBot(): void {
                     // biome-ignore lint/suspicious/noExplicitAny: Return type is unknown atm.
                 )) as any;
             } else {
-                data = (await rest.put(
+                data = (await rest.post(
                     Routes.applicationCommands(process.env.CLIENT_ID),
                     { body: commands }
                     // biome-ignore lint/suspicious/noExplicitAny: Return type is unknown atm.
