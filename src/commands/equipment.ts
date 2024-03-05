@@ -311,20 +311,6 @@ async function CreateEquipmentEmbed(
                     }
                 );
             }
-            const buttons = [
-                new ButtonBuilder()
-                    .setURL(
-                        `https://starcitizen.tools/${ensure(
-                            item.name
-                        ).replaceAll(" ", "_")}`
-                    )
-                    .setLabel("View wiki page")
-                    .setStyle(ButtonStyle.Link),
-            ];
-
-            components = [
-                new ActionRowBuilder<ButtonBuilder>().addComponents(buttons),
-            ];
             break;
         }
         case "e": {
