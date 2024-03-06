@@ -21,7 +21,7 @@ import { FPSItemShort, MasterItem, Weapon } from "../types/sc_wiki";
 
 module.exports = {
     flags: {
-        dev: true,
+        dev: false,
     },
     data: new SlashCommandBuilder()
         .setName("equipment")
