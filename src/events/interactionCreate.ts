@@ -1,4 +1,4 @@
-import { CacheType, Events, Interaction } from "discord.js";
+import { type CacheType, Events, type Interaction } from "discord.js";
 import { ErrorResponse } from "@utilities/errors";
 
 module.exports = {

@@ -2,40 +2,35 @@ import {
     ActionRowBuilder,
     AttachmentBuilder,
     ButtonBuilder,
-    ButtonInteraction,
+    type ButtonInteraction,
     ButtonStyle,
-    CommandInteraction,
+    type CommandInteraction,
     EmbedBuilder,
-    ModalActionRowComponentBuilder,
+    type ModalActionRowComponentBuilder,
     ModalBuilder,
-    ModalSubmitInteraction,
+    type ModalSubmitInteraction,
     SlashCommandBuilder,
     TextInputBuilder,
     TextInputStyle,
 } from "discord.js";
 import { client } from "@/src/runtime";
-import { blue, dev, msToTime, prod, red } from "@utilities/general";
+import { dev, msToTime, prod, red } from "@utilities/general";
 import pjson from "@/package.json";
 import { Github } from "@utilities/octokit";
 import { ErrorResponse } from "../utilities/errors";
-import { ChildProcess, exec, execSync } from "child_process";
-import { log } from "../logging/logger";
+import { execSync } from "node:child_process";
 
 module.exports = {
-    data: new SlashCommandBuilder()
-        .setName("starlight")
-        .setDescription("Various information about me"),
+    data: new SlashCommandBuilder().setName("starlight").setDescription("Various information about me"),
     async modalInteraction(interaction: ModalSubmitInteraction) {
         Github.rest.issues
             .create({
-                owner: "kingultron99",
+                owner: "Kings-Starlight",
                 repo: "Starlight",
-                title: interaction.fields.getTextInputValue(
-                    "starlight_feedback-title"
-                ),
-                body: interaction.fields.getTextInputValue(
+                title: interaction.fields.getTextInputValue("starlight_feedback-title"),
+                body: `${interaction.fields.getTextInputValue(
                     "starlight_feedback-description"
-                ),
+                )}\n\nSubmitted from discord by: ${interaction.user.username}`,
                 assignees: ["kingultron99"],
             })
             .then(() => {
@@ -60,13 +55,7 @@ module.exports = {
                     ],
                 });
             })
-            .catch((err: Error) =>
-                ErrorResponse(
-                    interaction,
-                    "Sorry, I was unable to submit your report.",
-                    err
-                )
-            );
+            .catch((err: Error) => ErrorResponse(interaction, "Sorry, I was unable to submit your report.", err));
     },
     async buttonInteraction(interaction: ButtonInteraction) {
         if (interaction.customId !== "starlight_feedback-confirm") {
@@ -114,13 +103,9 @@ module.exports = {
     },
     async execute(interaction: CommandInteraction) {
         const file = new AttachmentBuilder(
-            process.env.NODE_ENV === "production"
-                ? "./src/assets/sl_banner.png"
-                : "./src/assets/sld_banner.png"
+            process.env.NODE_ENV === "production" ? "./src/assets/sl_banner.png" : "./src/assets/sld_banner.png"
         );
-        const thumbnail = new AttachmentBuilder(
-            "./src/assets/MadeByTheCommunity.png"
-        );
+        const thumbnail = new AttachmentBuilder("./src/assets/MadeByTheCommunity.png");
 
         const infoEmbed: EmbedBuilder = new EmbedBuilder()
             .setColor(process.env.NODE_ENV === "production" ? prod : dev)
@@ -140,19 +125,14 @@ module.exports = {
                     name: "Commit",
                     value: `\`${
                         process.env.NODE_ENV === "production"
-                            ? String(
-                                  process.env.RAILWAY_GIT_COMMIT_SHA
-                              ).substring(0, 7)
+                            ? String(process.env.RAILWAY_GIT_COMMIT_SHA).substring(0, 7)
                             : execSync("git rev-parse --short HEAD").toString()
                     }\``,
                     inline: true,
                 },
                 {
                     name: "Status",
-                    value:
-                        process.env.NODE_ENV === "production"
-                            ? "Production"
-                            : "Development",
+                    value: process.env.NODE_ENV === "production" ? "Production" : "Development",
                     inline: true,
                 },
                 {
@@ -199,9 +179,7 @@ module.exports = {
             )
             .setFooter({ text: "Brought to you by king_ultron99#0647." })
             .setImage(
-                process.env.NODE_ENV === "production"
-                    ? "attachment://sl_banner.png"
-                    : "attachment://sld_banner.png"
+                process.env.NODE_ENV === "production" ? "attachment://sl_banner.png" : "attachment://sld_banner.png"
             )
             .setTimestamp();
 
@@ -233,21 +211,14 @@ module.exports = {
                         name: "Commit",
                         value: `\`${
                             process.env.NODE_ENV === "production"
-                                ? String(
-                                      process.env.RAILWAY_GIT_COMMIT_SHA
-                                  ).substring(0, 7)
-                                : execSync(
-                                      "git rev-parse --short HEAD"
-                                  ).toString()
+                                ? String(process.env.RAILWAY_GIT_COMMIT_SHA).substring(0, 7)
+                                : execSync("git rev-parse --short HEAD").toString()
                         }\``,
                         inline: true,
                     },
                     {
                         name: "Status",
-                        value:
-                            process.env.NODE_ENV === "production"
-                                ? "Production"
-                                : "Development",
+                        value: process.env.NODE_ENV === "production" ? "Production" : "Development",
                         inline: true,
                     },
                     {
@@ -262,9 +233,7 @@ module.exports = {
                     },
                     {
                         name: "Response Ping",
-                        value: `${
-                            sent.createdTimestamp - interaction.createdTimestamp
-                        }ms`,
+                        value: `${sent.createdTimestamp - interaction.createdTimestamp}ms`,
                         inline: true,
                     },
                     {

@@ -9,9 +9,8 @@ export const RedisClient = createClient(
         : {}
 );
 
-RedisClient.on("error", (err: any) =>
-    log.error(`A redis error occured: ${err}`)
-);
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+RedisClient.on("error", (err: any) => log.error(`A redis error occured: ${err}`));
 
 export async function SetupRedisClient() {
     await Promise.all([RedisClient.connect()]);

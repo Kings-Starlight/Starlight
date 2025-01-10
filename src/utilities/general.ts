@@ -1,5 +1,7 @@
 import { AttachmentBuilder } from "discord.js";
 
+export const time_week_seconds = 7 * 24 * 3600;
+
 export function msToTime(duration: number) {
     const milliseconds = Math.floor(duration % 1000);
     const seconds = Math.floor((duration / 1000) % 60);

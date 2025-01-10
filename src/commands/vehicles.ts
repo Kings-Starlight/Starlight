@@ -1,20 +1,20 @@
 import {
     ActionRowBuilder,
-    AnyComponentBuilder,
-    AnySelectMenuInteraction,
-    AttachmentBuilder,
-    AutocompleteInteraction,
+    type AnyComponentBuilder,
+    type AnySelectMenuInteraction,
+    type AttachmentBuilder,
+    type AutocompleteInteraction,
     ButtonBuilder,
     ButtonStyle,
-    CommandInteraction,
-    CommandInteractionOption,
+    type CommandInteraction,
+    type CommandInteractionOption,
     EmbedBuilder,
     SlashCommandBuilder,
     StringSelectMenuBuilder,
     StringSelectMenuOptionBuilder,
 } from "discord.js";
-import { MasterItem, SearchResponse, WikiShip } from "@/src/types/sc_wiki";
-import { UEXShip } from "@/src/types/uex";
+import type { MasterItem, SearchResponse, WikiShip } from "@/src/types/sc_wiki";
+import type { UEXShip } from "@/src/types/uex";
 import {
     FetchVehicleSerie,
     RequestImage,
@@ -260,7 +260,7 @@ module.exports = {
 
 async function RetrieveFromAPI(name: string) {
     const WikiInfo: WikiShip = await RetrieveVehicleInfo(name);
-    const UEXInfo: UEXShip = UEXShips.filter((ship) =>
+    const UEXInfo: UEXShip = UEXShips.filter((ship: UEXShip) =>
         ship.name.includes(WikiInfo.name)
     )[0];
 
@@ -349,13 +349,6 @@ async function CreateGeneralEmbed(
             )
 
             .setImage(await RequestImage(WikiInfo.name));
-
-        const brand = getBrandImage(WikiInfo.manufacturer.name);
-
-        if (brand !== null) {
-            embed.setThumbnail(`attachment://${brand.name}`);
-            return { embed, file: brand.file };
-        }
     } else {
         /** At which locations can the specified ship be rented at? */
         const rentable = WikiInfo.shops.filter(
@@ -535,13 +528,6 @@ async function CreateGeneralEmbed(
                 }
             )
             .setImage(await RequestImage(WikiInfo.name));
-
-        const brand = getBrandImage(WikiInfo.manufacturer.name);
-
-        if (brand !== null) {
-            embed.setThumbnail(`attachment://${brand.name}`);
-            return { embed, file: brand.file };
-        }
     }
     return { embed, file: null };
 }
@@ -563,9 +549,9 @@ async function CreateShipComponents(
     };
 
     const buttons = [
-        UEXInfo?.store_url
+        UEXInfo?.url_store
             ? new ButtonBuilder()
-                  .setURL(UEXInfo.store_url)
+                  .setURL(UEXInfo.url_store)
                   .setLabel("Go to store page")
                   .setStyle(ButtonStyle.Link)
             : disabledLink("Store"),
@@ -597,10 +583,10 @@ async function CreateShipComponents(
                 .setCustomId("vehicles_page")
                 .setPlaceholder("Select a page")
                 .setDisabled(
-                    WikiInfo.hardpoints === undefined ||
+                    !!(
+                        WikiInfo.hardpoints === undefined ||
                         WikiInfo.production_status.en_EN !== "flight-ready"
-                        ? true
-                        : false
+                    )
                 )
                 .addOptions(
                     new StringSelectMenuOptionBuilder()
@@ -825,13 +811,6 @@ async function CreateWeaponsEmbed(
         .setColor(blue)
         .setTitle(WikiInfo.manufacturer.name);
 
-    const brand = getBrandImage(WikiInfo.manufacturer.name);
-
-    if (brand !== null) {
-        embed.setThumbnail(`attachment://${brand.name}`);
-        return { embed, file: brand.file };
-    }
-
     return { embed, file: null };
 }
 
@@ -900,13 +879,6 @@ async function CreateComponentsEmbed(
         .setTimestamp()
         .setColor(blue)
         .setTitle(WikiInfo.manufacturer.name);
-
-    const brand = getBrandImage(WikiInfo.manufacturer.name);
-
-    if (brand !== null) {
-        embed.setThumbnail(`attachment://${brand.name}`);
-        return { embed, file: brand.file };
-    }
 
     return { embed, file: null };
 }

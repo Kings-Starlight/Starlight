@@ -1,14 +1,13 @@
 import {
-    AutocompleteInteraction,
-    CommandInteraction,
-    EmbedBuilder,
+    type AutocompleteInteraction,
+    type CommandInteraction,
     SlashCommandBuilder,
 } from "discord.js";
-import { Planets, Satellites, UEXTradePorts } from "@api/uexAPI";
-import { Planet, Tradeport } from "@/src/types/uex";
-import { blue, ensure } from "@utilities/general";
 
 module.exports = {
+    flags: {
+        dev: true,
+    },
     data: new SlashCommandBuilder()
         .setName("trading")
         .setDescription(
@@ -30,106 +29,6 @@ module.exports = {
                         .setRequired(true)
                 )
         ),
-    async autocomplete(interaction: AutocompleteInteraction) {
-        const focusedValue = interaction.options.getFocused();
-        const choices: { name: string; value: string }[] = UEXTradePorts.map(
-            (tradeport: Tradeport) => ({
-                name: tradeport.name,
-                value: tradeport.code,
-            })
-        );
-        const filtered = choices
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .filter((choice) =>
-                choice.name.toLowerCase().startsWith(focusedValue)
-            );
-        await interaction.respond(
-            filtered.slice(0, 24).map((choice) => ({
-                name: choice.name,
-                value: choice.value,
-            }))
-        );
-    },
-    async execute(interaction: CommandInteraction) {
-        const data = interaction.options.data[0];
-        const tradeportCode = ensure(data.options)[0].value;
-        switch (data.name) {
-            case "tradeport": {
-                const tradeport = UEXTradePorts.filter(
-                    (e) => e.code === tradeportCode
-                )[0];
-                const planet: Planet = Planets.filter(
-                    (e) => e.code === tradeport.planet
-                )[0];
-                const satellite: Planet | null = tradeport.satellite
-                    ? Satellites.filter(
-                          (e) => e.code === tradeport.satellite
-                      )[0]
-                    : null;
-                const embeds = [];
-                const infoEmbed = new EmbedBuilder()
-                    .setTitle(tradeport.name)
-                    .setDescription(
-                        `${tradeport.name_short} is a${
-                            tradeport.space
-                                ? ` space station, orbiting \`${planet.name}\``
-                                : `n outpost, located on ${
-                                      tradeport.satellite
-                                          ? `\`${planet.name} > ${satellite?.name}\``
-                                          : `\`${planet.name}\``
-                                  }`
-                        }`
-                    )
-                    .setColor(blue)
-                    .setTimestamp()
-                    .setFooter({ text: "Powered by UEX" });
-
-                if (tradeport.prices) {
-                    infoEmbed.addFields(
-                        {
-                            name: "Buying",
-                            value: `${tradeport.prices
-                                .filter((e) => e.operation === "sell")
-                                .map(
-                                    (e) =>
-                                        `- ${e.name} (${
-                                            e.kind
-                                        }): aUEC ${Intl.NumberFormat(
-                                            "en"
-                                        ).format(e.price_sell)}\n`
-                                )
-                                .join("")}`,
-                            inline: true,
-                        },
-                        {
-                            name: "Selling",
-                            value: `${tradeport.prices
-                                .filter((e) => e.operation === "buy")
-                                .map(
-                                    (e) =>
-                                        `- ${e.name} (${
-                                            e.kind
-                                        }): aUEC ${Intl.NumberFormat(
-                                            "en"
-                                        ).format(e.price_buy)}\n`
-                                )
-                                .join("")}`,
-                            inline: true,
-                        }
-                    );
-
-                    embeds.push(infoEmbed);
-                } else {
-                    infoEmbed.addFields({
-                        name: "Well, snap!",
-                        value: "This location doesnt appear to be buying or selling anything!",
-                    });
-                    embeds.push(infoEmbed);
-                }
-
-                interaction.reply({ embeds });
-                break;
-            }
-        }
-    },
+    async autocomplete(interaction: AutocompleteInteraction) {},
+    async execute(interaction: CommandInteraction) {},
 };

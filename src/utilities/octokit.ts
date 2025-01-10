@@ -11,9 +11,7 @@ export async function initiateGithub() {
         authStrategy: createAppAuth,
         auth: {
             appId: process.env.GH_APPID,
-            privateKey: Buffer.from(process.env.GH_AUTH, "base64").toString(
-                "ascii"
-            ),
+            privateKey: process.env.GH_AUTH,
             installationId: process.env.GH_INSTALLID,
         },
     });

@@ -1,112 +1,50 @@
 export interface UEXShip {
-    manufacturer: string;
+    id: number;
+    id_company: number; // vehicle manufacturer
+    id_parent: number; // parent ship series
+    ids_vehicles_loaners: string; // vehicles loaned, comma separated
     name: string;
-    serie: string;
-    code: string;
-    loaner: string | null;
-    role: string;
+    name_full: string;
     scu: number;
     crew: string;
-    implemented: string;
-    mining: string;
-    stealth: string;
-    price: number;
-    price_warbond: number | null;
-    price_pkg: number;
-    photos: string;
-    store_url: string;
-    stock_qt_speed: number;
-    flyable_since: string;
-    showdown_winner: number;
-    date_added: number;
-    date_modified: number;
-    buy_at:
-        | {
-              system: string;
-              system_name: string;
-              planet: string;
-              planet_name: string;
-              satellite: string | null;
-              satellite_name: string | null;
-              city: string;
-              city_name: string;
-              tradeport: string | null;
-              tradeport_name: string | null;
-              store: string;
-              store_name: string;
-              price: number;
-              date_added: number;
-              date_modified: number;
-          }[]
-        | null;
-    rent_at:
-        | {
-              system: string;
-              system_name: string;
-              planet: string;
-              planet_name: string;
-              satellite: null;
-              satellite_name: null;
-              city: string;
-              city_name: string;
-              tradeport: string | null;
-              tradeport_name: string | null;
-              store: string;
-              store_name: string;
-              price: number;
-              date_added: number;
-              date_modified: number;
-          }[]
-        | null;
-}
-
-export interface Systems {
-    name: string;
-    code: string;
-    available: number;
-    default: number;
-    date_added: number;
-    date_modified: number;
-}
-
-export interface Tradeport {
-    system: string;
-    planet: string;
-    satellite: string | null;
-    city: string | null;
-    code: string;
-    name: string;
-    name_short: string;
-    space: boolean;
-    visible: boolean;
-    armistice: boolean;
-    trade: boolean;
-    outlaw: boolean;
-    refinery: boolean;
-    shops: boolean;
-    restricted: boolean;
-    minable: number;
-    date_added: number;
-    date_modified: number;
-    prices?: tradeportPrices[];
-}
-
-export interface TradeportPrices {
-    name: string;
-    kind: string;
-    code: string;
-    operation: string;
-    price_buy: number;
-    price_sell: number;
-    date_update: number;
-    is_updated: boolean;
-}
-
-export interface Planet {
-    system: string;
-    code: string;
-    name: string;
-    available: number;
-    date_added: number;
-    date_modified: number;
+    is_addon: number; // e.g. RSI Galaxy Refinery Module
+    is_concept: number;
+    is_civilian: number;
+    is_military: number;
+    is_exploration: number;
+    is_passenger: number;
+    is_industrial: number;
+    is_mining: number;
+    is_salvage: number;
+    is_refinery: number;
+    is_scanning: number;
+    is_cargo: number;
+    is_medical: number;
+    is_racing: number;
+    is_repair: number;
+    is_refuel: number;
+    is_interdiction: number;
+    is_bomber: number;
+    is_tractor_beam: number;
+    is_qed: number;
+    is_emp: number;
+    is_construction: number;
+    is_datarunner: number;
+    is_science: number;
+    is_boarding: number;
+    is_stealth: number;
+    is_research: number;
+    is_carrier: number;
+    is_ground_vehicle: number;
+    is_spaceship: number;
+    is_showdown_winner: number;
+    url_store: string;
+    url_brochure: string;
+    url_hotsite: string;
+    url_video: string;
+    url_photos: string[]; // array of urls
+    game_version: string; // version it was announced or updated
+    date_added: number; // timestamp
+    date_modified: number; // timestamp
+    company_name: string; // manufacturer name
 }

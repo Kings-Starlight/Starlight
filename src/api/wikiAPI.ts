@@ -1,5 +1,5 @@
 import { log } from "@logging/logger";
-import {
+import type {
     GalactapediaResult,
     SearchResponse,
     WikiShip,
@@ -10,6 +10,7 @@ import {
     WikiResponse,
 } from "@/src/types/sc_wiki";
 import { RedisClient } from "@utilities/redis";
+import { time_week_seconds } from "../utilities/general";
 
 const WikiAPI = "https://api.star-citizen.wiki/api/v2/";
 
@@ -86,10 +87,10 @@ export async function RetrieveVehicleInfo(name: string): Promise<WikiShip> {
 
         if (fetchShip.status !== 200) {
             log.error(
-                `Failed to retrieve ship. Wiki returned a non-OK status. code: ${fetchShip.status} - ${fetchShip.statusText}`
+                `Failed to retrieve ship. Wiki returned a non-OK status. code: ${fetchShip.status} - ${fetchShip.statusText}`, 
             );
             return Promise.reject(
-                `Failed to retrieve ship. Wiki returned a non-OK status. code: ${fetchShip.status} - ${fetchShip.statusText}`
+                `Failed to retrieve ship. Wiki returned a non-OK status. code: ${fetchShip.status} - ${fetchShip.statusText}`, 
             );
         }
         const response: WikiShip = (await fetchShip.json()).data;
@@ -152,7 +153,7 @@ export async function FetchVehicles(): Promise<void> {
         const data = (await search.json()).data;
         RedisClient.set("Wiki:WikiShips", JSON.stringify(data));
         // set expiry for 2 weeks.
-        RedisClient.expire("Wiki:WikiShips", 86400 * 14);
+        RedisClient.expire("Wiki:WikiShips", time_week_seconds * 2);
         log.info("...Done!");
 
         Ships = data;
@@ -188,6 +189,7 @@ export async function FetchManufacturers(): Promise<void> {
 
         RedisClient.set("Wiki:WikiManufacturers", JSON.stringify(data));
         // set no point expiring this information. it basically never changes...
+        RedisClient.expire("Wiki:WikiManufacturers", time_week_seconds * 26);
 
         Manufacturers = data;
         log.info("...Done!");
@@ -254,9 +256,7 @@ export async function FetchVehicleWeapons() {
             );
         }
         const data = (await search.json()).data
-            .filter((item: MasterItem) =>
-                item.name === "<= PLACEHOLDER =>" ? false : true
-            )
+            .filter((item: MasterItem) => item.name !== "<= PLACEHOLDER =>")
             .filter(
                 (arr: MasterItem, index: number, self: MasterItem[]) =>
                     index ===
@@ -267,6 +267,8 @@ export async function FetchVehicleWeapons() {
                     )
             );
         RedisClient.set("Wiki:WikiVehicleWeapons", JSON.stringify(data));
+        RedisClient.expire("Wiki:WikiVehicleWeapons", time_week_seconds * 26);
+
         log.info("...Done!");
 
         VehicleWeapons = data;
@@ -294,9 +296,7 @@ export async function FetchVehicleItems() {
             );
         }
         const data = (await search.json()).data
-            .filter((item: MasterItem) =>
-                item.name === "<= PLACEHOLDER =>" ? false : true
-            )
+            .filter((item: MasterItem) => item.name !== "<= PLACEHOLDER =>")
             .filter(
                 (arr: MasterItem, index: number, self: MasterItem[]) =>
                     index ===
@@ -307,6 +307,8 @@ export async function FetchVehicleItems() {
                     )
             );
         RedisClient.set("Wiki:WikiVehicleItems", JSON.stringify(data));
+        RedisClient.expire("Wiki:WikiVehicleItems", time_week_seconds * 26);
+
         log.info("...Done!");
 
         VehicleItems = data;
@@ -349,6 +351,8 @@ export async function FetchFPSWeapons() {
                     )
             );
         RedisClient.set("Wiki:WikiWeapons", JSON.stringify(data));
+        RedisClient.expire("Wiki:WikiWeapons", time_week_seconds * 26);
+
         log.info("...Done!");
 
         Weapons = data;
@@ -391,6 +395,11 @@ export async function FetchFPSWeaponAttachments() {
                     )
             );
         RedisClient.set("Wiki:WikiWeaponAttachments", JSON.stringify(data));
+        RedisClient.expire(
+            "Wiki:WikiWeaponAttachments",
+            time_week_seconds * 26
+        );
+
         log.info("...Done!");
 
         WeaponAttachments = data;
@@ -449,6 +458,8 @@ export async function FetchFPSItems() {
             newItems = false;
         }
         RedisClient.set("Wiki:WikiFPSItems", JSON.stringify(temp));
+        RedisClient.expire("Wiki:WikiFPSItems", time_week_seconds * 26);
+
         log.info("...Done!");
 
         Items = temp;
@@ -491,6 +502,8 @@ export async function FetchFood() {
                     )
             );
         RedisClient.set("Wiki:WikiFood", JSON.stringify(data));
+        RedisClient.expire("Wiki:WikiFood", time_week_seconds * 26);
+
         log.info("...Done!");
 
         Food = data;
@@ -533,6 +546,8 @@ export async function FetchClothes() {
                     )
             );
         RedisClient.set("Wiki:WikiClothes", JSON.stringify(data));
+        RedisClient.expire("Wiki:WikiClothes", time_week_seconds * 26);
+
         log.info("...Done!");
 
         Clothes = data;
@@ -574,6 +589,7 @@ export async function FetchArmour() {
                     )
             );
         RedisClient.set("Wiki:WikiArmor", JSON.stringify(data));
+        RedisClient.expire("Wiki:WikiArmor", time_week_seconds * 26);
         log.info("...Done!");
 
         Armor = data;

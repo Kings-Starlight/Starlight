@@ -1,103 +1,105 @@
 import {
-    Client,
-    Collection,
-    GatewayIntentBits,
-    REST,
-    Routes,
+  Client,
+  Collection,
+  GatewayIntentBits,
+  REST,
+  Routes,
 } from "discord.js";
-import path from "path";
+import path from "node:path";
 import fs from "node:fs";
 import { log } from "@logging/logger";
-import { Command } from "./types/commands";
+import type { Command } from "@/src/types/commands";
 
 export let client: Client<true>;
 
 export function InitiateBot(): void {
-    log.info("Setting up bot instance");
-    client = new Client({
-        intents: [GatewayIntentBits.Guilds],
-    });
+  log.info("Setting up bot instance");
+  client = new Client({
+    intents: [GatewayIntentBits.Guilds],
+  });
 
-    client.commands = new Collection();
+  client.commands = new Collection();
 
-    const eventsPath = path.join(__dirname, "events");
-    const eventFiles = fs
-        .readdirSync(eventsPath)
-        .filter((file) => file.endsWith(".ts") || file.endsWith(".js"));
-    for (const file of eventFiles) {
-        const filePath = path.join(eventsPath, file);
-        const event = require(filePath);
-        if (event.once) {
-            client.once(event.name, (...args) => event.execute(...args));
-        } else {
-            client.on(event.name, (...args) => event.execute(...args));
-        }
+  const eventsPath = path.join(__dirname, "events");
+  const eventFiles = fs
+    .readdirSync(eventsPath)
+    .filter((file) => file.endsWith(".ts") || file.endsWith(".js"));
+  for (const file of eventFiles) {
+    const filePath = path.join(eventsPath, file);
+    const event = require(filePath);
+    if (event.once) {
+      client.once(event.name, (...args) => event.execute(...args));
+    } else {
+      client.on(event.name, (...args) => event.execute(...args));
     }
-    client.login(process.env.TOKEN);
+  }
+  client.login(process.env.TOKEN);
 
-    // Command mapping and registration:
-    const commands = [];
+  // Command mapping and registration:
+  const commands = [];
 
-    const commandsPath: string = path.join(__dirname, "commands");
-    const commandsFiles: string[] = fs
-        .readdirSync(commandsPath)
-        .filter((file) => file.endsWith(".ts") || file.endsWith(".js"));
+  const commandsPath: string = path.join(__dirname, "commands");
+  const commandsFiles: string[] = fs
+    .readdirSync(commandsPath)
+    .filter((file) => file.endsWith(".ts") || file.endsWith(".js"));
 
-    for (const file of commandsFiles) {
-        const filePath: string = path.join(commandsPath, file);
-        const command: Command = require(filePath);
+  for (const file of commandsFiles) {
+    const filePath: string = path.join(commandsPath, file);
+    const command: Command = require(filePath);
 
-        if ("data" in command && "execute" in command) {
-            if (
-                "flags" in command &&
-                command.flags.dev &&
-                process.env.NODE_ENV === "production"
-            ) {
-                log.info(`${command.data.name} has "dev" flag. skipping...`);
-            } else {
-                client.commands.set(command.data.name, command);
-                commands.push(command.data.toJSON());
-            }
-        } else {
-            log.warn(
-                `The command at ${filePath} is missing some required properties.`
-            );
-        }
+    if ("data" in command && "execute" in command) {
+      if (
+        "flags" in command &&
+        command.flags.dev &&
+        process.env.NODE_ENV === "production"
+      ) {
+        log.info(`${command.data.name} has "dev" flag. skipping...`);
+      } else {
+        client.commands.set(command.data.name, command);
+        const tcommand = command.data.toJSON();
+        tcommand.integration_types = [0, 1];
+        commands.push(tcommand);
+      }
+    } else {
+      log.warn(
+        `The command at ${filePath} is missing some required properties.`
+      );
     }
+  }
 
-    const rest = new REST().setToken(process.env.TOKEN);
+  console.log(commands[0]);
 
-    (async () => {
-        try {
-            log.info(
-                `Started refreshing ${client.commands.size}  application (/) commands.`
-            );
+  const rest = new REST().setToken(process.env.TOKEN);
 
-            // biome-ignore lint/suspicious/noExplicitAny: Return type is unknown atm.
-            let data: Array<any>;
+  (async () => {
+    try {
+      log.info(
+        `Started refreshing ${client.commands.size}  application (/) commands.`
+      );
 
-            if (process.env.NODE_ENV !== "production") {
-                data = (await rest.put(
-                    Routes.applicationGuildCommands(
-                        process.env.CLIENT_ID,
-                        process.env.TEST_GUILD
-                    ),
-                    { body: commands }
-                    // biome-ignore lint/suspicious/noExplicitAny: Return type is unknown atm.
-                )) as any;
-            } else {
-                data = (await rest.put(
-                    Routes.applicationCommands(process.env.CLIENT_ID),
-                    { body: commands }
-                    // biome-ignore lint/suspicious/noExplicitAny: Return type is unknown atm.
-                )) as any;
-            }
+      // biome-ignore lint/suspicious/noExplicitAny: Return type is unknown atm.
+      let data: Array<any>;
 
-            log.info(
-                `Successfully reloaded ${data.length} application (/) commands`
-            );
-        } catch (err) {
-            log.error(err);
-        }
-    })();
+      if (process.env.NODE_ENV !== "production") {
+        data = (await rest.put(
+          Routes.applicationGuildCommands(
+            process.env.CLIENT_ID,
+            process.env.TEST_GUILD
+          ),
+          { body: commands }
+          // biome-ignore lint/suspicious/noExplicitAny: Return type is unknown atm.
+        )) as any;
+      } else {
+        data = (await rest.put(
+          Routes.applicationCommands(process.env.CLIENT_ID),
+          { body: commands }
+          // biome-ignore lint/suspicious/noExplicitAny: Return type is unknown atm.
+        )) as any;
+      }
+
+      log.info(`Successfully reloaded ${data.length} application (/) commands`);
+    } catch (err) {
+      log.error(err);
+    }
+  })();
 }
