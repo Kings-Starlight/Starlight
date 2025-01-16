@@ -148,6 +148,8 @@ export interface WikiShip {
               version: string;
           }[]
         | null;
+
+    hasOwnProperty<K extends PropertyKey>(key: K): this is Record<K, unknown>;
 }
 
 interface VehicleComponent {

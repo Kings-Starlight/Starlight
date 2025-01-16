@@ -3,7 +3,7 @@ import type { UEXShip } from "../types/uex";
 import { time_week_seconds } from "../utilities/general";
 import { RedisClient } from "../utilities/redis";
 
-const UEXAPI = "https://uexcorp.space/api/2.0/";
+const UEXAPI = "https://api.uexcorp.space/2.0/";
 const VEHICLESENDPOINT = `${UEXAPI}vehicles`;
 const VEHICLESFROMBRANDENDPOINT = `${VEHICLESENDPOINT}?id_company=`;
 
@@ -24,9 +24,7 @@ export async function FetchUEXVehicles() {
         });
 
         if (fetchShips.status !== 200) {
-            log.error(
-                `UEX returned a non-OK status. code: ${fetchShips.status} - ${fetchShips.statusText}`
-            );
+            log.error(`UEX returned a non-OK status. code: ${fetchShips.status} - ${fetchShips.statusText}`);
             return;
         }
         const data: UEXShip[] = (await fetchShips.json()).data;
@@ -44,9 +42,7 @@ export async function FetchUEXVehicles() {
     return;
 }
 
-export async function FetchUEXBrandVehicles(
-    brand: string
-): Promise<UEXShip[] | Error> {
+export async function FetchUEXBrandVehicles(brand: string): Promise<UEXShip[] | Error> {
     const cache = await RedisClient.get(`UEX:Ships-${brand}`);
 
     if (cache === null) {
@@ -60,9 +56,7 @@ export async function FetchUEXBrandVehicles(
         });
 
         if (fetchShips.status !== 200) {
-            return new Error(
-                `UEX returned a non-OK status. code: ${fetchShips.status} - ${fetchShips.statusText}`
-            );
+            return new Error(`UEX returned a non-OK status. code: ${fetchShips.status} - ${fetchShips.statusText}`);
         }
         const data: UEXShip[] = (await fetchShips.json()).data;
         RedisClient.set(`UEX:Ships-${brand}`, JSON.stringify(data));

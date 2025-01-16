@@ -36,11 +36,13 @@ export async function RequestImage(title: string) {
         titles: title.replace(/\s/g, "_"),
     };
 
-    const url = new URL("https://star-citizen.wiki/api.php");
+    const url = new URL("https://starcitizen.tools/api.php");
 
     for (const [k, v] of Object.entries(props)) {
         url.searchParams.append(k, v.toString());
     }
+
+    console.log(url);
 
     const response = await fetch(url, {
         method: "GET",
@@ -48,23 +50,14 @@ export async function RequestImage(title: string) {
 
     const result: WikiResponse = await response.json();
 
-    if (
-        response.status !== 200 ||
-        result.batchcomplete !== true ||
-        result.query.pages.length === 0
-    ) {
+    if (response.status !== 200 || result.batchcomplete !== true || result.query.pages.length === 0) {
         return null;
     }
 
     let image = null;
 
-    for (const page of result.query.pages.filter(
-        (page) => page?.missing !== true
-    )) {
-        if (
-            typeof page.thumbnail !== "undefined" &&
-            !page.thumbnail.source.includes("Platzhalter")
-        ) {
+    for (const page of result.query.pages.filter((page) => page?.missing !== true)) {
+        if (typeof page.thumbnail !== "undefined" && !page.thumbnail.source.includes("Platzhalter")) {
             image = page.thumbnail.source.replace("50px-", "800px-");
         }
     }
@@ -81,16 +74,14 @@ export async function RetrieveVehicleInfo(name: string): Promise<WikiShip> {
     const data = await RedisClient.get(name);
 
     if (data === null) {
-        const fetchShip = await fetch(
-            `${WikiAPI}vehicles/${name}?include=components,hardpoints,shops`
-        );
+        const fetchShip = await fetch(`${WikiAPI}vehicles/${name}?include=components,hardpoints,shops`);
 
         if (fetchShip.status !== 200) {
             log.error(
-                `Failed to retrieve ship. Wiki returned a non-OK status. code: ${fetchShip.status} - ${fetchShip.statusText}`, 
+                `Failed to retrieve ship. Wiki returned a non-OK status. code: ${fetchShip.status} - ${fetchShip.statusText}`
             );
             return Promise.reject(
-                `Failed to retrieve ship. Wiki returned a non-OK status. code: ${fetchShip.status} - ${fetchShip.statusText}`, 
+                `Failed to retrieve ship. Wiki returned a non-OK status. code: ${fetchShip.status} - ${fetchShip.statusText}`
             );
         }
         const response: WikiShip = (await fetchShip.json()).data;
@@ -204,12 +195,8 @@ export async function FetchManufacturers(): Promise<void> {
  * @param chassis_id the ID of a ship series chassis platform
  * @returns SearchResponse[]
  */
-export async function FetchVehicleSerie(
-    chassis_id: number
-): Promise<SearchResponse[]> {
-    const search = await fetch(
-        `${WikiAPI}vehicles?filter[chassis_id]=${chassis_id}`
-    );
+export async function FetchVehicleSerie(chassis_id: number): Promise<SearchResponse[]> {
+    const search = await fetch(`${WikiAPI}vehicles?filter[chassis_id]=${chassis_id}`);
     if (search.status !== 200) {
         log.error(
             `Failed to search vehicle serie. Wiki returned a non-OK status. code: ${search.status} - ${search.statusText}`
@@ -226,9 +213,7 @@ export async function FetchVehicleSerie(
  * @param query
  * @returns GalactapediaResult[]
  */
-export async function SearchGalactapedia(
-    query: string
-): Promise<GalactapediaResult[] | null> {
+export async function SearchGalactapedia(query: string): Promise<GalactapediaResult[] | null> {
     const search = await fetch(`${WikiAPI}galactapedia/search`, {
         method: "POST",
         headers: {
@@ -260,11 +245,7 @@ export async function FetchVehicleWeapons() {
             .filter(
                 (arr: MasterItem, index: number, self: MasterItem[]) =>
                     index ===
-                    self.findIndex(
-                        (t: MasterItem) =>
-                            t.name === arr.name &&
-                            t.description === arr.description
-                    )
+                    self.findIndex((t: MasterItem) => t.name === arr.name && t.description === arr.description)
             );
         RedisClient.set("Wiki:WikiVehicleWeapons", JSON.stringify(data));
         RedisClient.expire("Wiki:WikiVehicleWeapons", time_week_seconds * 26);
@@ -300,11 +281,7 @@ export async function FetchVehicleItems() {
             .filter(
                 (arr: MasterItem, index: number, self: MasterItem[]) =>
                     index ===
-                    self.findIndex(
-                        (t: MasterItem) =>
-                            t.name === arr.name &&
-                            t.description === arr.description
-                    )
+                    self.findIndex((t: MasterItem) => t.name === arr.name && t.description === arr.description)
             );
         RedisClient.set("Wiki:WikiVehicleItems", JSON.stringify(data));
         RedisClient.expire("Wiki:WikiVehicleItems", time_week_seconds * 26);
@@ -336,19 +313,11 @@ export async function FetchFPSWeapons() {
             );
         }
         const data = (await search.json()).data
-            .filter((item: MasterItem) =>
-                item.name === "<= PLACEHOLDER =>"
-                    ? false
-                    : true && item.is_base_variant
-            )
+            .filter((item: MasterItem) => (item.name === "<= PLACEHOLDER =>" ? false : true && item.is_base_variant))
             .filter(
                 (arr: MasterItem, index: number, self: MasterItem[]) =>
                     index ===
-                    self.findIndex(
-                        (t: MasterItem) =>
-                            t.name === arr.name &&
-                            t.description === arr.description
-                    )
+                    self.findIndex((t: MasterItem) => t.name === arr.name && t.description === arr.description)
             );
         RedisClient.set("Wiki:WikiWeapons", JSON.stringify(data));
         RedisClient.expire("Wiki:WikiWeapons", time_week_seconds * 26);
@@ -380,25 +349,14 @@ export async function FetchFPSWeaponAttachments() {
             );
         }
         const data = (await search.json()).data
-            .filter((item: MasterItem) =>
-                item.name === "<= PLACEHOLDER =>"
-                    ? false
-                    : true && item.is_base_variant
-            )
+            .filter((item: MasterItem) => (item.name === "<= PLACEHOLDER =>" ? false : true && item.is_base_variant))
             .filter(
                 (arr: MasterItem, index: number, self: MasterItem[]) =>
                     index ===
-                    self.findIndex(
-                        (t: MasterItem) =>
-                            t.name === arr.name &&
-                            t.description === arr.description
-                    )
+                    self.findIndex((t: MasterItem) => t.name === arr.name && t.description === arr.description)
             );
         RedisClient.set("Wiki:WikiWeaponAttachments", JSON.stringify(data));
-        RedisClient.expire(
-            "Wiki:WikiWeaponAttachments",
-            time_week_seconds * 26
-        );
+        RedisClient.expire("Wiki:WikiWeaponAttachments", time_week_seconds * 26);
 
         log.info("...Done!");
 
@@ -435,18 +393,12 @@ export async function FetchFPSItems() {
             temp.push(
                 ...data.data
                     .filter((item: MasterItem) =>
-                        item.name === "<= PLACEHOLDER =>"
-                            ? false
-                            : true && item.is_base_variant
+                        item.name === "<= PLACEHOLDER =>" ? false : true && item.is_base_variant
                     )
                     .filter(
                         (arr: MasterItem, index: number, self: MasterItem[]) =>
                             index ===
-                            self.findIndex(
-                                (t: MasterItem) =>
-                                    t.name === arr.name &&
-                                    t.description === arr.description
-                            )
+                            self.findIndex((t: MasterItem) => t.name === arr.name && t.description === arr.description)
                     )
             );
             if (data.links.next !== null) {
@@ -487,19 +439,11 @@ export async function FetchFood() {
             );
         }
         const data = (await search.json()).data
-            .filter((item: MasterItem) =>
-                item.name === "<= PLACEHOLDER =>"
-                    ? false
-                    : true && item.is_base_variant
-            )
+            .filter((item: MasterItem) => (item.name === "<= PLACEHOLDER =>" ? false : true && item.is_base_variant))
             .filter(
                 (arr: MasterItem, index: number, self: MasterItem[]) =>
                     index ===
-                    self.findIndex(
-                        (t: MasterItem) =>
-                            t.name === arr.name &&
-                            t.description === arr.description
-                    )
+                    self.findIndex((t: MasterItem) => t.name === arr.name && t.description === arr.description)
             );
         RedisClient.set("Wiki:WikiFood", JSON.stringify(data));
         RedisClient.expire("Wiki:WikiFood", time_week_seconds * 26);
@@ -531,19 +475,11 @@ export async function FetchClothes() {
             );
         }
         const data = (await search.json()).data
-            .filter((item: MasterItem) =>
-                item.name === "<= PLACEHOLDER =>"
-                    ? false
-                    : true && item.is_base_variant
-            )
+            .filter((item: MasterItem) => (item.name === "<= PLACEHOLDER =>" ? false : true && item.is_base_variant))
             .filter(
                 (arr: MasterItem, index: number, self: MasterItem[]) =>
                     index ===
-                    self.findIndex(
-                        (t: MasterItem) =>
-                            t.name === arr.name &&
-                            t.description === arr.description
-                    )
+                    self.findIndex((t: MasterItem) => t.name === arr.name && t.description === arr.description)
             );
         RedisClient.set("Wiki:WikiClothes", JSON.stringify(data));
         RedisClient.expire("Wiki:WikiClothes", time_week_seconds * 26);
@@ -574,19 +510,11 @@ export async function FetchArmour() {
             );
         }
         const data = (await search.json()).data
-            .filter((item: MasterItem) =>
-                item.name === "<= PLACEHOLDER =>"
-                    ? false
-                    : true && item.is_base_variant
-            )
+            .filter((item: MasterItem) => (item.name === "<= PLACEHOLDER =>" ? false : true && item.is_base_variant))
             .filter(
                 (arr: MasterItem, index: number, self: MasterItem[]) =>
                     index ===
-                    self.findIndex(
-                        (t: MasterItem) =>
-                            t.name === arr.name &&
-                            t.description === arr.description
-                    )
+                    self.findIndex((t: MasterItem) => t.name === arr.name && t.description === arr.description)
             );
         RedisClient.set("Wiki:WikiArmor", JSON.stringify(data));
         RedisClient.expire("Wiki:WikiArmor", time_week_seconds * 26);

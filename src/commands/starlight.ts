@@ -28,9 +28,7 @@ module.exports = {
                 owner: "Kings-Starlight",
                 repo: "Starlight",
                 title: interaction.fields.getTextInputValue("starlight_feedback-title"),
-                body: `${interaction.fields.getTextInputValue(
-                    "starlight_feedback-description"
-                )}\n\nSubmitted from discord by: ${interaction.user.username}`,
+                body: `${interaction.fields.getTextInputValue("starlight_feedback-description")}`,
                 assignees: ["kingultron99"],
             })
             .then(() => {
