@@ -1,8 +1,7 @@
 import { type AutocompleteInteraction, type CommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import type { FPSItemShort, MasterItem } from "../types/sc_wiki";
-import { FetchItemInfo, Items, RequestImage, VehicleWeapons } from "../api/wikiAPI";
+import { FetchItemInfo, Items, VehicleWeapons } from "../api/wikiAPI";
 import { blue, ensure } from "../utilities/general";
-import { it } from "node:test";
 
 module.exports = {
     data: new SlashCommandBuilder()
