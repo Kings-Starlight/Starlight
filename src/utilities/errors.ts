@@ -1,4 +1,4 @@
-import { type AutocompleteInteraction, EmbedBuilder, type RepliableInteraction } from "discord.js";
+import { type Interaction, type TextChannel, EmbedBuilder } from "discord.js";
 import { log } from "@logging/logger";
 import { interactionType, red } from "./general";
 
@@ -8,7 +8,7 @@ import { interactionType, red } from "./general";
  * @param error Error message to display.
  */
 export function ErrorResponse(
-    interaction: RepliableInteraction | AutocompleteInteraction,
+    interaction: Interaction,
     description: string,
     // biome-ignore lint/suspicious/noExplicitAny: Errors caught in catch blocks require a type of either "any" or "unknown"
     error?: any
@@ -24,13 +24,10 @@ export function ErrorResponse(
         .setDescription(`## ${description}\nThis error has been recorded.\n${error ? `\`\`\`${error}\`\`\`` : ""}`)
         .setTimestamp();
 
-    if (!interaction.isChatInputCommand()) {
+    if (interaction.isAutocomplete()) {
         if (!interaction.channel) return;
 
-        interaction.channel.send({
-            content: `<@${interaction.user.id}>`,
-            embeds: [responseEmbed],
-        });
+        (interaction.channel as TextChannel).send({ content: `<@${interaction.user.id}>`, embeds: [responseEmbed] });
         return;
     }
     switch (interaction.replied || interaction.deferred) {
@@ -44,5 +41,6 @@ export function ErrorResponse(
             });
             break;
     }
+
     return;
 }

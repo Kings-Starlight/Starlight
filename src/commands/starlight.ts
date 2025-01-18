@@ -258,7 +258,7 @@ module.exports = {
                     },
                     {
                         name: "Disclaimer",
-                        value: "\n This is an unofficial Star Citizen service, not affiliated with UEX, the StarCitizen Wiki, Cloud Imperium Games, Roberts Space Industries®️ or StarCitizen.\nAll content on this service not authored by its host or users are property of their respective owners.",
+                        value: "\n-# This is an unofficial Star Citizen service, not affiliated with UEX, the StarCitizen Wiki, Cloud Imperium Games, Roberts Space Industries®️ or StarCitizen.\n-# All content on this service not authored by its host or users are property of their respective owners.",
                     }
                 ),
             ],

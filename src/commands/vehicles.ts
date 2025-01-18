@@ -576,7 +576,7 @@ async function CreateShipComponents(
 }
 
 async function CreateCompareComponents(
-    options: CommandInteractionOption[]
+    options: readonly CommandInteractionOption[]
     // biome-ignore lint/suspicious/noExplicitAny: Discord.js's AnyComponentBuilder generic causes issues when passing components into replies. Specifying any stops this. I cannot set a specific generic as multiple are being used.
 ): Promise<ActionRowBuilder<any>[]> {
     const selectOptions = await Promise.all(

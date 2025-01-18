@@ -22,11 +22,7 @@ dotenv.config();
 
 InitiateLogger();
 
-log.debug(
-    `Bot is running in ${
-        process.env.NODE_ENV === "production" ? "prod" : "dev"
-    } mode`
-);
+log.debug(`Bot is running in ${process.env.NODE_ENV === "production" ? "prod" : "dev"} mode`);
 
 const intervals = new Map<string, NodeJS.Timer>();
 
@@ -89,7 +85,7 @@ process.on("SIGINT", async () => {
     // Disconnect from redis
     await RedisClient.quit();
     // stop all intervals
-    intervals.forEach((interval, _) => {
+    intervals.forEach((_, interval) => {
         clearInterval(interval);
     });
     log.info("Preparing for shutdown!");
