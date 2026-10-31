@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [V3]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Quality checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.4"
+
+      - name: Install dependencies
+        run: bun ci
+
+      - name: Biome
+        run: bun run check:ci
+
+      - name: TypeScript
+        run: bun run typecheck
+
+      - name: Tests
+        run: bun run test:coverage
