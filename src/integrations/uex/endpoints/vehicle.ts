@@ -137,7 +137,7 @@ const VehicleStorePriceSchema = z.object({
   vehicle_name: z.string(),
 });
 
-const VehiclePriceSchema = z.object({
+const VehicleBuySchema = z.object({
   id: z.int(),
   id_vehicle: z.int(),
   id_planet: z.int(),
@@ -175,11 +175,59 @@ const VehiclePriceSchema = z.object({
   terminal_is_player_owned: z.int(),
 });
 
-const VehiclePriceMiniSchema = z.object({
+const VehicleBuyMiniSchema = z.object({
   id: z.int(),
   id_vehicle: z.int(),
   id_terminal: z.int(),
   price_buy: z.float32(),
+  date_added: z.int(),
+  date_modified: z.int(),
+  vehicle_name: z.string(),
+  terminal_name: z.string(),
+});
+const VehicleRentSchema = z.object({
+  id: z.int(),
+  id_vehicle: z.int(),
+  id_planet: z.int(),
+  id_orbit: z.int(),
+  id_moon: z.int(),
+  id_city: z.int(),
+  id_outpost: z.int(),
+  id_poi: z.int(),
+  id_faction: z.int().nullish(),
+  id_terminal: z.int(),
+  price_rent: z.float32(), // last
+  price_rent_min: z.float32(),
+  price_rent_min_week: z.float32(),
+  price_rent_min_month: z.float32(),
+  price_rent_max: z.float32(),
+  price_rent_max_week: z.float32(),
+  price_rent_max_month: z.float32(),
+  price_rent_avg: z.float32(),
+  price_rent_avg_week: z.float32(),
+  price_rent_avg_month: z.float32(),
+  faction_affinity: z.int(),
+  game_version: z.string(),
+  date_added: z.int(),
+  date_modified: z.int(),
+  datarunner: z.string().nullable(),
+  star_system_name: z.string().nullable(),
+  planet_name: z.string().nullable(),
+  orbit_name: z.string().nullable(),
+  moon_name: z.string().nullable(),
+  space_station_name: z.string().nullable(),
+  outpost_name: z.string().nullable(),
+  city_name: z.string().nullable(),
+  terminal_name: z.string(),
+  terminal_code: z.string(),
+  terminal_is_player_owned: z.int(),
+});
+
+const VehicleRentMiniSchema = z.object({
+  id: z.int(),
+  id_vehicle: z.int(),
+  id_terminal: z.int(),
+  price_rent: z.float32(),
   date_added: z.int(),
   date_modified: z.int(),
   vehicle_name: z.string(),
@@ -257,34 +305,65 @@ export class UexVehicleEndpoints {
   /* Vehicle Ingame Prices */
 
   /**
-   * Gets all vehicle prices, for every terminal
+   * Gets all vehicle purchase prices, for every terminal
    * @returns an array of all known vehicle prices
    */
-  async getVehiclePrices() {
-    return this.client.get(`vehicles_purchases_prices_all`, {}, z.array(VehiclePriceMiniSchema));
+  async getVehicleBuyPrices() {
+    return this.client.get(`vehicles_purchases_prices_all`, {}, z.array(VehicleBuyMiniSchema));
   }
   /**
-   * Gets all known ingame prices for the specified vehicle across all terminals
+   * Gets all known ingame purchase prices for the specified vehicle across all terminals
    * @param id ID of the target vehicle
    * @returns an array of prices for the specified vehicle
    */
-  async getVehiclePricesByVehicleID(id: number) {
+  async getVehicleBuyPricesByVehicleID(id: number) {
     return this.client.get(
       `vehicles_purchases_prices?id_vehicle=${id}`,
       {},
-      z.array(VehiclePriceSchema),
+      z.array(VehicleBuySchema),
     );
   }
   /**
-   * Gets all known ingame prices for the specified terminal
+   * Gets all known ingame purchase prices for the specified terminal
    * @param id ID of the target terminal
    * @returns an array of all prices for the specified terminal
    */
-  async getVehiclePricesByTerminalID(id: number) {
+  async getVehicleBuyPricesByTerminalID(id: number) {
     return this.client.get(
       `vehicles_purchases_prices?id_terminal=${id}`,
       {},
-      z.array(VehiclePriceSchema),
+      z.array(VehicleBuySchema),
+    );
+  }
+  /**
+   * Gets all vehicle rent prices, for every terminal
+   * @returns an array of all known vehicle prices
+   */
+  async getVehicleRentPrices() {
+    return this.client.get(`vehicles_rentals_prices_all`, {}, z.array(VehicleRentMiniSchema));
+  }
+  /**
+   * Gets all known ingame rent prices for the specified vehicle across all terminals
+   * @param id ID of the target vehicle
+   * @returns an array of prices for the specified vehicle
+   */
+  async getVehicleRentPricesByVehicleID(id: number) {
+    return this.client.get(
+      `vehicles_rentals_prices?id_vehicle=${id}`,
+      {},
+      z.array(VehicleRentSchema),
+    );
+  }
+  /**
+   * Gets all known ingame rent prices for the specified terminal
+   * @param id ID of the target terminal
+   * @returns an array of all prices for the specified terminal
+   */
+  async getVehicleRentPricesByTerminalID(id: number) {
+    return this.client.get(
+      `vehicles_rentals_prices?id_terminal=${id}`,
+      {},
+      z.array(VehicleRentSchema),
     );
   }
 }
