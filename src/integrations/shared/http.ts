@@ -9,6 +9,9 @@ export class ApiError extends Error {
   }
 }
 
+// Runtime-neutral sleep: works under Bun, Node (Vitest) and fake timers.
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
 interface HttpClientOptions {
   baseUrl: string;
   headers: Record<string, string>;
@@ -53,13 +56,13 @@ export class HttpClient {
           Number.isFinite(retryAfter) && retryAfter > 0
             ? Math.min(retryAfter * 1000, 30000)
             : Math.min(500 * 2 ** (attempt - 1), 5000);
-        await Bun.sleep(delay);
+        await sleep(delay);
       } catch (err) {
         if (err instanceof ApiError) throw err;
         if (attempt === maxAttempts) {
           throw new ApiError(`API request failed: ${String(err)}`, undefined, true);
         }
-        await Bun.sleep(500 * 2 ** (attempt - 1));
+        await sleep(500 * 2 ** (attempt - 1));
       }
     }
     throw new ApiError("Request attempts exhausted");

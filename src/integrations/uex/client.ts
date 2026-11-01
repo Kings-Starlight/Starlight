@@ -1,5 +1,6 @@
 import z from "zod";
 import { HttpClient } from "../shared/http";
+import { UexCommoditiesEndpoints } from "./endpoints/commodities";
 import { UexVehicleEndpoints } from "./endpoints/vehicle";
 
 const UexResponse = z.object({
@@ -12,6 +13,7 @@ const UexResponse = z.object({
 export class UEXClient {
   private readonly http: HttpClient;
   readonly vehicles: UexVehicleEndpoints;
+  readonly commodities: UexCommoditiesEndpoints;
 
   constructor(token: string | undefined) {
     if (token === undefined) throw new Error("UEX API token not provided!");
@@ -24,6 +26,7 @@ export class UEXClient {
     });
 
     this.vehicles = new UexVehicleEndpoints(this);
+    this.commodities = new UexCommoditiesEndpoints(this);
   }
 
   async get<T>(

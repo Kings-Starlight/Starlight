@@ -67,7 +67,7 @@ const VehicleSchema = z.object({
   company_name: z.string().nullable(),
 });
 
-const LoanerSchema = z.object({
+const VehicleLoanerSchema = z.object({
   id: z.int(),
   id_company: z.int(),
   id_parent: z.int(),
@@ -116,7 +116,7 @@ const LoanerSchema = z.object({
   date_modified: z.int(),
   company_name: z.string().nullable(),
   get loaners() {
-    return z.array(LoanerSchema).nullish();
+    return z.array(VehicleLoanerSchema).nullish();
   },
 });
 
@@ -251,7 +251,7 @@ export class UexVehicleEndpoints {
    * @returns an array of all vehicles related to the specified manufacturer
    */
   async getVehiclesByCompanyID(id: number) {
-    return this.client.get(`vehicles?id_company=${id}`, {}, z.array(VehicleSchema));
+    return this.client.get("vehicles", { id_company: id }, z.array(VehicleSchema));
   }
 
   /* Vehicle Loaners */
@@ -261,7 +261,7 @@ export class UexVehicleEndpoints {
    * @returns an array of all vehicle loaners
    */
   async getVehicleLoaners() {
-    return this.client.get(`vehicles_loaners`, {}, z.array(LoanerSchema));
+    return this.client.get(`vehicles_loaners`, {}, z.array(VehicleLoanerSchema));
   }
   /**
    * Gets the specified vehicle and its associated loaners
@@ -269,7 +269,7 @@ export class UexVehicleEndpoints {
    * @returns an array containing only the specified loaner parent
    */
   async getVehicleLoanersByID(id: number) {
-    return this.client.get(`vehicles_loaners?id_vehicle=${id}`, {}, z.array(LoanerSchema));
+    return this.client.get("vehicles_loaners", { id_vehicle: id }, z.array(VehicleLoanerSchema));
   }
   /**
    * Gets the specified vehicle and its associated loaners
@@ -277,7 +277,7 @@ export class UexVehicleEndpoints {
    * @returns an array containing only the specified loaner parent
    */
   async getVehicleLoanersByName(name: string) {
-    return this.client.get(`vehicles_loaners?name=${name}`, {}, z.array(LoanerSchema));
+    return this.client.get("vehicles_loaners", { name }, z.array(VehicleLoanerSchema));
   }
 
   /* Vehicle Store Prices */
@@ -295,11 +295,7 @@ export class UexVehicleEndpoints {
    * @returns an array containing only the specified vehicles store prices
    */
   async GetVehicleStorePricesByVehicleID(id: number) {
-    return this.client.get(
-      `vehicles_prices?id_vehicle=${id}`,
-      {},
-      z.array(VehicleStorePriceSchema),
-    );
+    return this.client.get("vehicles_prices", { id_vehicle: id }, z.array(VehicleStorePriceSchema));
   }
 
   /* Vehicle Ingame Prices */
@@ -318,8 +314,8 @@ export class UexVehicleEndpoints {
    */
   async getVehicleBuyPricesByVehicleID(id: number) {
     return this.client.get(
-      `vehicles_purchases_prices?id_vehicle=${id}`,
-      {},
+      "vehicles_purchases_prices",
+      { id_vehicle: id },
       z.array(VehicleBuySchema),
     );
   }
@@ -330,8 +326,8 @@ export class UexVehicleEndpoints {
    */
   async getVehicleBuyPricesByTerminalID(id: number) {
     return this.client.get(
-      `vehicles_purchases_prices?id_terminal=${id}`,
-      {},
+      "vehicles_purchases_prices",
+      { id_terminal: id },
       z.array(VehicleBuySchema),
     );
   }
@@ -349,8 +345,8 @@ export class UexVehicleEndpoints {
    */
   async getVehicleRentPricesByVehicleID(id: number) {
     return this.client.get(
-      `vehicles_rentals_prices?id_vehicle=${id}`,
-      {},
+      "vehicles_rentals_prices",
+      { id_vehicle: id },
       z.array(VehicleRentSchema),
     );
   }
@@ -361,8 +357,8 @@ export class UexVehicleEndpoints {
    */
   async getVehicleRentPricesByTerminalID(id: number) {
     return this.client.get(
-      `vehicles_rentals_prices?id_terminal=${id}`,
-      {},
+      "vehicles_rentals_prices",
+      { id_terminal: id },
       z.array(VehicleRentSchema),
     );
   }
