@@ -5,24 +5,26 @@ const CommoditiesSchema = z.object({
   id: z.int(),
   id_parent: z.int().nullable(),
   id_item: z.int().nullable(),
-  id_star_systems: z.string().nullable(),
-  id_planets: z.string().nullable(),
-  id_moons: z.string().nullable(),
-  id_poi: z.string().nullable(),
-  ids_orbits: z.string().nullable(),
+  ids_star_systems: z.string().nullable().optional(),
+  ids_planets: z.string().nullable().optional(),
+  ids_moons: z.string().nullable().optional(),
+  ids_poi: z.string().nullable().optional(),
+  ids_orbits: z.string().nullable().optional(),
   uuid: z.string().nullable(),
   name: z.string(),
   code: z.string(),
   slug: z.string(),
   kind: z.string().nullable(),
-  weight_scu: z.int().nullable(),
+  weight_scu: z.number().nullable(),
   price_buy: z.float32(),
   price_sell: z.float32(),
   is_available: z.int(),
+  is_available_live: z.int(),
   is_visible: z.int(),
   is_extractable: z.int(),
   is_mineral: z.int(),
   is_raw: z.int(),
+  is_pure: z.int(),
   is_refined: z.int(),
   is_refinable: z.int(),
   is_harvestable: z.int(),
@@ -419,8 +421,8 @@ export class UexCommoditiesEndpoints {
    */
   async getCommodityPricesByCommodityID(id: number) {
     return this.client.get(
-      `commodities_prices?id_commodity=${id}`,
-      {},
+      `commodities_prices`,
+      { id_commodity: id },
       z.array(CommodityPricesSchema),
     );
   }
@@ -431,8 +433,13 @@ export class UexCommoditiesEndpoints {
    */
   async getCommodityPricesByTerminalID(id: number[]) {
     return this.client.get(
-      `commodities_prices?id_commodity=${id.slice(0, 9).join(",")}`,
-      {},
+      `commodities_prices`,
+      {
+        id_terminal: Array.from(new Set(id))
+          .slice(0, 10)
+          .sort((a, b) => a - b)
+          .join(","),
+      },
       z.array(CommodityPricesSchema),
     );
   }
@@ -451,8 +458,8 @@ export class UexCommoditiesEndpoints {
    */
   async getCommodityPriceHistory(terminalId: number, commodityId: number) {
     return this.client.get(
-      `commodities_prices_history?id_terminal=${terminalId}&id_commodity=${commodityId}`,
-      {},
+      `commodities_prices_history`,
+      { id_terminal: terminalId, id_commodity: commodityId },
       z.array(CommodityPriceHistorySchema),
     );
   }
@@ -470,8 +477,8 @@ export class UexCommoditiesEndpoints {
    */
   async getCommoditiesAlertsByCommodityID(id: number) {
     return this.client.get(
-      `commodities_alerts?id_commodity=${id}`,
-      {},
+      `commodities_alerts`,
+      { id_commodity: id },
       z.array(CommodityAlertSchema),
     );
   }
@@ -482,8 +489,8 @@ export class UexCommoditiesEndpoints {
    */
   async getCommodityAverages(id: number) {
     return this.client.get(
-      `commodities_averages?id_commodity=${id}`,
-      {},
+      `commodities_averages`,
+      { id_commodity: id },
       z.array(CommodityAveragesSchema),
     );
   }

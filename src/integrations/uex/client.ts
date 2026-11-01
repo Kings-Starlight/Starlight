@@ -1,7 +1,7 @@
 import z from "zod";
 import { HttpClient } from "../shared/http";
-import { UexVehicleEndpoints } from "./endpoints/vehicle";
 import { UexCommoditiesEndpoints } from "./endpoints/commodities";
+import { UexVehicleEndpoints } from "./endpoints/vehicle";
 
 const UexResponse = z.object({
   status: z.string(),
