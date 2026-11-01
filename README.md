@@ -1,16 +1,16 @@
-<div style="display:flex;flex-direction:column;align-items:center;">
-  <img width="256" style="border-radius:20px;" src="./src/assets/Starlight.png">
-<h1 style="color:#adbeff">Starlight</h1>
-<p>The solution for your trading and general knowledge needs.</p>
-</div>
-<div style="display:flex;gap:20px;justify-content:center;align-items:center;">
+<p align="center">
+  <img width="256" src="./src/assets/Starlight.png">
+</p>
+<h1 align="center">Starlight</h1>
+<p align="center">The solution for your trading and general knowledge needs.</p>
+<p align="center">
   <a href="https://uexcorp.space"><img width="128" src="https://uexcorp.space/img/api/uex-api-badge-powered.png"/></a>
-  <div style="display:flex;gap:5px;align-items:center;">
   <a href="https://starcitizen.tools/"><img width="128" src="./src/assets/sctools.png"></a>
-  <p>and its <a href="https://api.star-citizen.wiki">API</a></p>
-  </div>
-</div>
-<br/>
+  and its <a href="https://api.star-citizen.wiki">API</a>
+</p>
+<p align="center">
+  <a href="https://github.com/Kings-Starlight/Starlight/actions/workflows/ci.yml"><img src="https://github.com/Kings-Starlight/Starlight/actions/workflows/ci.yml/badge.svg"/></a>
+</p>
 
 ## What is Starlight?
 
