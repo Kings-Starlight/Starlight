@@ -16,8 +16,8 @@ export function uexReplies(data: unknown) {
  * Runs `call` against a fake UEX that returns an empty list, and reports the
  * request it received: the path, and the query string as a plain object.
  */
-export async function requestMadeBy(call: () => Promise<unknown>) {
-  uexReplies([]);
+export async function requestMadeBy(call: () => Promise<unknown>, reply: unknown = []) {
+  uexReplies(reply);
   await call();
 
   const url = new URL(String(fetchMock.mock.calls[0]?.[0]));

@@ -118,7 +118,7 @@ describe("commodities", () => {
   });
 
   it("asks for commodity terminal states", async () => {
-    const request = await requestMadeBy(() => client.commodities.getCommodityTerminalStates());
+    const request = await requestMadeBy(() => client.commodities.getCommodityTerminalStates(), { buy: [], sell: [] });
 
     expect(request.path).toBe("/2.0/commodities_status/");
     expect(request.query).toEqual({});
