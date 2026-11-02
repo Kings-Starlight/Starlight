@@ -1,6 +1,7 @@
 import z from "zod";
 import { HttpClient } from "../shared/http";
 import { UexCommoditiesEndpoints } from "./endpoints/commodities";
+import { UexLocationEndpoints } from "./endpoints/locations";
 import { UexVehicleEndpoints } from "./endpoints/vehicle";
 
 const UexResponse = z.object({
@@ -14,6 +15,7 @@ export class UEXClient {
   private readonly http: HttpClient;
   readonly vehicles: UexVehicleEndpoints;
   readonly commodities: UexCommoditiesEndpoints;
+  readonly locations: UexLocationEndpoints;
 
   constructor(token: string | undefined) {
     if (token === undefined) throw new Error("UEX API token not provided!");
@@ -27,11 +29,12 @@ export class UEXClient {
 
     this.vehicles = new UexVehicleEndpoints(this);
     this.commodities = new UexCommoditiesEndpoints(this);
+    this.locations = new UexLocationEndpoints(this);
   }
 
   async get<T>(
     resource: string,
-    params: Record<string, string | number> = {},
+    params: Record<string, string | number | undefined> = {},
     schema: z.ZodType<T>,
   ): Promise<T> {
     const response = UexResponse.parse(await this.http.get<unknown>(`${resource}/`, params));

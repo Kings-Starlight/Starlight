@@ -1,4 +1,4 @@
-// Sample UEX data for the vehicle tests
+// Sample UEX data for the commodity tests
 
 export const Agricium = {
   id: 1,

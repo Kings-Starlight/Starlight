@@ -415,30 +415,27 @@ export class UexCommoditiesEndpoints {
     return this.client.get(`commodities`, {}, z.array(CommoditiesSchema));
   }
   /**
-   * Gets all prices for the specified commodity from all terminals
-   * @param id ID of the target commodity
-   * @returns
+   * Gets all commodity prices for the specified filters
+   * @param {object} filters
+   * @param {number} filters.commodityID the ID of the target commodity
+   * @param {number} filters.terminalID the IDs of the target terminals (max 10)
+   * @returns an array of commodity prices
    */
-  async getCommodityPricesByCommodityID(id: number) {
-    return this.client.get(
-      `commodities_prices`,
-      { id_commodity: id },
-      z.array(CommodityPricesSchema),
-    );
-  }
-  /**
-   * Gets all commodity prices for the specified terminals
-   * @param id an array of terminal IDs. A maximum of 10, anything else will be stripped and ignored
-   * @returns
-   */
-  async getCommodityPricesByTerminalID(id: number[]) {
+  async getCommodityPrices(
+    filters:
+      | { commodityID: number; terminalID?: number[] }
+      | { commodityID?: number; terminalID: number[] },
+  ) {
     return this.client.get(
       `commodities_prices`,
       {
-        id_terminal: Array.from(new Set(id))
-          .slice(0, 10)
-          .sort((a, b) => a - b)
-          .join(","),
+        id_commodity: filters.commodityID,
+        id_terminal:
+          filters.terminalID &&
+          Array.from(new Set<number>(filters.terminalID))
+            .slice(0, 10)
+            .sort((a, b) => a - b)
+            .join(","),
       },
       z.array(CommodityPricesSchema),
     );
@@ -452,14 +449,15 @@ export class UexCommoditiesEndpoints {
   }
   /**
    * Gets known price history of a commodity from a specific terminal
-   * @param terminalId ID of the target terminal
-   * @param commodityId ID of the target commodity
-   * @returns an array containing price history information for the specified terminal/commodity
+   * @param {object} filters
+   * @param {number} filters.terminalID ID of the target terminal
+   * @param {number} filters.commodityID ID of the target commodity
+   * @returns an array containing price history information
    */
-  async getCommodityPriceHistory(terminalId: number, commodityId: number) {
+  async getCommodityPriceHistory(filters: { terminalID: number; commodityID: number }) {
     return this.client.get(
       `commodities_prices_history`,
-      { id_terminal: terminalId, id_commodity: commodityId },
+      { id_terminal: filters.terminalID, id_commodity: filters.commodityID },
       z.array(CommodityPriceHistorySchema),
     );
   }
@@ -472,25 +470,25 @@ export class UexCommoditiesEndpoints {
   }
   /**
    * Gets any current alerts for the specified commodity
-   * @param id ID of the target commodity
+   * @param commodityID ID of the target commodity
    * @returns an array containing the target commoditys current alerts
    */
-  async getCommoditiesAlertsByCommodityID(id: number) {
+  async getCommoditiesAlertsByCommodityID(commodityID: number) {
     return this.client.get(
       `commodities_alerts`,
-      { id_commodity: id },
+      { id_commodity: commodityID },
       z.array(CommodityAlertSchema),
     );
   }
   /**
    * Gets the current 15-day averages of a specified commodity's prices and stock data
-   * @param id ID of the target commodity
+   * @param commodityID ID of the target commodity
    * @returns an array containing the target commodity's averages
    */
-  async getCommodityAverages(id: number) {
+  async getCommodityAverages(commodityID: number) {
     return this.client.get(
       `commodities_averages`,
-      { id_commodity: id },
+      { id_commodity: commodityID },
       z.array(CommodityAveragesSchema),
     );
   }

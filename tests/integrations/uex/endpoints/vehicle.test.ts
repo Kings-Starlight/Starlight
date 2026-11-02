@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { UEXClient } from "../../../../src/integrations/uex/client";
 import { fetchMock, requestMadeBy, uexReplies } from "../helpers";
-import { cutlassBlack, originfourhungie_i } from "./vehicle.fixtures";
+import { cutlassBlack, originfourhungie_i } from "./fixtures/vehicle.fixtures";
 
 const client = new UEXClient("test-token");
 
@@ -47,7 +47,7 @@ describe("loaners", () => {
   });
 
   it("looks up one vehicle by id", async () => {
-    const request = await requestMadeBy(() => client.vehicles.getVehicleLoanersByID(7));
+    const request = await requestMadeBy(() => client.vehicles.getVehicleLoanersByVehicleID(7));
 
     expect(request.path).toBe("/2.0/vehicles_loaners/");
     expect(request.query).toEqual({ id_vehicle: "7" });
@@ -86,7 +86,7 @@ describe("store prices", () => {
   });
 
   it("looks up one vehicle's store price", async () => {
-    const request = await requestMadeBy(() => client.vehicles.GetVehicleStorePricesByVehicleID(7));
+    const request = await requestMadeBy(() => client.vehicles.getVehicleStorePricesByVehicleID(7));
 
     expect(request.path).toBe("/2.0/vehicles_prices/");
     expect(request.query).toEqual({ id_vehicle: "7" });

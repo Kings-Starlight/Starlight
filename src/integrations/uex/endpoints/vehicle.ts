@@ -247,11 +247,11 @@ export class UexVehicleEndpoints {
   }
   /**
    * Gets all vehicles related to a specified manufacturer
-   * @param id target manufacturer ID
+   * @param companyID target manufacturer ID
    * @returns an array of all vehicles related to the specified manufacturer
    */
-  async getVehiclesByCompanyID(id: number) {
-    return this.client.get("vehicles", { id_company: id }, z.array(VehicleSchema));
+  async getVehiclesByCompanyID(companyID: number) {
+    return this.client.get("vehicles", { id_company: companyID }, z.array(VehicleSchema));
   }
 
   /* Vehicle Loaners */
@@ -265,11 +265,15 @@ export class UexVehicleEndpoints {
   }
   /**
    * Gets the specified vehicle and its associated loaners
-   * @param id ID of the parent vehicle
+   * @param vehicleID ID of the parent vehicle
    * @returns an array containing only the specified loaner parent
    */
-  async getVehicleLoanersByID(id: number) {
-    return this.client.get("vehicles_loaners", { id_vehicle: id }, z.array(VehicleLoanerSchema));
+  async getVehicleLoanersByVehicleID(vehicleID: number) {
+    return this.client.get(
+      "vehicles_loaners",
+      { id_vehicle: vehicleID },
+      z.array(VehicleLoanerSchema),
+    );
   }
   /**
    * Gets the specified vehicle and its associated loaners
@@ -291,11 +295,15 @@ export class UexVehicleEndpoints {
   }
   /**
    * Gets the store price of a specified vehicle
-   * @param id ID of the target vehicle
+   * @param vehicleID ID of the target vehicle
    * @returns an array containing only the specified vehicles store prices
    */
-  async GetVehicleStorePricesByVehicleID(id: number) {
-    return this.client.get("vehicles_prices", { id_vehicle: id }, z.array(VehicleStorePriceSchema));
+  async getVehicleStorePricesByVehicleID(vehicleID: number) {
+    return this.client.get(
+      "vehicles_prices",
+      { id_vehicle: vehicleID },
+      z.array(VehicleStorePriceSchema),
+    );
   }
 
   /* Vehicle Ingame Prices */
@@ -309,25 +317,25 @@ export class UexVehicleEndpoints {
   }
   /**
    * Gets all known ingame purchase prices for the specified vehicle across all terminals
-   * @param id ID of the target vehicle
+   * @param vehicleID ID of the target vehicle
    * @returns an array of prices for the specified vehicle
    */
-  async getVehicleBuyPricesByVehicleID(id: number) {
+  async getVehicleBuyPricesByVehicleID(vehicleID: number) {
     return this.client.get(
       "vehicles_purchases_prices",
-      { id_vehicle: id },
+      { id_vehicle: vehicleID },
       z.array(VehicleBuySchema),
     );
   }
   /**
    * Gets all known ingame purchase prices for the specified terminal
-   * @param id ID of the target terminal
+   * @param terminalID ID of the target terminal
    * @returns an array of all prices for the specified terminal
    */
-  async getVehicleBuyPricesByTerminalID(id: number) {
+  async getVehicleBuyPricesByTerminalID(terminalID: number) {
     return this.client.get(
       "vehicles_purchases_prices",
-      { id_terminal: id },
+      { id_terminal: terminalID },
       z.array(VehicleBuySchema),
     );
   }
@@ -340,25 +348,25 @@ export class UexVehicleEndpoints {
   }
   /**
    * Gets all known ingame rent prices for the specified vehicle across all terminals
-   * @param id ID of the target vehicle
+   * @param vehicleID ID of the target vehicle
    * @returns an array of prices for the specified vehicle
    */
-  async getVehicleRentPricesByVehicleID(id: number) {
+  async getVehicleRentPricesByVehicleID(vehicleID: number) {
     return this.client.get(
       "vehicles_rentals_prices",
-      { id_vehicle: id },
+      { id_vehicle: vehicleID },
       z.array(VehicleRentSchema),
     );
   }
   /**
    * Gets all known ingame rent prices for the specified terminal
-   * @param id ID of the target terminal
+   * @param TerminalID ID of the target terminal
    * @returns an array of all prices for the specified terminal
    */
-  async getVehicleRentPricesByTerminalID(id: number) {
+  async getVehicleRentPricesByTerminalID(terminalID: number) {
     return this.client.get(
       "vehicles_rentals_prices",
-      { id_terminal: id },
+      { id_terminal: terminalID },
       z.array(VehicleRentSchema),
     );
   }
