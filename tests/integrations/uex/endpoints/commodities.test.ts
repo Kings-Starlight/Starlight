@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { UEXClient } from "../../../../src/integrations/uex/client";
 import { fetchMock, requestMadeBy, uexReplies } from "../helpers";
-import { Agricium, AgriciumAverages } from "./commodities.fixtures";
+import { Agricium, AgriciumAverages } from "./fixtures/commodities.fixtures";
 
 const client = new UEXClient("test-token");
 
@@ -32,7 +32,7 @@ describe("commodities", () => {
 
   it("asks for commodity prices via commodity ID", async () => {
     const request = await requestMadeBy(() =>
-      client.commodities.getCommodityPricesByCommodityID(5),
+      client.commodities.getCommodityPrices({ commodityID: 5 }),
     );
 
     expect(request.path).toBe("/2.0/commodities_prices/");
@@ -41,7 +41,7 @@ describe("commodities", () => {
 
   it("asks for commodity prices via a single terminal ID", async () => {
     const request = await requestMadeBy(() =>
-      client.commodities.getCommodityPricesByTerminalID([5]),
+      client.commodities.getCommodityPrices({ terminalID: [5] }),
     );
 
     expect(request.path).toBe("/2.0/commodities_prices/");
@@ -50,7 +50,7 @@ describe("commodities", () => {
 
   it("asks for commodity prices via a multiple terminal ID", async () => {
     const request = await requestMadeBy(() =>
-      client.commodities.getCommodityPricesByTerminalID([1, 2, 3, 4, 5, 6, 7]),
+      client.commodities.getCommodityPrices({ terminalID: [1, 2, 3, 4, 5, 6, 7] }),
     );
 
     expect(request.path).toBe("/2.0/commodities_prices/");
@@ -59,7 +59,9 @@ describe("commodities", () => {
 
   it("should not ask for more than 10 terminals", async () => {
     const request = await requestMadeBy(() =>
-      client.commodities.getCommodityPricesByTerminalID([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
+      client.commodities.getCommodityPrices({
+        terminalID: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      }),
     );
 
     expect(request.path).toBe("/2.0/commodities_prices/");
@@ -68,7 +70,9 @@ describe("commodities", () => {
 
   it("should sort & deduplicate terminal ids", async () => {
     const request = await requestMadeBy(() =>
-      client.commodities.getCommodityPricesByTerminalID([5, 10, 10, 2, 14, 9, 5, 112, 56, 4, 250]),
+      client.commodities.getCommodityPrices({
+        terminalID: [5, 10, 10, 2, 14, 9, 5, 112, 56, 4, 250],
+      }),
     );
 
     expect(request.path).toBe("/2.0/commodities_prices/");
@@ -92,7 +96,9 @@ describe("commodities", () => {
   });
 
   it("asks for a commodity's price history", async () => {
-    const request = await requestMadeBy(() => client.commodities.getCommodityPriceHistory(1, 5));
+    const request = await requestMadeBy(() =>
+      client.commodities.getCommodityPriceHistory({ terminalID: 1, commodityID: 5 }),
+    );
 
     expect(request.path).toBe("/2.0/commodities_prices_history/");
     expect(request.query).toEqual({ id_terminal: "1", id_commodity: "5" });

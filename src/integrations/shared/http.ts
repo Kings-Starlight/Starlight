@@ -21,11 +21,11 @@ interface HttpClientOptions {
 export class HttpClient {
   constructor(private readonly options: HttpClientOptions) {}
 
-  async get<T>(path: string, params?: Record<string, string | number>): Promise<T> {
+  async get<T>(path: string, params?: Record<string, string | number | undefined>): Promise<T> {
     const url = new URL(path, this.options.baseUrl);
 
     for (const [k, v] of Object.entries(params ?? {})) {
-      url.searchParams.set(k, String(v));
+      if (v !== undefined) url.searchParams.set(k, String(v));
     }
 
     const maxAttempts = 3;
