@@ -406,8 +406,8 @@ const CommodityTerminalStateSchema = z.object({
 });
 const CommodityTerminalStateArraysSchema = z.object({
   buy: z.array(CommodityTerminalStateSchema),
-  sell: z.array(CommodityTerminalStateSchema)
-})
+  sell: z.array(CommodityTerminalStateSchema),
+});
 
 export class UexCommoditiesEndpoints {
   constructor(private readonly client: UEXClient) {}
