@@ -1,6 +1,6 @@
 import z from "zod";
-import type { UEXClient } from "../client";
 import type { RequireAtLeastOne } from "../../../utils/typeHelpers";
+import type { UEXClient } from "../client";
 
 const CommoditiesSchema = z.object({
   id: z.int(),
