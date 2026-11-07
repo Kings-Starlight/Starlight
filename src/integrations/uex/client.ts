@@ -1,6 +1,7 @@
 import z from "zod";
 import { HttpClient } from "../shared/http";
 import { UexCommoditiesEndpoints } from "./endpoints/commodities";
+import { UexItemEndpoints } from "./endpoints/items";
 import { UexLocationEndpoints } from "./endpoints/locations";
 import { UexVehicleEndpoints } from "./endpoints/vehicle";
 
@@ -16,6 +17,7 @@ export class UEXClient {
   readonly vehicles: UexVehicleEndpoints;
   readonly commodities: UexCommoditiesEndpoints;
   readonly locations: UexLocationEndpoints;
+  readonly items: UexItemEndpoints;
 
   constructor(token: string | undefined) {
     if (token === undefined) throw new Error("UEX API token not provided!");
@@ -30,6 +32,7 @@ export class UEXClient {
     this.vehicles = new UexVehicleEndpoints(this);
     this.commodities = new UexCommoditiesEndpoints(this);
     this.locations = new UexLocationEndpoints(this);
+    this.items = new UexItemEndpoints(this);
   }
 
   async get<T>(
