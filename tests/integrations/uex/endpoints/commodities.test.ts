@@ -126,4 +126,13 @@ describe("commodities", () => {
     expect(request.path).toBe("/2.0/commodities_status/");
     expect(request.query).toEqual({});
   });
+
+  it("asks for commodity routes", async () => {
+    const request = await requestMadeBy(() =>
+      client.commodities.getCommodityRoutes({ commodityID: 1 }),
+    );
+
+    expect(request.path).toBe("/2.0/commodities_routes/");
+    expect(request.query).toEqual({ id_commodity: "1" });
+  });
 });

@@ -1,4 +1,5 @@
 import z from "zod";
+import type { RequireAtLeastOne } from "../../../utils/typeHelpers";
 import type { UEXClient } from "../client";
 
 const CommoditiesSchema = z.object({
@@ -408,6 +409,116 @@ const CommodityTerminalStateArraysSchema = z.object({
   buy: z.array(CommodityTerminalStateSchema),
   sell: z.array(CommodityTerminalStateSchema),
 });
+const CommodityRoutesSchema = z.object({
+  id: z.int(),
+  id_commodity: z.int(),
+  id_star_system_origin: z.int(),
+  id_star_system_destination: z.int(),
+  id_planet_origin: z.int(),
+  id_planet_destination: z.int(),
+  id_orbit_origin: z.int(),
+  id_orbit_destination: z.int(),
+  id_terminal_origin: z.int(),
+  id_terminal_destination: z.int(),
+  id_faction_origin: z.int(),
+  id_faction_destination: z.int(),
+
+  code: z.string(), // unique route hash, e.g. https://uexcorp.space/trade/route?code={code}
+
+  // prices
+  price_origin: z.float32(), // scu
+  price_origin_users: z.float32(), // scu, coming from users trades
+  price_origin_users_rows: z.float32(), // user trips
+  price_destination: z.float32(), // scu
+  price_destination_users: z.float32(), // scu, coming from users trades
+  price_destination_users_rows: z.float32(), // user trips
+  price_margin: z.float32(),
+  price_roi: z.float32(),
+
+  // scu
+  scu_origin: z.float32(),
+  scu_origin_users: z.float32(), // average from users trades
+  scu_origin_users_rows: z.float32(), // number of user trades used to calculate 'scu_origin_users'
+  scu_destination: z.float32(),
+  scu_destination_users: z.float32(), // average from users trades
+  scu_destination_users_rows: z.float32(), // number of user trades used to calculate 'scu_destination_users'
+  scu_margin: z.float32(), // percentage
+
+  // inventory
+  status_origin: z.int(), // stock level at origin, higher is better
+  status_destination: z.int(), // stock level at destination, lower is better
+
+  // etc
+  investment: z.float32(), // maximum investment expected (scu_buy_avg * price_buy_avg)
+  profit: z.float32(), // maximum profit expected
+  distance: z.float32(), // Distance in Giga Meters (GM)
+  score: z.int(), // UEX score level, higher is better
+  container_sizes_origin: z.string().nullable(), // csv
+  container_sizes_destination: z.string().nullable(), // csv
+  game_version_origin: z.string().nullable(), // e.g. 3.24
+  game_version_destination: z.string().nullable(), // e.g. 4.0
+
+  // location attributes
+  has_docking_port_origin: z.int(),
+  has_docking_port_destination: z.int(),
+  has_freight_elevator_origin: z.int(),
+  has_freight_elevator_destination: z.int(),
+  has_loading_dock_origin: z.int(), // external freight elevator / autoload area
+  has_loading_dock_destination: z.int(), // external freight elevator / autoload area
+  has_refuel_origin: z.int(),
+  has_refuel_destination: z.int(),
+  has_cargo_center_origin: z.int(),
+  has_cargo_center_destination: z.int(),
+  has_quantum_marker_origin: z.int(),
+  has_quantum_marker_destination: z.int(),
+  is_monitored_origin: z.int(), // uee commlink
+  is_monitored_destination: z.int(), // uee commlink
+  is_space_station_origin: z.int(),
+  is_space_station_destination: z.int(),
+  is_on_ground_origin: z.int(),
+  is_on_ground_destination: z.int(),
+
+  // commodity
+  commodity_name: z.string().optional(),
+  commodity_code: z.string().optional(),
+  commodity_slug: z.string().optional(),
+
+  // location details
+  origin_star_system_name: z.string().nullable(),
+  origin_planet_name: z.string().nullable(),
+  origin_orbit_name: z.string().nullable(),
+  origin_terminal_name: z.string().nullable(),
+  origin_terminal_code: z.string().nullable(),
+  origin_terminal_slug: z.string().nullable(),
+  origin_terminal_is_player_owned: z.int(),
+  origin_faction_name: z.string().nullable(),
+  destination_star_system_name: z.string().nullable(),
+  destination_planet_name: z.string().nullable(),
+  destination_orbit_name: z.string().nullable(),
+  destination_terminal_name: z.string().nullable(),
+  destination_terminal_code: z.string().nullable(),
+  destination_terminal_slug: z.string().nullable(),
+  destination_terminal_is_player_owned: z.int(),
+  destination_faction_name: z.string().nullable(),
+
+  // dates
+  date_added: z.int(),
+});
+interface CommodityRouteParams {
+  // Required group: at least one
+  originTerminalID?: number;
+  originPlanetID?: number;
+  originOrbitID?: number;
+  commodityID?: number;
+
+  // Optional inputs
+  destinationTerminalID?: number;
+  destinationPlanetID?: number;
+  destinationOrbitID?: number;
+  originFactionID?: number;
+  destinationFactionID?: number;
+  investment?: number;
+}
 
 export class UexCommoditiesEndpoints {
   constructor(private readonly client: UEXClient) {}
@@ -502,5 +613,38 @@ export class UexCommoditiesEndpoints {
    */
   async getCommodityTerminalStates() {
     return this.client.get(`commodities_status`, {}, CommodityTerminalStateArraysSchema);
+  }
+
+  /**
+   * Gets a list of common routes based on reports
+   * @param {object} filters
+   * @returns
+   */
+
+  async getCommodityRoutes(
+    filters: RequireAtLeastOne<
+      CommodityRouteParams,
+      "originTerminalID" | "originPlanetID" | "originOrbitID" | "commodityID"
+    >,
+  ) {
+    return this.client.get(
+      `commodities_routes`,
+      {
+        // Required group: at least one
+        id_terminal_origin: filters.originTerminalID,
+        id_planet_origin: filters.originPlanetID,
+        id_orbit_origin: filters.originOrbitID,
+        id_commodity: filters.commodityID,
+
+        // Optional inputs
+        id_terminal_destination: filters.destinationTerminalID,
+        id_planet_destination: filters.destinationPlanetID,
+        id_orbit_destination: filters.destinationOrbitID,
+        id_faction_origin: filters.originFactionID,
+        id_faction_destination: filters.destinationFactionID,
+        investment: filters.investment,
+      },
+      z.array(CommodityRoutesSchema),
+    );
   }
 }
