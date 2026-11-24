@@ -21,7 +21,11 @@ interface HttpClientOptions {
 export class HttpClient {
   constructor(private readonly options: HttpClientOptions) {}
 
-  async get<T>(path: string, params?: Record<string, string | number | undefined>): Promise<T> {
+  async get<T>(
+    path: string,
+    params?: Record<string, string | number | undefined>,
+    text = false,
+  ): Promise<T | string> {
     const url = new URL(path, this.options.baseUrl);
 
     for (const [k, v] of Object.entries(params ?? {})) {
@@ -40,8 +44,10 @@ export class HttpClient {
           },
           signal: AbortSignal.timeout(this.options.timeoutMs ?? 10000),
         });
-        if (response.ok) {
+        if (response.ok && !text) {
           return (await response.json()) as T;
+        } else if (response.ok && text) {
+          return await response.text();
         }
 
         const retryable = response.status === 429 || response.status >= 500;

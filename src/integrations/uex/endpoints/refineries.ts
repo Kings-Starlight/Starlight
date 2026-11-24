@@ -107,18 +107,34 @@ const RefineryYieldSchema = z.object({
 export class UexRefineryRoutes {
   constructor(private readonly client: UEXClient) {}
 
+  /**
+   * Gets all of UEX's refinery audits
+   * @returns
+   */
   async getRefineryAudits() {
     return this.client.get(`refineries_audits`, {}, z.array(RefineryAuditSchema));
   }
 
+  /**
+   * Gets the last known capacities of all refineries
+   * @returns
+   */
   async getRefineryCapacities() {
     return this.client.get(`refineries_capacities`, {}, z.array(RefineryCapacitySchema));
   }
 
+  /**
+   * Gets UEX's list of all known refinery methods
+   * @returns
+   */
   async getRefineryMethods() {
     return this.client.get(`refineries_methods`, {}, z.array(RefineryMethodSchema));
   }
 
+  /**
+   * Gets UEX's refinery yield stats
+   * @returns
+   */
   async getRefineryYields() {
     return this.client.get(`refineries_yields`, {}, z.array(RefineryYieldSchema));
   }

@@ -43,7 +43,6 @@ const CommoditiesSchema = z.object({
   date_added: z.int(),
   date_modified: z.int(),
 });
-
 const CommodityAlertSchema = z.object({
   id_commodity: z.int(),
   id_terminal: z.int(),
@@ -55,9 +54,9 @@ const CommodityAlertSchema = z.object({
   status_sell: z.int(),
   date_added: z.int(),
   game_version: z.string(),
-  commodity_name: z.string().nullish(),
-  commodity_code: z.string().nullish(),
-  commodity_slug: z.string().nullish(),
+  commodity_name: z.string().optional(),
+  commodity_code: z.string().optional(),
+  commodity_slug: z.string().optional(),
   star_system_name: z.string().nullable(),
   planet_name: z.string().nullable(),
   orbit_name: z.string().nullable(),
@@ -65,11 +64,10 @@ const CommodityAlertSchema = z.object({
   space_station_name: z.string().nullable(),
   outpost_name: z.string().nullable(),
   faction_name: z.string().nullable(),
-  terminal_name: z.string().nullish(),
-  terminal_code: z.string().nullish(),
-  terminal_slug: z.string().nullish(),
+  terminal_name: z.string().optional(),
+  terminal_code: z.string().optional(),
+  terminal_slug: z.string().optional(),
 });
-
 const CommodityAveragesSchema = z.object({
   id: z.int(),
   id_commodity: z.int(),
@@ -173,11 +171,10 @@ const CommodityAveragesSchema = z.object({
   game_version: z.string(),
   date_added: z.int(), // timestamp
   date_modified: z.int(), // timestamp
-  commodity_name: z.string().nullish(),
-  commodity_code: z.string().nullish(),
-  commodity_slug: z.string().nullish(),
+  commodity_name: z.string().optional(),
+  commodity_code: z.string().optional(),
+  commodity_slug: z.string().optional(),
 });
-
 const CommodityPricesSchema = z.object({
   id: z.int(),
   id_commodity: z.int(),
@@ -305,9 +302,9 @@ const CommodityPricesSchema = z.object({
   game_version: z.string(),
   date_added: z.int(), // timestamp
   date_modified: z.int(), // timestamp
-  commodity_name: z.string().nullish(),
-  commodity_code: z.string().nullish(),
-  commodity_slug: z.string().nullish(),
+  commodity_name: z.string().optional(),
+  commodity_code: z.string().optional(),
+  commodity_slug: z.string().optional(),
   star_system_name: z.string().nullable(),
   planet_name: z.string().nullable(),
   orbit_name: z.string().nullable(),
@@ -315,12 +312,11 @@ const CommodityPricesSchema = z.object({
   space_station_name: z.string().nullable(),
   outpost_name: z.string().nullable(),
   city_name: z.string().nullable(),
-  terminal_name: z.string().nullish(),
-  terminal_code: z.string().nullish(),
-  terminal_slug: z.string().nullish(),
+  terminal_name: z.string().optional(),
+  terminal_code: z.string().optional(),
+  terminal_slug: z.string().optional(),
   terminal_is_player_owned: z.int(),
 });
-
 const CommodityPricesMiniSchema = z.object({
   id: z.int(),
   id_commodity: z.int(),
@@ -341,14 +337,13 @@ const CommodityPricesMiniSchema = z.object({
   quality: z.int().nullable(), // 0-1000
   date_added: z.int(), // timestamp
   date_modified: z.int(), // timestamp
-  commodity_name: z.string().nullish(),
-  commodity_code: z.string().nullish(),
-  commodity_slug: z.string().nullish(),
-  terminal_name: z.string().nullish(),
-  terminal_code: z.string().nullish(),
-  terminal_slug: z.string().nullish(),
+  commodity_name: z.string().optional(),
+  commodity_code: z.string().optional(),
+  commodity_slug: z.string().optional(),
+  terminal_name: z.string().optional(),
+  terminal_code: z.string().optional(),
+  terminal_slug: z.string().optional(),
 });
-
 const CommodityPriceHistorySchema = z.object({
   id: z.int(),
   id_commodity: z.int(),
@@ -379,9 +374,9 @@ const CommodityPriceHistorySchema = z.object({
   // etc
   game_version: z.string(),
   date_added: z.int(),
-  commodity_name: z.string().nullish(),
-  commodity_code: z.string().nullish(),
-  commodity_slug: z.string().nullish(),
+  commodity_name: z.string().optional(),
+  commodity_code: z.string().optional(),
+  commodity_slug: z.string().optional(),
   star_system_name: z.string().nullable(),
   planet_name: z.string().nullable(),
   orbit_name: z.string().nullable(),
@@ -390,11 +385,10 @@ const CommodityPriceHistorySchema = z.object({
   outpost_name: z.string().nullable(),
   city_name: z.string().nullable(),
   faction_name: z.string().nullable(),
-  terminal_name: z.string().nullish(),
-  terminal_code: z.string().nullish(),
-  terminal_slug: z.string().nullish(),
+  terminal_name: z.string().optional(),
+  terminal_code: z.string().optional(),
+  terminal_slug: z.string().optional(),
 });
-
 const CommodityTerminalStateSchema = z.object({
   code: z.int(), // status code
   name: z.string(),
@@ -504,6 +498,123 @@ const CommodityRoutesSchema = z.object({
   // dates
   date_added: z.int(),
 });
+const RawCommodityAverageSchema = z.object({
+  id: z.int(),
+  id_commodity: z.int(),
+
+  // buy
+  price_buy: z.float32(), // last
+  price_buy_min: z.float32(),
+  price_buy_min_week: z.float32(),
+  price_buy_min_month: z.float32(),
+  price_buy_max: z.float32(),
+  price_buy_max_week: z.float32(),
+  price_buy_max_month: z.float32(),
+  price_buy_avg: z.float32(),
+  price_buy_avg_week: z.float32(),
+  price_buy_avg_month: z.float32(),
+  price_buy_users: z.float32(), // last 15d, average from user trades
+  price_buy_users_rows: z.int().nullable(), // trips in the last 15d, coming from user trades
+
+  // sell
+  price_sell: z.float32(), // last
+  price_sell_min: z.float32(),
+  price_sell_min_week: z.float32(),
+  price_sell_min_month: z.float32(),
+  price_sell_max: z.float32(),
+  price_sell_max_week: z.float32(),
+  price_sell_max_month: z.float32(),
+  price_sell_avg: z.float32(),
+  price_sell_avg_week: z.float32(),
+  price_sell_users: z.float32(), // last 15d, average from user trades
+  price_sell_users_rows: z.int().nullable(), // trips in the last 15d, coming from user trades
+
+  // etc
+  game_version: z.string(),
+  date_added: z.int(), // timestamp
+  date_modified: z.int(), // timestamp
+  commodity_name: z.string(),
+  commodity_code: z.string(),
+  commodity_slug: z.string(),
+});
+const RawCommodityPriceSchema = z.object({
+  id: z.int(),
+  id_commodity: z.int(),
+  id_star_system: z.int(),
+  id_planet: z.int(),
+  id_orbit: z.int(),
+  id_moon: z.int(),
+  id_city: z.int(),
+  id_outpost: z.int(),
+  id_poi: z.int(),
+  id_terminal: z.int(),
+  id_faction: z.int(),
+
+  // buy
+  price_buy: z.float32(), // last
+  price_buy_min: z.float32(),
+  price_buy_min_week: z.float32(),
+  price_buy_min_month: z.float32(),
+  price_buy_max: z.float32(),
+  price_buy_max_week: z.float32(),
+  price_buy_max_month: z.float32(),
+  price_buy_avg: z.float32(),
+  price_buy_avg_week: z.float32(),
+  price_buy_avg_month: z.float32(),
+
+  // sell
+  price_sell: z.float32(), // last
+  price_sell_min: z.float32(),
+  price_sell_min_week: z.float32(),
+  price_sell_min_month: z.float32(),
+  price_sell_max: z.float32(),
+  price_sell_max_week: z.float32(),
+  price_sell_max_month: z.float32(),
+  price_sell_avg: z.float32(),
+  price_sell_avg_week: z.float32(),
+  price_sell_avg_month: z.float32(),
+
+  // factions
+  faction_affinity: z.int().optional(), // datarunner's affinity average at a location (between -100 and 100)
+
+  // etc
+  game_version: z.string(),
+  date_added: z.int(), // timestamp
+  date_modified: z.int(), // timestamp
+  commodity_name: z.string(),
+  commodity_code: z.string(),
+  commodity_slug: z.string(),
+  star_system_name: z.string().nullable(),
+  planet_name: z.string().nullable(),
+  orbit_name: z.string().nullable(),
+  moon_name: z.string().nullable(),
+  space_station_name: z.string().nullable(),
+  outpost_name: z.string().nullable(),
+  city_name: z.string().nullable(),
+  faction_name: z.string().nullable(),
+  terminal_name: z.string(),
+  terminal_code: z.string(),
+  terminal_slug: z.string(),
+  terminal_is_player_owned: z.int(),
+});
+const RawCommodityPriceMiniSchema = z.object({
+  id: z.int(),
+  id_commodity: z.int(),
+  id_terminal: z.int(),
+  price_buy: z.float32(),
+  price_buy_avg: z.float32(),
+  price_sell: z.float32(),
+  price_sell_avg: z.float32(),
+  date_added: z.int(), // timestamp
+  date_modified: z.int(), // timestamp
+  commodity_name: z.string().optional(),
+  commodity_code: z.string().optional(),
+  commodity_slug: z.string().optional(),
+  terminal_name: z.string().optional(),
+  terminal_code: z.string().optional(),
+  terminal_slug: z.string().optional(),
+});
+
 interface CommodityRouteParams {
   // Required group: at least one
   originTerminalID?: number;
@@ -524,17 +635,17 @@ export class UexCommoditiesEndpoints {
   constructor(private readonly client: UEXClient) {}
   /**
    * Gets all commodities covered by UEX
-   * @returns an array of commodities
+   * @returns
    */
   async getCommodities() {
     return this.client.get(`commodities`, {}, z.array(CommoditiesSchema));
   }
   /**
    * Gets all commodity prices for the specified filters
-   * @param {object} filters
-   * @param {number} filters.commodityID the ID of the target commodity
-   * @param {number} filters.terminalID the IDs of the target terminals (max 10)
-   * @returns an array of commodity prices
+   * @param filters
+   * @param filters.commodityID the ID of the target commodity
+   * @param filters.terminalID the IDs of the target terminals (max 10)
+   * @returns
    */
   async getCommodityPrices(
     filters:
@@ -557,17 +668,17 @@ export class UexCommoditiesEndpoints {
   }
   /**
    * Gets all commodity price information from all terminals
-   * @returns an array containing prices for every commodity
+   * @returns
    */
   async getAllCommodityPrices() {
     return this.client.get(`commodities_prices_all`, {}, z.array(CommodityPricesMiniSchema));
   }
   /**
    * Gets known price history of a commodity from a specific terminal
-   * @param {object} filters
-   * @param {number} filters.terminalID ID of the target terminal
-   * @param {number} filters.commodityID ID of the target commodity
-   * @returns an array containing price history information
+   * @param filters
+   * @param filters.terminalID ID of the target terminal
+   * @param filters.commodityID ID of the target commodity
+   * @returns
    */
   async getCommodityPriceHistory(filters: { terminalID: number; commodityID: number }) {
     return this.client.get(
@@ -578,7 +689,7 @@ export class UexCommoditiesEndpoints {
   }
   /**
    * Gets all current commodity alerts
-   * @returns an array of all current commodity alerts
+   * @returns
    */
   async getCommoditiesAlerts() {
     return this.client.get(`commodities_alerts`, {}, z.array(CommodityAlertSchema));
@@ -586,41 +697,39 @@ export class UexCommoditiesEndpoints {
   /**
    * Gets any current alerts for the specified commodity
    * @param commodityID ID of the target commodity
-   * @returns an array containing the target commoditys current alerts
+   * @returns
    */
-  async getCommoditiesAlertsByCommodityID(commodityID: number) {
+  async getCommoditiesAlertsByCommodityID(filters: { commodityID: number }) {
     return this.client.get(
       `commodities_alerts`,
-      { id_commodity: commodityID },
+      { id_commodity: filters.commodityID },
       z.array(CommodityAlertSchema),
     );
   }
   /**
    * Gets the current 15-day averages of a specified commodity's prices and stock data
    * @param commodityID ID of the target commodity
-   * @returns an array containing the target commodity's averages
+   * @returns
    */
-  async getCommodityAverages(commodityID: number) {
+  async getCommodityAverages(filters: { commodityID: number }) {
     return this.client.get(
       `commodities_averages`,
-      { id_commodity: commodityID },
+      { id_commodity: filters.commodityID },
       z.array(CommodityAveragesSchema),
     );
   }
   /**
    * Gets all current inventory states that are used by all terminals
-   * @returns an array of states
+   * @returns
    */
   async getCommodityTerminalStates() {
     return this.client.get(`commodities_status`, {}, CommodityTerminalStateArraysSchema);
   }
-
   /**
    * Gets a list of common routes based on reports
-   * @param {object} filters
+   * @param filters
    * @returns
    */
-
   async getCommodityRoutes(
     filters: RequireAtLeastOne<
       CommodityRouteParams,
@@ -646,5 +755,55 @@ export class UexCommoditiesEndpoints {
       },
       z.array(CommodityRoutesSchema),
     );
+  }
+
+  /**
+   * Gets the current 15-day averages for a specified raw commodity's prices
+   * @param filters
+   * @param filters.commodityID ID of the target commodity
+   * @returns
+   */
+  async getRawCommodityAverages(filters: { commodityID: number }) {
+    return this.client.get(
+      "commodities_raw_averages",
+      { id_commodity: filters.commodityID },
+      z.array(RawCommodityAverageSchema),
+    );
+  }
+
+  /**
+   * Gets all current raw commodity prices for a set of terminals or specific commodity
+   * @param filters
+   * @param filters.terminalID IDs of the target terminals (up to 10)
+   * @param filters.commodityID ID of the target raw commodity
+   * @returns
+   */
+  async getRawCommodityPrices(
+    filters: RequireAtLeastOne<
+      { terminalID: number[]; commodityID: number },
+      "commodityID" | "terminalID"
+    >,
+  ) {
+    return this.client.get(
+      "commodities_raw_prices",
+      {
+        id_terminal:
+          filters.terminalID &&
+          Array.from(new Set<number>(filters.terminalID))
+            .slice(0, 10)
+            .sort((a, b) => a - b)
+            .join(","),
+        id_commodity: filters.commodityID,
+      },
+      z.array(RawCommodityPriceSchema),
+    );
+  }
+
+  /**
+   * Gets all current raw commodity prices
+   * @returns
+   */
+  async getAllRawCommodityPrices() {
+    return this.client.get("commodities_raw_prices_all", {}, z.array(RawCommodityPriceMiniSchema));
   }
 }

@@ -18,7 +18,7 @@ describe("vehicles", () => {
   });
 
   it("filters by manufacturer", async () => {
-    const request = await requestMadeBy(() => client.vehicles.getVehiclesByCompanyID(5));
+    const request = await requestMadeBy(() => client.vehicles.getVehicles({ companyID: 5 }));
 
     expect(request.path).toBe("/2.0/vehicles/");
     expect(request.query).toEqual({ id_company: "5" });
@@ -47,7 +47,7 @@ describe("loaners", () => {
   });
 
   it("looks up one vehicle by id", async () => {
-    const request = await requestMadeBy(() => client.vehicles.getVehicleLoanersByVehicleID(7));
+    const request = await requestMadeBy(() => client.vehicles.getVehicleLoaners({ vehicleID: 7 }));
 
     expect(request.path).toBe("/2.0/vehicles_loaners/");
     expect(request.query).toEqual({ id_vehicle: "7" });
@@ -55,7 +55,7 @@ describe("loaners", () => {
 
   it("looks up one vehicle by name", async () => {
     const request = await requestMadeBy(() =>
-      client.vehicles.getVehicleLoanersByName("Cutlass Black"),
+      client.vehicles.getVehicleLoaners({ name: "Cutlass Black" }),
     );
 
     expect(request.path).toBe("/2.0/vehicles_loaners/");
@@ -64,7 +64,7 @@ describe("loaners", () => {
 
   it("keeps special characters in the name intact", async () => {
     const request = await requestMadeBy(() =>
-      client.vehicles.getVehicleLoanersByName("Cutlass & Co #1"),
+      client.vehicles.getVehicleLoaners({ name: "Cutlass & Co #1" }),
     );
 
     expect(request.query).toEqual({ name: "Cutlass & Co #1" });
@@ -86,7 +86,9 @@ describe("store prices", () => {
   });
 
   it("looks up one vehicle's store price", async () => {
-    const request = await requestMadeBy(() => client.vehicles.getVehicleStorePricesByVehicleID(7));
+    const request = await requestMadeBy(() =>
+      client.vehicles.getVehicleStorePrices({ vehicleID: 7 }),
+    );
 
     expect(request.path).toBe("/2.0/vehicles_prices/");
     expect(request.query).toEqual({ id_vehicle: "7" });
@@ -95,21 +97,25 @@ describe("store prices", () => {
 
 describe("in-game purchase prices", () => {
   it("asks for every price at every terminal", async () => {
-    const request = await requestMadeBy(() => client.vehicles.getVehicleBuyPrices());
+    const request = await requestMadeBy(() => client.vehicles.getAllVehicleBuyPrices());
 
     expect(request.path).toBe("/2.0/vehicles_purchases_prices_all/");
     expect(request.query).toEqual({});
   });
 
   it("looks up one vehicle across terminals", async () => {
-    const request = await requestMadeBy(() => client.vehicles.getVehicleBuyPricesByVehicleID(7));
+    const request = await requestMadeBy(() =>
+      client.vehicles.getVehicleBuyPrices({ vehicleID: 7 }),
+    );
 
     expect(request.path).toBe("/2.0/vehicles_purchases_prices/");
     expect(request.query).toEqual({ id_vehicle: "7" });
   });
 
   it("looks up one terminal's prices", async () => {
-    const request = await requestMadeBy(() => client.vehicles.getVehicleBuyPricesByTerminalID(9));
+    const request = await requestMadeBy(() =>
+      client.vehicles.getVehicleBuyPrices({ terminalID: 9 }),
+    );
 
     expect(request.path).toBe("/2.0/vehicles_purchases_prices/");
     expect(request.query).toEqual({ id_terminal: "9" });
@@ -118,21 +124,25 @@ describe("in-game purchase prices", () => {
 
 describe("in-game rental prices", () => {
   it("asks for every rental price at every terminal", async () => {
-    const request = await requestMadeBy(() => client.vehicles.getVehicleRentPrices());
+    const request = await requestMadeBy(() => client.vehicles.getAllVehicleRentPrices());
 
     expect(request.path).toBe("/2.0/vehicles_rentals_prices_all/");
     expect(request.query).toEqual({});
   });
 
   it("looks up one vehicle across terminals", async () => {
-    const request = await requestMadeBy(() => client.vehicles.getVehicleRentPricesByVehicleID(7));
+    const request = await requestMadeBy(() =>
+      client.vehicles.getVehicleRentPrices({ vehicleID: 7 }),
+    );
 
     expect(request.path).toBe("/2.0/vehicles_rentals_prices/");
     expect(request.query).toEqual({ id_vehicle: "7" });
   });
 
   it("looks up one terminal's prices", async () => {
-    const request = await requestMadeBy(() => client.vehicles.getVehicleRentPricesByTerminalID(9));
+    const request = await requestMadeBy(() =>
+      client.vehicles.getVehicleRentPrices({ terminalID: 9 }),
+    );
 
     expect(request.path).toBe("/2.0/vehicles_rentals_prices/");
     expect(request.query).toEqual({ id_terminal: "9" });

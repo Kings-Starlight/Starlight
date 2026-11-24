@@ -1,4 +1,5 @@
 import z from "zod";
+import type { RequireAtLeastOne } from "../../../utils/typeHelpers";
 import type { UEXClient } from "../client";
 
 const VehicleSchema = z.object({
@@ -66,7 +67,6 @@ const VehicleSchema = z.object({
   date_modified: z.int(),
   company_name: z.string().nullable(),
 });
-
 const VehicleLoanerSchema = z.object({
   id: z.int(),
   id_company: z.int(),
@@ -74,7 +74,7 @@ const VehicleLoanerSchema = z.object({
   ids_vehicles_loaners: z.string().nullable(),
   name: z.string(),
   name_full: z.string(),
-  uuid: z.string().nullish(),
+  uuid: z.string().optional(),
   scu: z.number(),
   crew: z.string(),
   is_addon: z.int(),
@@ -116,10 +116,9 @@ const VehicleLoanerSchema = z.object({
   date_modified: z.int(),
   company_name: z.string().nullable(),
   get loaners() {
-    return z.array(VehicleLoanerSchema).nullish();
+    return z.array(VehicleLoanerSchema).optional();
   },
 });
-
 const VehicleStorePriceSchema = z.object({
   id: z.int(),
   id_vehicle: z.int(),
@@ -136,7 +135,6 @@ const VehicleStorePriceSchema = z.object({
   date_modified: z.int(),
   vehicle_name: z.string(),
 });
-
 const VehicleBuySchema = z.object({
   id: z.int(),
   id_vehicle: z.int(),
@@ -146,7 +144,7 @@ const VehicleBuySchema = z.object({
   id_city: z.int(),
   id_outpost: z.int(),
   id_poi: z.int(),
-  id_faction: z.int().nullish(),
+  id_faction: z.int().optional(),
   id_terminal: z.int(),
   price_buy: z.float32(), // last
   price_buy_min: z.float32(),
@@ -174,7 +172,6 @@ const VehicleBuySchema = z.object({
   terminal_code: z.string(),
   terminal_is_player_owned: z.int(),
 });
-
 const VehicleBuyMiniSchema = z.object({
   id: z.int(),
   id_vehicle: z.int(),
@@ -194,7 +191,7 @@ const VehicleRentSchema = z.object({
   id_city: z.int(),
   id_outpost: z.int(),
   id_poi: z.int(),
-  id_faction: z.int().nullish(),
+  id_faction: z.int().optional(),
   id_terminal: z.int(),
   price_rent: z.float32(), // last
   price_rent_min: z.float32(),
@@ -222,7 +219,6 @@ const VehicleRentSchema = z.object({
   terminal_code: z.string(),
   terminal_is_player_owned: z.int(),
 });
-
 const VehicleRentMiniSchema = z.object({
   id: z.int(),
   id_vehicle: z.int(),
@@ -240,68 +236,45 @@ export class UexVehicleEndpoints {
   constructor(private readonly client: UEXClient) {}
   /**
    * Gets all vehicles
-   * @returns an array of all vehicles
+   * includes optional filter to target vehicles made by a specific manufacturer
+   * @param filters
+   * @param filters.companyID target manufacturer ID
+   * @returns
    */
-  async getVehicles() {
-    return this.client.get("vehicles", {}, z.array(VehicleSchema));
-  }
-  /**
-   * Gets all vehicles related to a specified manufacturer
-   * @param companyID target manufacturer ID
-   * @returns an array of all vehicles related to the specified manufacturer
-   */
-  async getVehiclesByCompanyID(companyID: number) {
-    return this.client.get("vehicles", { id_company: companyID }, z.array(VehicleSchema));
+  async getVehicles(filters: { companyID?: number } = {}) {
+    return this.client.get("vehicles", { id_company: filters.companyID }, z.array(VehicleSchema));
   }
 
   /* Vehicle Loaners */
 
   /**
    * Gets all vehicles that have loaners, and their associated loaners.
-   * @returns an array of all vehicle loaners
+   * Includes optional filters to narrow down what loaners are returned.
+   * @param filters
+   * @param filters.vehicleID ID of the parent vehicle
+   * @param filters.name Name of the parent vehicle
+   * @returns
    */
-  async getVehicleLoaners() {
-    return this.client.get(`vehicles_loaners`, {}, z.array(VehicleLoanerSchema));
-  }
-  /**
-   * Gets the specified vehicle and its associated loaners
-   * @param vehicleID ID of the parent vehicle
-   * @returns an array containing only the specified loaner parent
-   */
-  async getVehicleLoanersByVehicleID(vehicleID: number) {
+  async getVehicleLoaners(filters: { vehicleID?: number; name?: string } = {}) {
     return this.client.get(
-      "vehicles_loaners",
-      { id_vehicle: vehicleID },
+      `vehicles_loaners`,
+      { id_vehicle: filters.vehicleID, name: filters.name },
       z.array(VehicleLoanerSchema),
     );
-  }
-  /**
-   * Gets the specified vehicle and its associated loaners
-   * @param name Name of the parent vehicle
-   * @returns an array containing only the specified loaner parent
-   */
-  async getVehicleLoanersByName(name: string) {
-    return this.client.get("vehicles_loaners", { name }, z.array(VehicleLoanerSchema));
   }
 
   /* Vehicle Store Prices */
 
   /**
    * Gets the store prices of all vehicles
-   * @returns an array of all store prices for vehicles
+   * @param filters
+   * @param filters.vehicleID ID of the target vehicle
+   * @returns
    */
-  async getVehicleStorePrices() {
-    return this.client.get(`vehicles_prices`, {}, z.array(VehicleStorePriceSchema));
-  }
-  /**
-   * Gets the store price of a specified vehicle
-   * @param vehicleID ID of the target vehicle
-   * @returns an array containing only the specified vehicles store prices
-   */
-  async getVehicleStorePricesByVehicleID(vehicleID: number) {
+  async getVehicleStorePrices(filters: { vehicleID?: number } = {}) {
     return this.client.get(
-      "vehicles_prices",
-      { id_vehicle: vehicleID },
+      `vehicles_prices`,
+      { id_vehicle: filters.vehicleID },
       z.array(VehicleStorePriceSchema),
     );
   }
@@ -310,63 +283,64 @@ export class UexVehicleEndpoints {
 
   /**
    * Gets all vehicle purchase prices, for every terminal
-   * @returns an array of all known vehicle prices
+   * @returns
    */
-  async getVehicleBuyPrices() {
+  async getAllVehicleBuyPrices() {
     return this.client.get(`vehicles_purchases_prices_all`, {}, z.array(VehicleBuyMiniSchema));
   }
   /**
    * Gets all known ingame purchase prices for the specified vehicle across all terminals
-   * @param vehicleID ID of the target vehicle
-   * @returns an array of prices for the specified vehicle
+   * @param filters
+   * @param filters.vehicleID ID of the target vehicle
+   * @param filters.terminalID ID of the target terminal
+   * @param filters.uuid UUID of the target vehicle
+   * @returns
    */
-  async getVehicleBuyPricesByVehicleID(vehicleID: number) {
+  async getVehicleBuyPrices(
+    filters: RequireAtLeastOne<
+      { vehicleID: number; terminalID: number; uuid?: string },
+      "terminalID" | "vehicleID"
+    >,
+  ) {
     return this.client.get(
       "vehicles_purchases_prices",
-      { id_vehicle: vehicleID },
+      {
+        id_vehicle: filters.vehicleID,
+        id_terminal: filters.terminalID,
+        uuid: filters.uuid,
+      },
       z.array(VehicleBuySchema),
     );
   }
-  /**
-   * Gets all known ingame purchase prices for the specified terminal
-   * @param terminalID ID of the target terminal
-   * @returns an array of all prices for the specified terminal
-   */
-  async getVehicleBuyPricesByTerminalID(terminalID: number) {
-    return this.client.get(
-      "vehicles_purchases_prices",
-      { id_terminal: terminalID },
-      z.array(VehicleBuySchema),
-    );
-  }
+
   /**
    * Gets all vehicle rent prices, for every terminal
-   * @returns an array of all known vehicle prices
+   * @returns
    */
-  async getVehicleRentPrices() {
+  async getAllVehicleRentPrices() {
     return this.client.get(`vehicles_rentals_prices_all`, {}, z.array(VehicleRentMiniSchema));
   }
   /**
-   * Gets all known ingame rent prices for the specified vehicle across all terminals
-   * @param vehicleID ID of the target vehicle
-   * @returns an array of prices for the specified vehicle
-   */
-  async getVehicleRentPricesByVehicleID(vehicleID: number) {
-    return this.client.get(
-      "vehicles_rentals_prices",
-      { id_vehicle: vehicleID },
-      z.array(VehicleRentSchema),
-    );
-  }
-  /**
    * Gets all known ingame rent prices for the specified terminal
-   * @param TerminalID ID of the target terminal
-   * @returns an array of all prices for the specified terminal
+   * @param filters
+   * @param filters.vehicleID ID of the target vehicle
+   * @param filters.terminalID ID of the target terminal
+   * @param filters.uuid UUID of the target vehicle
+   * @returns
    */
-  async getVehicleRentPricesByTerminalID(terminalID: number) {
+  async getVehicleRentPrices(
+    filters: RequireAtLeastOne<
+      { vehicleID: number; terminalID: number; uuid?: string },
+      "terminalID" | "vehicleID"
+    >,
+  ) {
     return this.client.get(
       "vehicles_rentals_prices",
-      { id_terminal: terminalID },
+      {
+        id_vehicle: filters.vehicleID,
+        id_terminal: filters.terminalID,
+        uuid: filters.uuid,
+      },
       z.array(VehicleRentSchema),
     );
   }
