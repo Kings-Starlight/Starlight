@@ -15,8 +15,8 @@ const CategoryAttributeSchema = z.object({
   id: z.int(),
   id_category: z.int(),
   name: z.string(),
-  category_name: z.int(), // parent
-  description: z.string(),
+  category_name: z.string(), // parent
+  description: z.string().nullable(),
   is_lower_better: z.int(), // does not apply to all attributes
   date_added: z.int(), // timestamp
   date_modified: z.int(), // timestamp
@@ -33,7 +33,7 @@ export class UexMiscEndpoints {
    * @param filters.section
    * @returns
    */
-  async getCategories(filters: { type?: "item" | "service" | "contract"; section?: string }) {
+  async getCategories(filters: { type?: "item" | "service" | "contract"; section?: string } = {}) {
     return this.client.get(
       "categories",
       { type: filters.type, section: filters.section },
@@ -47,7 +47,7 @@ export class UexMiscEndpoints {
    * @param filters.categoryID ID of a specific category
    * @returns
    */
-  async getCategoryAttributes(filters: { categoryID?: number }) {
+  async getCategoryAttributes(filters: { categoryID?: number } = {}) {
     return this.client.get(
       "categories_attributes",
       { id_category: filters.categoryID },

@@ -59,7 +59,7 @@ const PlanetSchema = z.object({
   is_available_live: z.int(), // StarCitizen
   is_visible: z.int(), // UEX (public)
   is_default: z.int(),
-  is_lagrange: z.int().nullish(),
+  is_lagrange: z.int().optional(),
   date_added: z.int(),
   date_modified: z.int(),
   star_system_name: z.string().nullable(),

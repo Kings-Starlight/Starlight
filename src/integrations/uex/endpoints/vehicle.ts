@@ -74,7 +74,7 @@ const VehicleLoanerSchema = z.object({
   ids_vehicles_loaners: z.string().nullable(),
   name: z.string(),
   name_full: z.string(),
-  uuid: z.string().nullish(),
+  uuid: z.string().optional(),
   scu: z.number(),
   crew: z.string(),
   is_addon: z.int(),
@@ -116,7 +116,7 @@ const VehicleLoanerSchema = z.object({
   date_modified: z.int(),
   company_name: z.string().nullable(),
   get loaners() {
-    return z.array(VehicleLoanerSchema).nullish();
+    return z.array(VehicleLoanerSchema).optional();
   },
 });
 const VehicleStorePriceSchema = z.object({
@@ -144,7 +144,7 @@ const VehicleBuySchema = z.object({
   id_city: z.int(),
   id_outpost: z.int(),
   id_poi: z.int(),
-  id_faction: z.int().nullish(),
+  id_faction: z.int().optional(),
   id_terminal: z.int(),
   price_buy: z.float32(), // last
   price_buy_min: z.float32(),
@@ -191,7 +191,7 @@ const VehicleRentSchema = z.object({
   id_city: z.int(),
   id_outpost: z.int(),
   id_poi: z.int(),
-  id_faction: z.int().nullish(),
+  id_faction: z.int().optional(),
   id_terminal: z.int(),
   price_rent: z.float32(), // last
   price_rent_min: z.float32(),
