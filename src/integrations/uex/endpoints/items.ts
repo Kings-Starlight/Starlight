@@ -48,7 +48,6 @@ const ItemAttributeSchema = z.object({
   date_added: z.int(), // timestamp
   date_modified: z.int(), // timestamp
 });
-
 const ItemPriceSchema = z.object({
   id: z.int(),
   id_item: z.int(),
@@ -124,7 +123,6 @@ const ItemPriceMiniSchema = z.object({
   item_uuid: z.string().nullable(), // star citizen uuid
   terminal_name: z.string(),
 });
-
 const ItemCategorySchema = z.object({
   id: z.int(),
   type: z.string(), // item, service, contract
@@ -139,6 +137,16 @@ const ItemCategorySchema = z.object({
 export class UexItemEndpoints {
   constructor(private readonly client: UEXClient) {}
 
+  /**
+   * Gets all items for the specified criteria
+   * At least one of the following must be supplied, but any combination is also valid.
+   * @param filters
+   * @param filters.categoryID ID of the target category
+   * @param filters.companyID  ID of the target company
+   * @param filters.uuid Starcitizen UUID
+   * @param filters.size target size of the item
+   * @returns
+   */
   async getItems(
     filters: RequireAtLeastOne<
       {
@@ -162,6 +170,15 @@ export class UexItemEndpoints {
     );
   }
 
+  /**
+   * Gets the attributes of an item
+   * At least one of the following must be supplied, but any combination is also valid.
+   * @param filters
+   * @param filters.itemID ID of the target item
+   * @param filters.categoryID ID of the target category
+   * @param filters.uuid Starcitizen UUID of the target item
+   * @returns
+   */
   async getItemAttributes(
     filters: RequireAtLeastOne<
       {
@@ -183,6 +200,16 @@ export class UexItemEndpoints {
     );
   }
 
+  /**
+   * Gets item prices for the specified criteria
+   * At least one of the following must be supplied, but any combination is also valid. UUID is not required
+   * @param filters
+   * @param filters.terminalID ID of the target terminal (up to 10)
+   * @param filters.itemID ID of the target item
+   * @param filters.categoryID ID of the target category
+   * @param filters.uuid Starcitizen UUID of the target item
+   * @returns
+   */
   async getItemPrices(
     filters: RequireAtLeastOne<
       {
@@ -212,10 +239,20 @@ export class UexItemEndpoints {
     );
   }
 
+  /**
+   * Gets all known item prices
+   * @returns
+   */
   async getAllItemPrices() {
     return this.client.get(`items_prices_all`, {}, z.array(ItemPriceMiniSchema));
   }
 
+  /**
+   * Gets all of UEXs item categories, with support for an optional section identifier to narrow search
+   * @param filters
+   * @param filters.section Name of the target item section
+   * @returns
+   */
   async getItemCategories(filters: { section?: string } = {}) {
     return this.client.get(
       `categories`,

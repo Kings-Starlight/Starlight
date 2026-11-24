@@ -362,6 +362,14 @@ export class UexLocationEndpoints {
 
   /* Moons */
 
+  /**
+   * Gets all known moons.
+   * Provides optional filters for narrowing the search scope
+   * @param filters
+   * @param filters.starSystemID ID of the target star system
+   * @param filters.planetID ID of the target planet
+   * @returns
+   */
   async getMoons(filters: { starSystemID?: number; planetID?: number } = {}) {
     return this.client.get(
       `moons`,
@@ -372,12 +380,32 @@ export class UexLocationEndpoints {
 
   /* Orbits */
 
-  async getOrbits(starSystemID?: number) {
-    return this.client.get(`orbits`, { id_star_system: starSystemID }, z.array(OrbitSchema));
+  /**
+   * Gets all known planetary orbits.
+   * Includes an optional filter to narrow search scope
+   * @param filters
+   * @param filters.starSystemID ID of teh target star system
+   * @returns
+   */
+  async getOrbits(filters: { starSystemID?: number } = {}) {
+    return this.client.get(
+      `orbits`,
+      { id_star_system: filters.starSystemID },
+      z.array(OrbitSchema),
+    );
   }
 
   /* Planets */
 
+  /**
+   * Gets all known planets.
+   * Provides optional filters to narrow the search scope
+   * @param filters
+   * @param filters.starSystemID ID of the target star system
+   * @param filters.factionID ID of the target faction
+   * @param filters.jurisdictionID ID of the target jurisdiction
+   * @returns
+   */
   async getPlanets(
     filters: { starSystemID?: number; factionID?: number; jurisdictionID?: number } = {},
   ) {
@@ -394,6 +422,18 @@ export class UexLocationEndpoints {
 
   /* POI */
 
+  /**
+   * Gets all known points of interest.
+   * Provides optional filters to narrow the search scope
+   * @param filters
+   * @param filters.starSystemID ID of the target star system
+   * @param filters.planetID ID of the target planet
+   * @param filters.moonID ID of the target moon
+   * @param filters.cityID ID of the target city
+   * @param filters.outpostID ID of the target outpost
+   * @param filters.spaceStationID ID of the target space station
+   * @returns
+   */
   async getPOIs(
     filters: {
       starSystemID?: number;
@@ -420,6 +460,16 @@ export class UexLocationEndpoints {
 
   /* Outposts */
 
+  /**
+   * Gets all known outposts.
+   * Provides optional filters to narrow the search scope
+   * @param filters
+   * @param filters.starSystemID ID of the target star system
+   * @param filters.factionID ID of the target faction
+   * @param filters.planetID ID of the target planet
+   * @param filters.moonID ID of the target moon
+   * @returns
+   */
   async getOutposts(
     filters: { starSystemID?: number; factionID?: number; planetID?: number; moonID?: number } = {},
   ) {
@@ -437,6 +487,16 @@ export class UexLocationEndpoints {
 
   /* Space Stations */
 
+  /**
+   * Gets all known space stations
+   * Provides optional filters to narrow the search scope
+   * @param filters
+   * @param filters.starSystemID ID of the target star system
+   * @param filters.planetID ID of the target planet
+   * @param filters.moonID ID of the target moon
+   * @param filters.cityID ID of the target city
+   * @returns
+   */
   async getSpaceStations(
     filters: { starSystemID?: number; planetID?: number; moonID?: number; cityID?: number } = {},
   ) {
@@ -454,6 +514,15 @@ export class UexLocationEndpoints {
 
   /* Cities */
 
+  /**
+   * Gets all known cities.
+   * Provides optional filters to narrow the search scope
+   * @param filters
+   * @param filters.starSystemID ID of the target star system
+   * @param filters.planetID ID of the target planet
+   * @param filters.moonID ID of the target moon
+   * @returns
+   */
   async getCities(filters: { starSystemID?: number; planetID?: number; moonID?: number } = {}) {
     return this.client.get(
       `cities`,
@@ -468,27 +537,41 @@ export class UexLocationEndpoints {
 
   /* Star Systems */
 
+  /**
+   * Gets all known star systems
+   * @returns
+   */
   async getStarSystems() {
     return this.client.get(`star_systems`, {}, z.array(StarSystemSchema));
   }
 
   /* Jump Points */
 
+  /**
+   * Gets all known jump points
+   * Provides optional filters to narrow the search scope
+   * @param filters
+   * @param filters.originStarSystemID ID of the origin star system
+   * @param filters.destinationStarID ID of the destination starsystem
+   * @param filters.originOrbitID ID of the origin orbit
+   * @param filters.destinationOrbitID ID of the destination orbit
+   * @returns
+   */
   async getJumpPoints(
     filters: {
-      OriginStarSystemID?: number;
-      DestinationSystemID?: number;
-      OriginOrbitID?: number;
-      DestinationOrbitID?: number;
+      originStarSystemID?: number;
+      destinationSystemID?: number;
+      originOrbitID?: number;
+      destinationOrbitID?: number;
     } = {},
   ) {
     return this.client.get(
       `jump_points`,
       {
-        id_star_system_origin: filters.OriginStarSystemID,
-        id_star_system_destination: filters.DestinationSystemID,
-        id_orbit_origin: filters.OriginOrbitID,
-        id_orbit_destination: filters.DestinationOrbitID,
+        id_star_system_origin: filters.originStarSystemID,
+        id_star_system_destination: filters.destinationSystemID,
+        id_orbit_origin: filters.originOrbitID,
+        id_orbit_destination: filters.destinationOrbitID,
       },
       z.array(JumpPointSchema),
     );
@@ -496,12 +579,32 @@ export class UexLocationEndpoints {
 
   /* Jurisdictions */
 
+  /**
+   * Gets all known jurisdictions
+   * @returns
+   */
   async getJurisdictions() {
     return this.client.get(`jurisdictions`, {}, z.array(JurisdictionSchema));
   }
 
   /* Terminals */
 
+  /**
+   * Gets all known terminals
+   * Includes optional filters to narrow search scope
+   * @param filters
+   * @param filters.starSystemID ID of the target star system
+   * @param filters.planetID ID of the target planet
+   * @param filters.moonID ID of the target moon
+   * @param filters.spaceStationID ID of the target space station
+   * @param filters.cityID ID of the target city
+   * @param filters.outpostID ID of the target outpost
+   * @param filters.poiID ID of the target poi
+   * @param filters.factionID ID of the target faction
+   * @param filters.companyID ID of the target company
+   * @param filters.type ID of the target type
+   * @returns
+   */
   async getTerminals(
     filters: {
       starSystemID?: number;
@@ -534,6 +637,13 @@ export class UexLocationEndpoints {
     );
   }
 
+  /**
+   * Gets the distance between two terminals
+   * @param filters
+   * @param filters.originTerminalID ID of the origin terminal
+   * @param filters.destinationTerminalID ID of the destination terminal
+   * @returns
+   */
   async getTerminalDistances(filters: { originTerminalID: number; destinationTerminalID: number }) {
     return this.client.get(
       `terminals_distances`,

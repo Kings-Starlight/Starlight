@@ -88,7 +88,7 @@ describe("commodities", () => {
 
   it("asks for commodity alerts via commodity ID", async () => {
     const request = await requestMadeBy(() =>
-      client.commodities.getCommoditiesAlertsByCommodityID(1),
+      client.commodities.getCommoditiesAlertsByCommodityID({ commodityID: 1 }),
     );
 
     expect(request.path).toBe("/2.0/commodities_alerts/");
@@ -105,7 +105,9 @@ describe("commodities", () => {
   });
 
   it("asks for commodity averages", async () => {
-    const request = await requestMadeBy(() => client.commodities.getCommodityAverages(1));
+    const request = await requestMadeBy(() =>
+      client.commodities.getCommodityAverages({ commodityID: 1 }),
+    );
 
     expect(request.path).toBe("/2.0/commodities_averages/");
     expect(request.query).toEqual({ id_commodity: "1" });
@@ -114,7 +116,9 @@ describe("commodities", () => {
   it("matches the CommodityAverages schema", async () => {
     uexReplies([AgriciumAverages]);
 
-    await expect(client.commodities.getCommodityAverages(1)).resolves.toEqual([AgriciumAverages]);
+    await expect(client.commodities.getCommodityAverages({ commodityID: 1 })).resolves.toEqual([
+      AgriciumAverages,
+    ]);
   });
 
   it("asks for commodity terminal states", async () => {
@@ -134,5 +138,42 @@ describe("commodities", () => {
 
     expect(request.path).toBe("/2.0/commodities_routes/");
     expect(request.query).toEqual({ id_commodity: "1" });
+  });
+});
+
+describe("raw commodities", () => {
+  it("asks for raw commodity averages", async () => {
+    const request = await requestMadeBy(() =>
+      client.commodities.getRawCommodityAverages({ commodityID: 1 }),
+    );
+
+    expect(request.path).toBe("/2.0/commodities_raw_averages/");
+    expect(request.query).toEqual({ id_commodity: "1" });
+  });
+
+  it("asks for raw commodity prices", async () => {
+    const request = await requestMadeBy(() =>
+      client.commodities.getRawCommodityPrices({ commodityID: 1 }),
+    );
+
+    expect(request.path).toBe("/2.0/commodities_raw_prices/");
+    expect(request.query).toEqual({ id_commodity: "1" });
+  });
+
+  it("asks for all raw commodity", async () => {
+    const request = await requestMadeBy(() => client.commodities.getAllRawCommodityPrices());
+
+    expect(request.path).toBe("/2.0/commodities_raw_prices_all/");
+    expect(request.query).toEqual({});
+  });
+  it("should not ask for more than 10 terminals", async () => {
+    const request = await requestMadeBy(() =>
+      client.commodities.getRawCommodityPrices({
+        terminalID: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      }),
+    );
+
+    expect(request.path).toBe("/2.0/commodities_raw_prices/");
+    expect(request.query).toEqual({ id_terminal: "1,2,3,4,5,6,7,8,9,10" });
   });
 });

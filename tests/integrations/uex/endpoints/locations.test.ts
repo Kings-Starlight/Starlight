@@ -43,7 +43,7 @@ describe("Orbits", () => {
     expect(request.query).toEqual({});
   });
   it("asks for all orbits in a star system", async () => {
-    const request = await requestMadeBy(() => client.locations.getOrbits(68));
+    const request = await requestMadeBy(() => client.locations.getOrbits({ starSystemID: 68 }));
 
     expect(request.path).toBe("/2.0/orbits/");
     expect(request.query).toEqual({ id_star_system: "68" });
@@ -201,7 +201,7 @@ describe("Jump Points", () => {
   });
   it("asks for all jump points with a target destination", async () => {
     const request = await requestMadeBy(() =>
-      client.locations.getJumpPoints({ DestinationSystemID: 68 }),
+      client.locations.getJumpPoints({ destinationSystemID: 68 }),
     );
 
     expect(request.path).toBe("/2.0/jump_points/");
