@@ -21,6 +21,14 @@ interface HttpClientOptions {
 export class HttpClient {
   constructor(private readonly options: HttpClientOptions) {}
 
+  /**
+   * An expanded get function, offering a streamlined way of setting url params for API requests,
+   * built in exponential backoff and request cap.
+   * @param path the target http(s) endpoint path your desired resource is located
+   * @param params A key-value record of parameters to be serialised into search params
+   * @param text For when you expect the returned content to be plaintext (such as the UEX the `/data_export` route)
+   * @returns
+   */
   async get<T>(
     path: string,
     params?: Record<string, string | number | undefined>,
